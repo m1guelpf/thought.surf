@@ -1,4 +1,4 @@
-import { Camera } from '@/lib/canvas'
+import { Camera } from '@/types/canvas'
 import { createContext, Dispatch, FC, PropsWithChildren, SetStateAction, useContext, useState } from 'react'
 
 const CanvasContext = createContext<{ camera: Camera; setCamera: Dispatch<SetStateAction<Camera>> }>(null)
