@@ -1,7 +1,7 @@
 import { useCamera } from '@/context/CanvasContext'
 import { addPoint, Point, subPoint } from '@/lib/canvas'
-import { useDrag, useGesture } from '@use-gesture/react'
-import { memo, useEffect } from 'react'
+import { useGesture } from '@use-gesture/react'
+import { Dispatch, memo, MutableRefObject, SetStateAction, useEffect } from 'react'
 import { useState } from 'react'
 import { FC, PropsWithChildren, useRef } from 'react'
 import ResizeIcon from './Icons/ResizeIcon'
@@ -84,7 +84,10 @@ const CanvasItem: FC<PropsWithChildren<{ startPoint: Point; startSize: Size }>> 
 	)
 }
 
-const ResizeButton: FC<{ size: Size }> = ({ setSize, containerRef }) => {
+const ResizeButton: FC<{ setSize: Dispatch<SetStateAction<Size>>; containerRef: MutableRefObject<HTMLDivElement> }> = ({
+	setSize,
+	containerRef,
+}) => {
 	const { camera } = useCamera()
 	const resizeData = useRef<{ start: Point; origin: Point }>(null)
 
