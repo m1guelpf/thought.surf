@@ -43,6 +43,7 @@ const Canvas: FC<{ items: [] }> = ({ items }) => {
 			>
 				<div className="opacity-100 pointer-events-[all] transition-opacity">
 					{Object.values(items).map(item => (
+						// @ts-ignore
 						<CanvasItem key={item.id} startPoint={item.point} startSize={item.size} />
 					))}
 				</div>

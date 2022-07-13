@@ -33,6 +33,7 @@ const CanvasItem: FC<PropsWithChildren<{ startPoint: Point; startSize: Size }>> 
 
 				target.setPointerCapture(event.pointerId)
 				target.style.setProperty('cursor', 'grabbing')
+				target.style.setProperty('z-index', '2')
 				target.style.setProperty('--scale', '0.95')
 
 				dragData.current = {
@@ -55,6 +56,7 @@ const CanvasItem: FC<PropsWithChildren<{ startPoint: Point; startSize: Size }>> 
 
 				target.releasePointerCapture(event.pointerId)
 				target.style.setProperty('cursor', 'grab')
+				target.style.setProperty('z-index', '0')
 				target.style.setProperty('--scale', '1')
 
 				dragData.current = null
@@ -66,7 +68,7 @@ const CanvasItem: FC<PropsWithChildren<{ startPoint: Point; startSize: Size }>> 
 	return (
 		<div
 			ref={containerRef}
-			className="p-3 min-w-[300px] min-h-[150px] bg-gray-800/90 absolute will-change-transform cursor-grab [content-visibility:auto] [contain:layout_style_paint] rounded-lg shadow-md backdrop-blur backdrop-filter"
+			className="group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-white/10 absolute will-change-transform cursor-grab [content-visibility:auto] [contain:layout_style_paint] rounded-lg shadow-md backdrop-blur backdrop-filter"
 			style={
 				{
 					'--scale': '1',
@@ -122,9 +124,9 @@ const ResizeButton: FC<{ setSize: Dispatch<SetStateAction<Size>>; containerRef: 
 	return (
 		<button
 			{...listeners()}
-			className="absolute bg-gray-700 bottom-2 right-2 cursor-se-resize flex items-center justify-center shadow rounded p-2"
+			className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-gray-100 dark:bg-black/30 bottom-2 right-2 cursor-se-resize flex items-center justify-center dark:shadow rounded p-2"
 		>
-			<ResizeIcon className="w-2 h-2 text-gray-100" />
+			<ResizeIcon className="w-2 h-2 text-gray-900 dark:text-gray-100" />
 		</button>
 	)
 }

@@ -1,9 +1,12 @@
 import 'tailwindcss/tailwind.css'
 import { APP_NAME } from '@/lib/consts'
 import '@rainbow-me/rainbowkit/styles.css'
+import CommandBar from '@/components/CommandBar'
 import { chain, createClient, WagmiConfig } from 'wagmi'
 import { CanvasProvider } from '@/context/CanvasContext'
 import { apiProvider, configureChains, getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { Toaster } from 'react-hot-toast'
+import { ThemeProvider } from 'next-themes'
 
 const { chains, provider } = configureChains(
 	[chain.optimism],
@@ -15,13 +18,18 @@ const wagmiClient = createClient({ autoConnect: true, connectors, provider })
 
 const App = ({ Component, pageProps }) => {
 	return (
-		<WagmiConfig client={wagmiClient}>
-			<RainbowKitProvider chains={chains}>
-				<CanvasProvider>
-					<Component {...pageProps} />
-				</CanvasProvider>
-			</RainbowKitProvider>
-		</WagmiConfig>
+		<ThemeProvider defaultTheme="dark" attribute="class">
+			<WagmiConfig client={wagmiClient}>
+				<RainbowKitProvider chains={chains}>
+					<CanvasProvider>
+						<CommandBar>
+							<Toaster />
+							<Component {...pageProps} />
+						</CommandBar>
+					</CanvasProvider>
+				</RainbowKitProvider>
+			</WagmiConfig>
+		</ThemeProvider>
 	)
 }
 

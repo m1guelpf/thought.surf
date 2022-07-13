@@ -22,8 +22,9 @@ const Home: FC = () => {
 	}
 
 	return (
-		<div className="w-full h-screen overflow-hidden bg-gray-900">
+		<div className="w-full h-screen overflow-hidden bg-gray-100 dark:bg-black">
 			<Header />
+			{/* @ts-ignore */}
 			<Canvas items={items} />
 		</div>
 	)
