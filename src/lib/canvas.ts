@@ -1,17 +1,7 @@
-export type Point = { x: number; y: number }
+import { Box, Camera, Point } from '@/types/canvas'
 
 export const addPoint = (a: Point, b: Point): Point => ({ x: a.x + b.x, y: a.y + b.y })
 export const subPoint = (a: Point, b: Point): Point => ({ x: a.x - b.x, y: a.y - b.y })
-
-export type Camera = { x: number; y: number; z: number }
-export type Box = {
-	minX: number
-	minY: number
-	maxX: number
-	maxY: number
-	width: number
-	height: number
-}
 
 export const screenToCanvas = (point: Point, camera: Camera): Point => ({
 	x: point.x / camera.z - camera.x,

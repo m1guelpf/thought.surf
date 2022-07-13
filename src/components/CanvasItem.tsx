@@ -1,12 +1,10 @@
-import { useCamera } from '@/context/CanvasContext'
-import { addPoint, Point, subPoint } from '@/lib/canvas'
-import { useGesture } from '@use-gesture/react'
-import { Dispatch, memo, MutableRefObject, SetStateAction, useEffect } from 'react'
 import { useState } from 'react'
-import { FC, PropsWithChildren, useRef } from 'react'
 import ResizeIcon from './Icons/ResizeIcon'
-
-type Size = { width: number; heigth: number }
+import { Point, Size } from '@/types/canvas'
+import { useGesture } from '@use-gesture/react'
+import { addPoint, subPoint } from '@/lib/canvas'
+import { useCamera } from '@/context/CanvasContext'
+import { Dispatch, memo, MutableRefObject, SetStateAction, useEffect, FC, PropsWithChildren, useRef } from 'react'
 
 const CanvasItem: FC<PropsWithChildren<{ startPoint: Point; startSize: Size }>> = ({
 	children,
