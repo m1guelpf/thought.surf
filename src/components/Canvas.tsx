@@ -1,6 +1,6 @@
-import { useGesture, useWheel } from '@use-gesture/react'
-import { addPoint, Camera, panCamera, Point, subPoint, zoomCamera } from '@/lib/canvas'
-import { FC, PropsWithChildren, useRef, useState } from 'react'
+import { useGesture, usePinch, useWheel } from '@use-gesture/react'
+import { panCamera, Point, zoomCamera } from '@/lib/canvas'
+import { FC, useEffect, useRef, useState } from 'react'
 import CanvasItem from './CanvasItem'
 import { useCamera } from '@/context/CanvasContext'
 
@@ -48,45 +48,19 @@ const Canvas: FC<{}> = ({}) => {
 		{ target: canvasRef, eventOptions: { passive: false } }
 	)
 
-	const listeners = useGesture(
+	useGesture(
 		{
-			onPointerDown: ({ event }) => {
-				const target = event.currentTarget as HTMLDivElement
+			onDrag: ({ event, direction, delta, memo }) => {
+				if (event.target != event.currentTarget) return
 
-				target.setPointerCapture(event.pointerId)
-				target.style.setProperty('cursor', 'grabbing')
-				target.style.setProperty('--scale', '0.95')
-
-				rDragging.current = {
-					item: items[target.id],
-					origin: { x: event.clientX / camera.z, y: event.clientY / camera.z },
-				}
+				setCamera(panCamera(camera, delta[0] * -1, delta[1] * -1))
 			},
-			onPointerMove: ({ event }) => {
-				const dragging = rDragging.current
-				if (!dragging) return
-
-				const item = items[dragging.item.id]
-				const delta = subPoint({ x: event.clientX / camera.z, y: event.clientY / camera.z }, dragging.origin)
-
-				setItems({
-					...items,
-					[item.id]: {
-						...item,
-						point: addPoint(dragging.item.point, delta),
-					},
-				})
-			},
-			onPointerUp: ({ event }) => {
-				const target = event.currentTarget as HTMLDivElement
-
-				rDragging.current = null
-				target.releasePointerCapture(event.pointerId)
-				target.style.setProperty('cursor', 'grab')
-				target.style.setProperty('--scale', '1')
+			onPinch: ({ event, origin, memo, direction }) => {
+				console.log({ origin, direction })
+				setCamera(zoomCamera(camera, { x: origin[0], y: origin[1] }, 0.05 * -direction[1]))
 			},
 		},
-		{ eventOptions: { passive: false } }
+		{ target: canvasRef }
 	)
 
 	return (
