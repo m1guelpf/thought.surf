@@ -2,6 +2,7 @@ import 'tailwindcss/tailwind.css'
 import { APP_NAME } from '@/lib/consts'
 import '@rainbow-me/rainbowkit/styles.css'
 import { chain, createClient, WagmiConfig } from 'wagmi'
+import { CanvasProvider } from '@/context/CanvasContext'
 import { apiProvider, configureChains, getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 
 const { chains, provider } = configureChains(
@@ -16,7 +17,9 @@ const App = ({ Component, pageProps }) => {
 	return (
 		<WagmiConfig client={wagmiClient}>
 			<RainbowKitProvider chains={chains}>
-				<Component {...pageProps} />
+				<CanvasProvider>
+					<Component {...pageProps} />
+				</CanvasProvider>
 			</RainbowKitProvider>
 		</WagmiConfig>
 	)
