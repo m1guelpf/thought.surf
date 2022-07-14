@@ -6,7 +6,7 @@ const Home: FC = () => {
 	const items = {
 		a: {
 			id: 'a',
-			point: { x: 200, y: 200 },
+			point: { x: 0, y: 0 },
 			size: { width: 300, heigth: 300 },
 		},
 		b: {
@@ -16,7 +16,7 @@ const Home: FC = () => {
 		},
 		c: {
 			id: 'c',
-			point: { x: 50, y: 70 },
+			point: { x: 500, y: 2000 },
 			size: { width: 524, heigth: 300 },
 		},
 	}

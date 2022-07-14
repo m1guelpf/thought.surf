@@ -1,16 +1,23 @@
+import { useKBar } from 'kbar'
 import { APP_NAME } from '@/lib/consts'
 import { classNames } from '@/lib/utils'
-import { useKBar } from 'kbar'
-import { useEffect, useRef, useState } from 'react'
 import CommandIcon from './Icons/CommandIcon'
+import { useEffect, useRef, useState } from 'react'
 
 const Header = () => {
-	const { query } = useKBar()
+	const { query, isShowing: commandBarOpen } = useKBar(state => {
+		return { isShowing: state.visualState === 'showing' }
+	})
+
 	const headerRef = useRef<HTMLDivElement>(null)
 	const [isVisible, setVisible] = useState<boolean>(false)
 
 	useEffect(() => {
-		const onMouseMove = (event: MouseEvent) => setVisible(event.clientY < 200)
+		const onMouseMove = (event: MouseEvent) => {
+			if (commandBarOpen) return
+
+			setVisible(event.clientY < 200)
+		}
 
 		document.addEventListener('mousemove', onMouseMove)
 

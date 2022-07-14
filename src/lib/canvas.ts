@@ -1,7 +1,10 @@
-import { Box, Camera, Point } from '@/types/canvas'
+import { Box, Camera, Point, Size } from '@/types/canvas'
 
 export const addPoint = (a: Point, b: Point): Point => ({ x: a.x + b.x, y: a.y + b.y })
 export const subPoint = (a: Point, b: Point): Point => ({ x: a.x - b.x, y: a.y - b.y })
+
+// Most of the canvas logic comes from Steve Ruiz's "Creating a Zoom UI" article
+// https://www.steveruiz.me/posts/zoom-ui
 
 export const screenToCanvas = (point: Point, camera: Camera): Point => ({
 	x: point.x / camera.z - camera.x,
@@ -55,4 +58,47 @@ export const zoomCamera = (camera: Camera, point: Point, dz: number): Camera => 
 		y: camera.y + (p2.y - p1.y),
 		z: zoom,
 	}
+}
+
+export const zoomCameraTo = (camera: Camera, point: Point, zoom: number): Camera => {
+	const p1 = screenToCanvas(point, camera)
+	const p2 = screenToCanvas(point, { ...camera, z: zoom })
+
+	return {
+		x: camera.x + (p2.x - p1.x),
+		y: camera.y + (p2.y - p1.y),
+		z: zoom,
+	}
+}
+
+export const zoomOn = (camera: Camera, point: Point, size: Size): Camera => {
+	return {
+		x: -point.x + window.innerWidth / 2 - size.width / 2 / camera.z,
+		y: -point.y + window.innerHeight / 2 - size.heigth / 2 / camera.z,
+		z: 1,
+	}
+}
+
+export const zoomIn = (camera: Camera, increment: number) => {
+	const i = Math.round(camera.z * 100) / increment
+
+	const nextZoom = (i + 1) * (increment / 100)
+	const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+
+	return zoomCameraTo(camera, center, camera.z - nextZoom)
+}
+
+export const zoomOut = (camera: Camera, increment: number) => {
+	const i = Math.round(camera.z * 100) / increment
+
+	const nextZoom = (i - 1) * (increment / 100)
+	const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+
+	return zoomCameraTo(camera, center, camera.z - nextZoom)
+}
+
+export const resetZoom = (camera: Camera): Camera => {
+	const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+
+	return zoomCamera(camera, center, camera.z - 1)
 }

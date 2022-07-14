@@ -1,21 +1,40 @@
 import { useState } from 'react'
 import ResizeIcon from './Icons/ResizeIcon'
 import { Point, Size } from '@/types/canvas'
+import { Sections } from '@/types/command-bar'
 import { useGesture } from '@use-gesture/react'
-import { addPoint, subPoint } from '@/lib/canvas'
 import { useCamera } from '@/context/CanvasContext'
+import useRegisterAction from '@/hooks/useRegisterAction'
+import { addPoint, subPoint, zoomOn } from '@/lib/canvas'
+import { DocumentTextIcon } from '@heroicons/react/outline'
 import { Dispatch, memo, MutableRefObject, SetStateAction, useEffect, FC, PropsWithChildren, useRef } from 'react'
 
-const CanvasItem: FC<PropsWithChildren<{ startPoint: Point; startSize: Size }>> = ({
+const CanvasItem: FC<PropsWithChildren<{ id: string; startPoint: Point; startSize: Size }>> = ({
+	id,
 	children,
 	startPoint,
 	startSize,
 }) => {
-	const { camera } = useCamera()
+	const { camera, setCamera, setTransitioning } = useCamera()
 	const containerRef = useRef<HTMLDivElement>(null)
 	const dragData = useRef<{ start: Point; origin: Point }>(null)
 	const [point, setPoint] = useState<Point>(startPoint)
 	const [size, setSize] = useState<Size>(startSize)
+
+	const kbarAction = {
+		id: `canvas-item-${id}`,
+		name: 'Untitled',
+		icon: <DocumentTextIcon />,
+		parent: 'search-canvas',
+		section: Sections.Canvas,
+		perform: () => {
+			const rect = containerRef.current.getBoundingClientRect()
+			setTransitioning(true)
+			setCamera(camera => zoomOn(camera, point, { width: rect.width, heigth: rect.height }))
+		},
+	}
+
+	useRegisterAction(kbarAction, [point])
 
 	useEffect(() => {
 		setPoint(startPoint)

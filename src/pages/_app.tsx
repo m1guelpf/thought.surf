@@ -1,12 +1,12 @@
 import 'tailwindcss/tailwind.css'
 import { APP_NAME } from '@/lib/consts'
-import '@rainbow-me/rainbowkit/styles.css'
-import CommandBar from '@/components/CommandBar'
-import { chain, createClient, WagmiConfig } from 'wagmi'
-import { CanvasProvider } from '@/context/CanvasContext'
-import { apiProvider, configureChains, getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { Toaster } from 'react-hot-toast'
+import '@rainbow-me/rainbowkit/styles.css'
 import { ThemeProvider } from 'next-themes'
+import CommandBar from '@/components/CommandBar'
+import { CanvasProvider } from '@/context/CanvasContext'
+import { chain, createClient, WagmiConfig } from 'wagmi'
+import { apiProvider, configureChains, getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 
 const { chains, provider } = configureChains(
 	[chain.optimism],
