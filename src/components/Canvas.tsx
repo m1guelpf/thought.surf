@@ -1,26 +1,24 @@
+import Cursor from './Cursor'
+import DevMode from './DevMode'
 import { FC, useRef } from 'react'
 import CanvasItem from './CanvasItem'
 import { classNames } from '@/lib/utils'
-import { Sections } from '@/types/command-bar'
+import { CURSOR_COLORS } from '@/lib/consts'
+import { LiveMap, Lson } from '@liveblocks/client'
 import { useCamera } from '@/context/CanvasContext'
 import { panCamera, zoomCamera } from '@/lib/canvas'
-import useRegisterAction from '@/hooks/useRegisterAction'
 import { useGesture, useWheel } from '@use-gesture/react'
-import { DocumentSearchIcon } from '@heroicons/react/outline'
+import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
+import { Presence, useMap, useOthers, useUpdateMyPresence } from '@/lib/liveblocks'
 
-const Canvas: FC<{ items: [] }> = ({ items }) => {
-	const { camera, setCamera, isTransitioning, setTransitioning } = useCamera()
+const Canvas: FC = () => {
+	const items = useMap('items') as LiveMap<string, Lson> | null
 	const canvasRef = useRef<HTMLDivElement>()
+	const updateMyPresence = useUpdateMyPresence()
+	const { camera, setCamera, isTransitioning, setTransitioning } = useCamera()
+	const others = useOthers() as unknown as Array<{ connectionId: number; presence: Presence }>
 
-	useRegisterAction({
-		id: 'search-canvas',
-		name: 'Search Canvas...',
-		subtitle: `${Object.values(items).length} items`,
-		icon: <DocumentSearchIcon />,
-		section: Sections.Canvas,
-		shortcut: ['/'],
-		keywords: 'search find',
-	})
+	useCanvasCommands(items)
 
 	useWheel(
 		({ event, ctrlKey, metaKey }) => {
@@ -37,6 +35,9 @@ const Canvas: FC<{ items: [] }> = ({ items }) => {
 
 	useGesture(
 		{
+			onPointerMove: ({ event }) => {
+				updateMyPresence({ cursor: { x: event.clientX, y: event.clientY } })
+			},
 			onDrag: ({ event, delta }) => {
 				if (event.target != event.currentTarget) return
 
@@ -53,6 +54,18 @@ const Canvas: FC<{ items: [] }> = ({ items }) => {
 
 	return (
 		<main ref={canvasRef} className="fixed w-full h-full inset-0 touch-none [contain:strict]">
+			<DevMode />
+			{others.map(({ connectionId, presence }) => {
+				if (!presence || !presence.cursor) return
+
+				return (
+					<Cursor
+						key={connectionId}
+						pos={presence.cursor}
+						color={CURSOR_COLORS[connectionId % CURSOR_COLORS.length]}
+					/>
+				)
+			})}
 			<div
 				className={classNames(
 					isTransitioning && 'transition-transform duration-1000',
@@ -62,10 +75,11 @@ const Canvas: FC<{ items: [] }> = ({ items }) => {
 				style={{ transform: `scale(${camera.z}) translate(${camera.x}px, ${camera.y}px)` }}
 			>
 				<div className="opacity-100 pointer-events-[all] transition-opacity">
-					{Object.values(items).map(item => (
-						// @ts-ignore
-						<CanvasItem key={item.id} id={item.id} startPoint={item.point} startSize={item.size} />
-					))}
+					{items &&
+						Array.from(items, ([itemId, item]) => (
+							// @ts-ignore
+							<CanvasItem key={itemId} id={itemId} item={item} />
+						))}
 				</div>
 			</div>
 		</main>

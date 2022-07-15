@@ -79,22 +79,22 @@ export const zoomOn = (camera: Camera, point: Point, size: Size): Camera => {
 	}
 }
 
-export const zoomIn = (camera: Camera, increment: number) => {
-	const i = Math.round(camera.z * 100) / increment
+export const zoomIn = (camera: Camera) => {
+	const i = Math.round(camera.z * 100) / 50
 
-	const nextZoom = (i + 1) * (increment / 100)
+	const nextZoom = (i + 1) * 0.5
 	const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
 
-	return zoomCameraTo(camera, center, camera.z - nextZoom)
+	return zoomCamera(camera, center, camera.z - nextZoom)
 }
 
-export const zoomOut = (camera: Camera, increment: number) => {
-	const i = Math.round(camera.z * 100) / increment
+export const zoomOut = (camera: Camera) => {
+	const i = Math.round(camera.z * 100) / 50
 
-	const nextZoom = (i - 1) * (increment / 100)
+	const nextZoom = (i - 1) * 0.5
 	const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
 
-	return zoomCameraTo(camera, center, camera.z - nextZoom)
+	return zoomCamera(camera, center, camera.z - nextZoom)
 }
 
 export const resetZoom = (camera: Camera): Camera => {

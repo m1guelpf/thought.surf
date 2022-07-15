@@ -1,62 +1,67 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ResizeIcon from './Icons/ResizeIcon'
 import { Point, Size } from '@/types/canvas'
 import { Sections } from '@/types/command-bar'
 import { useGesture } from '@use-gesture/react'
+import { LiveObject } from '@liveblocks/client'
 import { useCamera } from '@/context/CanvasContext'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { addPoint, subPoint, zoomOn } from '@/lib/canvas'
 import { DocumentTextIcon } from '@heroicons/react/outline'
-import { Dispatch, memo, MutableRefObject, SetStateAction, useEffect, FC, PropsWithChildren, useRef } from 'react'
+import { useHistory, useRoom, useUpdateMyPresence } from '@/lib/liveblocks'
+import { memo, MutableRefObject, FC, PropsWithChildren, useRef } from 'react'
 
-const CanvasItem: FC<PropsWithChildren<{ id: string; startPoint: Point; startSize: Size }>> = ({
+const CanvasItem: FC<PropsWithChildren<{ id: string; item: LiveObject<{ point: Point; size: Size }> }>> = ({
 	id,
 	children,
-	startPoint,
-	startSize,
+	item,
 }) => {
-	const { camera, setCamera, setTransitioning } = useCamera()
+	const room = useRoom()
+	const history = useHistory()
+	const updateMyPresence = useUpdateMyPresence()
 	const containerRef = useRef<HTMLDivElement>(null)
+	const { camera, setCamera, setTransitioning } = useCamera()
 	const dragData = useRef<{ start: Point; origin: Point }>(null)
-	const [point, setPoint] = useState<Point>(startPoint)
-	const [size, setSize] = useState<Size>(startSize)
+	const [{ point, size }, setItem] = useState(item.toObject())
+
+	useEffect(() => {
+		function onChange() {
+			setItem(item.toObject())
+		}
+
+		return room.subscribe(item, onChange)
+	}, [room, item])
 
 	const kbarAction = {
 		id: `canvas-item-${id}`,
 		name: 'Untitled',
 		icon: <DocumentTextIcon />,
-		parent: 'search-canvas',
+		parent: 'canvas',
 		section: Sections.Canvas,
 		perform: () => {
 			const rect = containerRef.current.getBoundingClientRect()
 			setTransitioning(true)
-			setCamera(camera => zoomOn(camera, point, { width: rect.width, heigth: rect.height }))
+			setCamera(camera => zoomOn(camera, item.get('point'), { width: rect.width, heigth: rect.height }))
 		},
 	}
 
-	useRegisterAction(kbarAction, [point])
-
-	useEffect(() => {
-		setPoint(startPoint)
-	}, [startPoint])
-
-	useEffect(() => {
-		setSize(startSize)
-	}, [startSize])
+	useRegisterAction(kbarAction, [item])
 
 	useGesture(
 		{
 			onPointerDown: ({ event }) => {
+				updateMyPresence({ selectedItem: id }, { addToHistory: true })
 				if (event.target != event.currentTarget) return
 				const target = event.currentTarget as HTMLDivElement
 
+				history.pause()
 				target.setPointerCapture(event.pointerId)
 				target.style.setProperty('cursor', 'grabbing')
 				target.style.setProperty('z-index', '2')
 				target.style.setProperty('--scale', '0.95')
 
 				dragData.current = {
-					start: point,
+					start: item.get('point'),
 					origin: { x: event.clientX / camera.z, y: event.clientY / camera.z },
 				}
 			},
@@ -68,11 +73,13 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; startPoint: Point; startSiz
 					dragData.current.origin
 				)
 
-				setPoint(addPoint(dragData.current.start, delta))
+				item.update({ point: addPoint(dragData.current.start, delta) })
 			},
 			onPointerUp: ({ event }) => {
+				updateMyPresence({ selectedItem: null }, { addToHistory: true })
 				const target = event.currentTarget as HTMLDivElement
 
+				history.resume()
 				target.releasePointerCapture(event.pointerId)
 				target.style.setProperty('cursor', 'grab')
 				target.style.setProperty('z-index', '0')
@@ -97,22 +104,24 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; startPoint: Point; startSiz
 				} as React.CSSProperties
 			}
 		>
-			<ResizeButton setSize={setSize} containerRef={containerRef} />
+			<ResizeButton item={item} containerRef={containerRef} />
 			{children}
 		</div>
 	)
 }
 
-const ResizeButton: FC<{ setSize: Dispatch<SetStateAction<Size>>; containerRef: MutableRefObject<HTMLDivElement> }> = ({
-	setSize,
-	containerRef,
-}) => {
+const ResizeButton: FC<{
+	item: LiveObject<{ point: Point; size: Size }>
+	containerRef: MutableRefObject<HTMLDivElement>
+}> = ({ item, containerRef }) => {
+	const history = useHistory()
 	const { camera } = useCamera()
 	const resizeData = useRef<{ start: Point; origin: Point }>(null)
 
 	const listeners = useGesture(
 		{
 			onPointerDown: ({ event }) => {
+				history.pause()
 				;(event.target as HTMLDivElement).setPointerCapture(event.pointerId)
 
 				resizeData.current = {
@@ -126,15 +135,19 @@ const ResizeButton: FC<{ setSize: Dispatch<SetStateAction<Size>>; containerRef: 
 			onPointerMove: ({ event }) => {
 				if (!resizeData.current) return
 
-				setSize({
-					width: resizeData.current.start.x + event.clientX / camera.z - resizeData.current.origin.x,
-					heigth: resizeData.current.start.y + event.clientY / camera.z - resizeData.current.origin.y,
+				item.update({
+					size: {
+						width: resizeData.current.start.x + event.clientX / camera.z - resizeData.current.origin.x,
+						heigth: resizeData.current.start.y + event.clientY / camera.z - resizeData.current.origin.y,
+					},
 				})
 			},
 			onPointerUp: ({ event }) => {
 				if (!resizeData.current) return
-				;(event.target as HTMLDivElement).releasePointerCapture(event.pointerId)
+
+				history.resume()
 				resizeData.current = null
+				;(event.target as HTMLDivElement).releasePointerCapture(event.pointerId)
 			},
 		},
 		{ eventOptions: {} }

@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.walletconnect-qrcode__base {
+	@apply !bg-white/50 dark:!bg-black/50 !z-50;
+}
+
+.walletconnect-modal__base {
+	@apply !bg-white/10 !shadow-xl backdrop-filter backdrop-blur-xl backdrop-saturate-150 border border-black/10;
+}
+.walletconnect-qrcode__notification {
+	@apply !hidden;
+}
+
+.walletconnect-modal__close__wrapper {
+	@apply dark:!bg-white/30;
+}
+.walletconnect-modal__close__icon::after {
+	content: '\d7';
+
+	@apply absolute top-0 right-0 visible transform rotate-45 text-2xl leading-none -mt-3 -mr-0.5;
+}
+
+.walletconnect-modal__close__line1,
+.walletconnect-modal__close__line2 {
+	@apply !static !w-0 hidden;
+}
+
+.walletconnect-modal__mobile__toggle {
+	@apply dark:!bg-black/50 cursor-pointer;
+}
+
+.walletconnect-modal__mobile__toggle_selector {
+	@apply dark:!bg-white/10;
+}
+
+.walletconnect-modal__header p {
+	@apply !text-black/60;
+}
+
+.walletconnect-qrcode__text {
+	@apply dark:!text-white/30;
+}
+
+.walletconnect-qrcode__image :first-child {
+	@apply dark:!text-black dark:!fill-current;
+}
+.walletconnect-qrcode__image :nth-child(2) {
+	@apply dark:!text-white dark:!stroke-current;
+}
+
+.walletconnect-search__input {
+	@apply dark:!bg-white/30 dark:placeholder:!text-white/50;
+}
+
+.walletconnect-connect__button__text {
+	@apply dark:!text-white/50;
+}

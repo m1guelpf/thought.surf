@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid'
+
 export const classNames = (...classes: string[]): string => classes.filter(Boolean).join(' ')
 
 export const normalizeKey = (keyCode: string) => {
@@ -7,3 +9,5 @@ export const normalizeKey = (keyCode: string) => {
 
 	return keyCode
 }
+
+export const randomId = (): string => uuidv4()

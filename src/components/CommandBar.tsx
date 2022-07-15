@@ -1,27 +1,19 @@
 import toast from 'react-hot-toast'
 import copy from 'copy-to-clipboard'
-import { useTheme } from 'next-themes'
 import { useRouter } from 'next/router'
 import { Sections } from '@/types/command-bar'
+import { LinkIcon } from '@heroicons/react/outline'
 import { classNames, normalizeKey } from '@/lib/utils'
-import { FC, forwardRef, PropsWithChildren, PropsWithRef, Ref, useMemo } from 'react'
+import useRegisterAction from '@/hooks/useRegisterAction'
+import useAuthCommands from '@/hooks/command-bar/useAuthCommands'
+import { FC, forwardRef, PropsWithRef, Ref, useMemo } from 'react'
+import useThemeCommands from '@/hooks/command-bar/useThemeCommands'
 import {
-	MoonIcon,
-	SunIcon,
-	DesktopComputerIcon,
-	LightningBoltIcon,
-	LinkIcon,
-	CameraIcon,
-	ZoomInIcon,
-} from '@heroicons/react/outline'
-import {
-	Action,
 	ActionId,
 	ActionImpl,
 	KBarAnimator,
 	KBarPortal,
 	KBarPositioner,
-	KBarProvider,
 	KBarQuery,
 	KBarResults,
 	KBarSearch,
@@ -31,54 +23,10 @@ import {
 	useMatches,
 } from 'kbar'
 
-const CommandBar: FC<PropsWithChildren<{}>> = ({ children }) => {
+const CommandBar: FC<{}> = () => {
 	const router = useRouter()
-	const { setTheme } = useTheme()
 
-	const actions: Action[] = [
-		{
-			id: 'wallet-login',
-			name: 'Sign In with Wallet',
-			icon: <LightningBoltIcon />,
-			section: Sections.Account,
-			priority: Priority.HIGH,
-			keywords: 'account save ethereum wallet login sign-in',
-			perform: () => toast.error('Not implemented yet'),
-		},
-		{
-			id: 'center-camera',
-			name: 'Center Camera',
-			icon: <CameraIcon />,
-			section: Sections.Canvas,
-			keywords: 'reset',
-			perform: () => toast.error('Not implemented yet'),
-		},
-		{
-			id: 'zoom-in',
-			name: 'Zoom In',
-			icon: <ZoomInIcon />,
-			section: Sections.Canvas,
-			shortcut: ['Meta+Equal'],
-			keywords: 'bigger',
-			perform: () => toast.error('Not implemented yet'),
-		},
-		{
-			id: 'zoom-out',
-			name: 'Zoom Out',
-			icon: <ZoomInIcon />,
-			section: Sections.Canvas,
-			shortcut: ['Meta+Minus'],
-			keywords: 'smaller',
-			perform: () => toast.error('Not implemented yet'),
-		},
-		{
-			id: 'theme',
-			name: 'Toggle theme',
-			shortcut: ['t'],
-			priority: Priority.LOW,
-			icon: <DesktopComputerIcon />,
-			section: Sections.General,
-		},
+	useRegisterAction([
 		{
 			id: 'link',
 			name: 'Copy URL',
@@ -91,55 +39,28 @@ const CommandBar: FC<PropsWithChildren<{}>> = ({ children }) => {
 				toast.success('Copied to clipboard!')
 			},
 		},
-		{
-			id: 'light',
-			name: 'Light',
-			icon: <SunIcon />,
-			section: Sections.General,
-			keywords: 'light theme',
-			parent: 'theme',
-			perform: () => setTheme('light'),
-		},
-		{
-			id: 'dark',
-			name: 'Dark',
-			icon: <MoonIcon />,
-			section: Sections.General,
-			keywords: 'dark theme',
-			parent: 'theme',
-			perform: () => setTheme('dark'),
-		},
-		{
-			id: 'system',
-			name: 'System',
-			icon: <DesktopComputerIcon />,
-			section: Sections.General,
-			keywords: 'system theme',
-			parent: 'theme',
-			perform: () => setTheme('system'),
-		},
-	]
+	])
+
+	useAuthCommands()
+	useThemeCommands()
 
 	return (
-		<KBarProvider actions={actions} options={{ enableHistory: true }}>
-			<KBarPortal>
-				<KBarPositioner className="bg-white/50 dark:bg-black/50 pt-[10vh] px-4 pb-4 z-40">
-					<KBarAnimator className="overflow-hidden w-full max-w-2xl bg-white/10 rounded-lg shadow-2xl backdrop-filter backdrop-blur-2xl backdrop-saturate-150 border border-black/10 z-10">
-						<div>
-							<Breadcrumbs />
-							<KBarSearch
-								defaultPlaceholder="What do you need?"
-								className="placeholder:text-black/30 dark:text-white/60 dark:placeholder:text-white/50 pt-4 pb-3.5 px-4 mb-2 w-full border-b-[1px] border-black/10 box-border outline-none dark:bg-black/10 dark:border-white/10"
-							/>
-						</div>
-						<div>
-							<Results />
-						</div>
-					</KBarAnimator>
-				</KBarPositioner>
-			</KBarPortal>
-			{children}
-		</KBarProvider>
+		<KBarPortal>
+			<KBarPositioner className="bg-white/50 dark:bg-black/50 px-4 pb-4 z-40">
+				<KBarAnimator className="overflow-hidden w-full max-w-2xl bg-white/10 rounded-lg shadow-2xl backdrop-filter backdrop-blur-2xl backdrop-saturate-150 border border-black/10 z-10">
+					<div>
+						<Breadcrumbs />
+						<KBarSearch
+							defaultPlaceholder="What do you need?"
+							className="placeholder:text-black/30 dark:text-white/60 dark:placeholder:text-white/50 pt-4 pb-3.5 px-4 mb-2 w-full border-b-[1px] border-black/10 box-border outline-none dark:bg-black/10 dark:border-white/10"
+						/>
+					</div>
+					<div className="pb-1.5">
+						<Results />
+					</div>
+				</KBarAnimator>
+			</KBarPositioner>
+		</KBarPortal>
 	)
 }
 
@@ -190,9 +111,15 @@ const Results = () => {
 		<div className="relative">
 			<KBarResults
 				items={dedupedResults}
+				maxHeight={700}
 				onRender={({ item, active }) =>
 					typeof item === 'string' ? (
-						<p className="pb-1 pl-3 text-[.65rem] uppercase text-black/50 tracking-wide dark:text-neutral-300/50">
+						<p
+							className={classNames(
+								dedupedResults[0] === item ? '' : 'mt-1',
+								'pb-1 pl-3 text-[.65rem] uppercase text-black/50 tracking-wide dark:text-neutral-300/50'
+							)}
+						>
 							{item}
 						</p>
 					) : (
@@ -220,6 +147,7 @@ const ResultItem: FC<
 
 	return (
 		<div
+			ref={ref}
 			className={classNames(
 				active && 'bg-black/5 dark:bg-white/10',
 				'flex justify-between items-center cursor-pointer py-2.5 px-3 mx-1.5 mb-2 rounded-md transition-colors duration-[.15s] delay-[0]'

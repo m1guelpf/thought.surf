@@ -1,4 +1,6 @@
-const CommandIcon = ({ className = '' }) => (
+import { FC } from 'react'
+
+const CommandIcon: FC<{ className: string }> = ({ className = '' }) => (
 	<svg className={className} viewBox="0 0 20 20">
 		<path
 			fill="currentColor"

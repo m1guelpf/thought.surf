@@ -1,26 +1,26 @@
 import { Action, useKBar } from 'kbar'
-import { useEffect, useMemo } from 'react'
+import { DependencyList, useEffect, useMemo } from 'react'
 
-const useRegisterAction = (action: Action, dependencies: React.DependencyList = []) => {
+const useRegisterAction = (action: Action | Action[], dependencies: DependencyList = [], include: boolean = true) => {
 	const { query, actionTree } = useKBar(state => {
 		return { actionTree: state.actions }
 	})
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const actionCache = useMemo(() => action, dependencies)
+	const actionsCache = useMemo(() => (Array.isArray(action) ? action : [action]), dependencies)
 
 	const parentsLoaded = useMemo<boolean>(
-		() => (actionCache.parent ? !!actionTree[actionCache.parent] : true),
-		[actionCache, actionTree]
+		() => actionsCache.every(action => (action.parent ? actionTree[action.parent] : true)),
+		[actionsCache, actionTree]
 	)
 
 	useEffect(() => {
-		if (!parentsLoaded) return
+		if (!parentsLoaded || !include) return
 
-		const unregister = query.registerActions([actionCache])
+		const unregister = query.registerActions(actionsCache)
 
 		return () => unregister()
-	}, [query, actionCache, parentsLoaded])
+	}, [query, actionsCache, parentsLoaded, include])
 }
 
 export default useRegisterAction
