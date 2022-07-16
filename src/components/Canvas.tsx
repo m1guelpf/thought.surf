@@ -1,20 +1,23 @@
 import Cursor from './Cursor'
 import DevMode from './DevMode'
-import { FC, useRef } from 'react'
+import { Card } from '@/types/cards'
 import CanvasItem from './CanvasItem'
 import { classNames } from '@/lib/utils'
+import { FC, Fragment, useRef } from 'react'
 import { CURSOR_COLORS } from '@/lib/consts'
-import { LiveMap, Lson } from '@liveblocks/client'
+import LoadingIcon from './Icons/LoadingIcon'
+import { Transition } from '@headlessui/react'
 import { useCamera } from '@/context/CanvasContext'
-import { panCamera, zoomCamera } from '@/lib/canvas'
+import { LiveMap, LiveObject } from '@liveblocks/client'
 import { useGesture, useWheel } from '@use-gesture/react'
+import { panCamera, screenToCanvas, zoomCamera } from '@/lib/canvas'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
 import { Presence, useMap, useOthers, useUpdateMyPresence } from '@/lib/liveblocks'
 
 const Canvas: FC = () => {
-	const items = useMap('items') as LiveMap<string, Lson> | null
 	const canvasRef = useRef<HTMLDivElement>()
 	const updateMyPresence = useUpdateMyPresence()
+	const items = useMap('items') as LiveMap<string, LiveObject<Card>> | null
 	const { camera, setCamera, isTransitioning, setTransitioning } = useCamera()
 	const others = useOthers() as unknown as Array<{ connectionId: number; presence: Presence }>
 
@@ -36,7 +39,7 @@ const Canvas: FC = () => {
 	useGesture(
 		{
 			onPointerMove: ({ event }) => {
-				updateMyPresence({ cursor: { x: event.clientX, y: event.clientY } })
+				updateMyPresence({ cursor: screenToCanvas({ x: event.clientX, y: event.clientY }, camera) })
 			},
 			onDrag: ({ event, delta }) => {
 				if (event.target != event.currentTarget) return
@@ -53,36 +56,69 @@ const Canvas: FC = () => {
 	)
 
 	return (
-		<main ref={canvasRef} className="fixed w-full h-full inset-0 touch-none [contain:strict]">
-			<DevMode />
-			{others.map(({ connectionId, presence }) => {
-				if (!presence || !presence.cursor) return
-
-				return (
-					<Cursor
-						key={connectionId}
-						pos={presence.cursor}
-						color={CURSOR_COLORS[connectionId % CURSOR_COLORS.length]}
-					/>
-				)
-			})}
-			<div
-				className={classNames(
-					isTransitioning && 'transition-transform duration-1000',
-					'absolute will-change-transform'
-				)}
-				onTransitionEnd={() => setTransitioning(false)}
-				style={{ transform: `scale(${camera.z}) translate(${camera.x}px, ${camera.y}px)` }}
+		<>
+			<Transition
+				as={Fragment}
+				show={!items}
+				enter="transition-opacity duration-75"
+				enterFrom="opacity-0"
+				enterTo="opacity-100"
+				leave="transition-opacity duration-700"
+				leaveFrom="opacity-100"
+				leaveTo="opacity-0"
 			>
-				<div className="opacity-100 pointer-events-[all] transition-opacity">
-					{items &&
-						Array.from(items, ([itemId, item]) => (
-							// @ts-ignore
-							<CanvasItem key={itemId} id={itemId} item={item} />
-						))}
+				<div
+					className={`absolute w-screen h-screen inset-0 flex flex-col items-center justify-center cursor-wait z-50 bg-white/10 backdrop-filter backdrop-blur saturate-150`}
+				>
+					<LoadingIcon className="w-32 h-32" />
+					<p className="-mt-6 ml-3 select-none text-2xl font-semibold text-center text-transparent bg-clip-text bg-gradient-to-br from-purple-300 to-purple-700">
+						Loading...
+					</p>
 				</div>
-			</div>
-		</main>
+			</Transition>
+			<main ref={canvasRef} className="fixed w-full h-full inset-0 touch-none [contain:strict] z-0">
+				<DevMode />
+				{others.map(({ connectionId, presence }) => {
+					if (!presence || !presence.cursor) return
+
+					return (
+						<Cursor
+							key={connectionId}
+							pos={presence.cursor}
+							color={CURSOR_COLORS[connectionId % CURSOR_COLORS.length]}
+						/>
+					)
+				})}
+				<div
+					className={classNames(
+						isTransitioning && 'transition-transform duration-1000',
+						'absolute will-change-transform'
+					)}
+					onTransitionEnd={() => setTransitioning(false)}
+					style={{ transform: `scale(${camera.z}) translate3d(${camera.x}px, ${camera.y}px, 0)` }}
+				>
+					<Transition
+						as={Fragment}
+						show={!!items}
+						enter="transition-opacity duration-300"
+						enterFrom="opacity-0"
+						enterTo="opacity-100"
+					>
+						<div className="opacity-100 pointer-events-[all] transition-opacity">
+							{items &&
+								Array.from(items, ([itemId, item]) => (
+									<CanvasItem
+										key={itemId}
+										id={itemId}
+										item={item}
+										onDelete={() => items.delete(itemId)}
+									/>
+								))}
+						</div>
+					</Transition>
+				</div>
+			</main>
+		</>
 	)
 }
 

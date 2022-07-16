@@ -1,23 +1,18 @@
+import { FC, useMemo } from 'react'
 import { Point } from '@/types/canvas'
-import { usePerfectCursor } from '@/hooks/usePerfectCursor'
-import { FC, useCallback, useLayoutEffect, useRef } from 'react'
+import { canvasToScreen } from '@/lib/canvas'
+import { useCamera } from '@/context/CanvasContext'
 
 const Cursor: FC<{ pos: Point; color: string }> = ({ pos, color }) => {
-	const cursorRef = useRef<SVGSVGElement>(null)
+	const { camera } = useCamera()
 
-	const animateCursor = useCallback((point: Point) => {
-		if (!cursorRef.current) return
-
-		cursorRef.current.style.setProperty('transform', `translate(${point.x}px, ${point.y}px)`)
-	}, [])
-
-	const onPointMove = usePerfectCursor(animateCursor)
-
-	useLayoutEffect(() => onPointMove(pos), [onPointMove, pos])
+	const { x, y } = useMemo(() => {
+		return canvasToScreen(pos, camera)
+	}, [pos, camera])
 
 	return (
 		<svg
-			ref={cursorRef}
+			style={{ transition: 'transform 120ms linear', transform: `translate3d(${x}px, ${y}px, 0)` }}
 			className="absolute top-0 left-0 w-9 h-9 z-20"
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 35 35"

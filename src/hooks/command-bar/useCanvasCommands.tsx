@@ -1,15 +1,24 @@
 import toast from 'react-hot-toast'
 import { randomId } from '@/lib/utils'
 import { Sections } from '@/types/command-bar'
-import { zoomIn, zoomOut } from '@/lib/canvas'
 import { useCamera } from '@/context/CanvasContext'
 import useRegisterAction from '../useRegisterAction'
 import { LiveMap, LiveObject, Lson } from '@liveblocks/client'
-import { useBatch, useUpdateMyPresence } from '@/lib/liveblocks'
-import { CameraIcon, DocumentSearchIcon, ViewGridAddIcon, ZoomInIcon, ZoomOutIcon } from '@heroicons/react/outline'
+import { screenToCanvas, zoomIn, zoomOut } from '@/lib/canvas'
+import { useBatch, useHistory, useUpdateMyPresence } from '@/lib/liveblocks'
+import {
+	CameraIcon,
+	DocumentSearchIcon,
+	ReplyIcon,
+	ViewGridAddIcon,
+	ZoomInIcon,
+	ZoomOutIcon,
+} from '@heroicons/react/outline'
 
 const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 	const batch = useBatch()
+	const history = useHistory()
+	const { camera } = useCamera()
 	const updateMyPresence = useUpdateMyPresence()
 	const { setCamera, setTransitioning } = useCamera()
 
@@ -22,6 +31,34 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 		shortcut: ['/'],
 		keywords: 'search find',
 	})
+	useRegisterAction([
+		{
+			id: 'undo-action',
+			name: 'Undo',
+			icon: <ReplyIcon />,
+			section: Sections.Canvas,
+			keywords: 'back',
+			shortcut: ['$mod+KeyZ'],
+			perform: () => {
+				history.undo()
+
+				return () => history.redo()
+			},
+		},
+		{
+			id: 'redo-action',
+			name: 'Redo',
+			icon: <ReplyIcon className="transform -scale-x-100" />,
+			section: Sections.Canvas,
+			keywords: 'forward',
+			shortcut: ['$mod+Shift+KeyZ'],
+			perform: () => {
+				history.redo()
+
+				return () => history.undo()
+			},
+		},
+	])
 	useRegisterAction(
 		{
 			id: 'test-add',
@@ -34,13 +71,18 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 				batch(() => {
 					const id = randomId()
 
-					items.set(id, new LiveObject({ point: { x: 500, y: 2000 }, size: { width: 524, heigth: 300 } }))
+					items.set(
+						id,
+						new LiveObject({
+							point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
+							size: { width: 500, heigth: 500 },
+						})
+					)
 					updateMyPresence({ selectedItem: id }, { addToHistory: true })
 				})
 			},
 		},
-		[],
-		false
+		[items, camera]
 	)
 	useRegisterAction({
 		id: 'zoom-in',

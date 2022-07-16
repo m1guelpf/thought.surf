@@ -10,6 +10,14 @@ module.exports = {
 				'soft-black': '#141415',
 				gray: colors.slate,
 			},
+			animation: {
+				loading: 'loading 2s linear infinite',
+			},
+			keyframes: {
+				loading: {
+					to: { strokeDashoffset: '0px' },
+				},
+			},
 		},
 	},
 	plugins: [],
