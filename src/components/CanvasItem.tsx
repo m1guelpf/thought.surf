@@ -22,9 +22,9 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; item: LiveObject<Card>; onD
 	const history = useHistory()
 	const updateMyPresence = useUpdateMyPresence()
 	const containerRef = useRef<HTMLDivElement>(null)
-	const { camera, setCamera, setTransitioning } = useCamera()
-	const dragData = useRef<{ start: Point; origin: Point }>(null)
+	const { camera, setCamera, withTransition } = useCamera()
 	const [{ point, size }, setItem] = useState(item.toObject())
+	const dragData = useRef<{ start: Point; origin: Point }>(null)
 
 	useEffect(() => {
 		function onChange() {
@@ -42,8 +42,10 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; item: LiveObject<Card>; onD
 		section: Sections.Canvas,
 		perform: () => {
 			const rect = containerRef.current.getBoundingClientRect()
-			setTransitioning(true)
-			setCamera(camera => zoomOn(camera, item.get('point'), { width: rect.width, heigth: rect.height }))
+
+			withTransition(() => {
+				setCamera(camera => zoomOn(camera, item.get('point'), { width: rect.width, heigth: rect.height }))
+			})
 		},
 	}
 

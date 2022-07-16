@@ -20,7 +20,7 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 	const history = useHistory()
 	const { camera } = useCamera()
 	const updateMyPresence = useUpdateMyPresence()
-	const { setCamera, setTransitioning } = useCamera()
+	const { setCamera, withTransition } = useCamera()
 
 	useRegisterAction({
 		id: 'canvas',
@@ -117,8 +117,7 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 		section: Sections.Canvas,
 		keywords: 'reset',
 		perform: () => {
-			setTransitioning(true)
-			setCamera({ x: 1, y: 1, z: 1 })
+			withTransition(() => setCamera({ x: 1, y: 1, z: 1 }))
 		},
 	})
 }

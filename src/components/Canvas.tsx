@@ -1,6 +1,5 @@
 import Cursor from './Cursor'
 import DevMode from './DevMode'
-import { Card } from '@/types/cards'
 import CanvasItem from './CanvasItem'
 import { classNames } from '@/lib/utils'
 import { FC, Fragment, useRef } from 'react'
@@ -8,18 +7,17 @@ import { CURSOR_COLORS } from '@/lib/consts'
 import LoadingIcon from './Icons/LoadingIcon'
 import { Transition } from '@headlessui/react'
 import { useCamera } from '@/context/CanvasContext'
-import { LiveMap, LiveObject } from '@liveblocks/client'
 import { useGesture, useWheel } from '@use-gesture/react'
 import { panCamera, screenToCanvas, zoomCamera } from '@/lib/canvas'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
-import { Presence, useMap, useOthers, useUpdateMyPresence } from '@/lib/liveblocks'
+import { useMap, useOthers, useUpdateMyPresence } from '@/lib/liveblocks'
 
 const Canvas: FC = () => {
+	const others = useOthers()
+	const items = useMap('items')
 	const canvasRef = useRef<HTMLDivElement>()
 	const updateMyPresence = useUpdateMyPresence()
-	const items = useMap('items') as LiveMap<string, LiveObject<Card>> | null
-	const { camera, setCamera, isTransitioning, setTransitioning } = useCamera()
-	const others = useOthers() as unknown as Array<{ connectionId: number; presence: Presence }>
+	const { camera, setCamera, shouldTransition, onTransitionEnd } = useCamera()
 
 	useCanvasCommands(items)
 
@@ -91,10 +89,10 @@ const Canvas: FC = () => {
 				})}
 				<div
 					className={classNames(
-						isTransitioning && 'transition-transform duration-1000',
+						shouldTransition && 'transition-transform duration-1000',
 						'absolute will-change-transform'
 					)}
-					onTransitionEnd={() => setTransitioning(false)}
+					onTransitionEnd={onTransitionEnd}
 					style={{ transform: `scale(${camera.z}) translate3d(${camera.x}px, ${camera.y}px, 0)` }}
 				>
 					<Transition
