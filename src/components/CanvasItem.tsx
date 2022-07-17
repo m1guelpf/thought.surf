@@ -1,4 +1,5 @@
 import { Card } from '@/types/cards'
+import { motion } from 'framer-motion'
 import ResizeIcon from './Icons/ResizeIcon'
 import { Point, Size } from '@/types/canvas'
 import { Sections } from '@/types/command-bar'
@@ -20,6 +21,7 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; item: LiveObject<Card>; onD
 }) => {
 	const room = useRoom()
 	const history = useHistory()
+	const [scale, setScale] = useState(1)
 	const updateMyPresence = useUpdateMyPresence()
 	const containerRef = useRef<HTMLDivElement>(null)
 	const { camera, setCamera, withTransition } = useCamera()
@@ -62,7 +64,7 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; item: LiveObject<Card>; onD
 				target.setPointerCapture(event.pointerId)
 				target.style.setProperty('cursor', 'grabbing')
 				target.style.setProperty('z-index', '2')
-				target.style.setProperty('--scale', '0.95')
+				setScale(0.95)
 
 				dragData.current = {
 					start: item.get('point'),
@@ -87,7 +89,7 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; item: LiveObject<Card>; onD
 				target.releasePointerCapture(event.pointerId)
 				target.style.setProperty('cursor', 'grab')
 				target.style.setProperty('z-index', '0')
-				target.style.setProperty('--scale', '1')
+				setScale(1)
 
 				dragData.current = null
 			},
@@ -101,17 +103,17 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; item: LiveObject<Card>; onD
 	}, [id, onDelete, updateMyPresence])
 
 	return (
-		<div
+		<motion.div
 			ref={containerRef}
+			animate={{ scale }}
 			className="group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-white/10 absolute will-change-transform cursor-grab [content-visibility:auto] [contain:layout_style_paint] rounded-lg shadow-md backdrop-blur backdrop-filter"
-			style={
-				{
-					'--scale': '1',
-					width: size.width,
-					height: size.heigth,
-					transform: `translate3d(${point.x}px, ${point.y}px, 0) scale(var(--scale))`,
-				} as React.CSSProperties
-			}
+			style={{
+				width: size.width,
+				height: size.heigth,
+				x: point.x,
+				y: point.y,
+				scale,
+			}}
 		>
 			<button
 				onClick={deleteItem}
@@ -121,7 +123,7 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; item: LiveObject<Card>; onD
 			</button>
 			<ResizeButton item={item} containerRef={containerRef} />
 			{children}
-		</div>
+		</motion.div>
 	)
 }
 

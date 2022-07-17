@@ -1,10 +1,11 @@
 import { useKBar } from 'kbar'
-import { APP_NAME } from '@/lib/consts'
 import { classNames } from '@/lib/utils'
+import { useRoom } from '@/lib/liveblocks'
 import CommandIcon from './Icons/CommandIcon'
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 
 const Header = () => {
+	const room = useRoom()
 	const { query, isShowing: commandBarOpen } = useKBar(state => {
 		return { isShowing: state.visualState === 'showing' }
 	})
@@ -36,7 +37,7 @@ const Header = () => {
 		>
 			<div></div>
 			<div className="bg-gray-200/40 dark:bg-black/40 backdrop-filter backdrop-blur backdrop-saturate-150 p-2 border dark:border-white/20 rounded-lg">
-				<p className="text-gray-700 dark:text-gray-300">{APP_NAME}</p>
+				<p className="text-gray-700 dark:text-gray-300">{room.id}</p>
 			</div>
 			<button
 				onClick={() => query.toggle()}
@@ -48,4 +49,4 @@ const Header = () => {
 	)
 }
 
-export default Header
+export default memo(Header)

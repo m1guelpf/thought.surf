@@ -1,7 +1,6 @@
 import { Card } from '@/types/cards'
 import { Point } from '@/types/canvas'
 import { FC, PropsWithChildren } from 'react'
-import { useRoomId } from '@/context/CanvasContext'
 import { createRoomContext } from '@liveblocks/react'
 import { createClient, LiveMap, LiveObject } from '@liveblocks/client'
 
@@ -14,19 +13,27 @@ type Storage = {
 	items: LiveMap<string, LiveObject<Card>>
 }
 
+type UserMeta = {}
+
 const client = createClient({
-	publicApiKey: process.env.NEXT_PUBLIC_LIVEBLOCKS_KEY,
+	authEndpoint: async room => {
+		const response = await fetch('/api/auth', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ room }),
+		})
+
+		return response.json()
+	},
 })
 
 export const { RoomProvider, useOthers, useUpdateMyPresence, useMap, useHistory, useRoom, useBatch } =
-	createRoomContext<Presence, Storage>(client)
+	createRoomContext<Presence, Storage, UserMeta>(client)
 
-export const LiveProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
-	const { roomId } = useRoomId()
-
-	return (
-		<RoomProvider id={roomId} initialStorage={{ items: new LiveMap() }}>
-			{children}
-		</RoomProvider>
-	)
-}
+export const LiveProvider: FC<PropsWithChildren<{ roomId: string }>> = ({ children, roomId }) => (
+	<RoomProvider id={roomId} initialStorage={{ items: new LiveMap() }}>
+		{children}
+	</RoomProvider>
+)

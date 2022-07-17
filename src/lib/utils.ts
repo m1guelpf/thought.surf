@@ -1,3 +1,4 @@
+import { parse } from 'tldts'
 import { nanoid } from 'nanoid'
 
 export const classNames = (...classes: string[]): string => classes.filter(Boolean).join(' ')
@@ -14,3 +15,9 @@ export const normalizeKey = (keyCode: string) => {
 }
 
 export const randomId = (): string => nanoid()
+
+export const getSubdomain = (host: string): string => {
+	if (host.includes('localhost:')) return host.split('localhost:')[0].replace(/\.$/, '')
+
+	return parse(host).subdomain
+}

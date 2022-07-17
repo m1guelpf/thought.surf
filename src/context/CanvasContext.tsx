@@ -1,10 +1,8 @@
 import { Camera } from '@/types/canvas'
-import { randomId } from 'kbar/lib/utils'
+import useLocalState from '@/hooks/useLocalState'
 import { createContext, Dispatch, FC, PropsWithChildren, SetStateAction, useContext, useState } from 'react'
 
 const CanvasContext = createContext<{
-	roomId: string
-	setRoomId: Dispatch<SetStateAction<string>>
 	camera: Camera
 	setCamera: Dispatch<SetStateAction<Camera>>
 	isTransitioning: boolean
@@ -12,13 +10,12 @@ const CanvasContext = createContext<{
 }>(null)
 CanvasContext.displayName = 'CanvasContext'
 
-export const CanvasProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
-	const [roomId, setRoomId] = useState<string>(randomId())
-	const [camera, setCamera] = useState<Camera>({ x: 1, y: 1, z: 1 })
+export const CanvasProvider: FC<PropsWithChildren<{ roomId: string }>> = ({ children, roomId }) => {
+	const [camera, setCamera] = useLocalState<Camera>(`${roomId}-camera`, { x: 1, y: 1, z: 1 })
 	const [isTransitioning, setTransitioning] = useState<boolean>(false)
 
 	return (
-		<CanvasContext.Provider value={{ roomId, setRoomId, camera, setCamera, isTransitioning, setTransitioning }}>
+		<CanvasContext.Provider value={{ camera, setCamera, isTransitioning, setTransitioning }}>
 			{children}
 		</CanvasContext.Provider>
 	)
@@ -35,12 +32,6 @@ export const useCamera = () => {
 	const onTransitionEnd = () => setTransitioning(false)
 
 	return { camera, setCamera, shouldTransition: isTransitioning, withTransition, onTransitionEnd }
-}
-
-export const useRoomId = () => {
-	const { roomId, setRoomId } = useContext(CanvasContext)
-
-	return { roomId, setRoomId }
 }
 
 export default CanvasContext
