@@ -276,9 +276,10 @@ const OptionRenderer = ({ actions, className, query, parents, onClick }) => {
 				) : (
 					<button
 						key={i}
+						onMouseEnter={() => setSelected(selectedIndexMap.findIndex(id => id == i))}
 						onClick={() => onClick(action)}
 						className={classNames(
-							'flex cursor-default select-none items-center justify-between rounded-md px-3 py-2 text-black/70 dark:text-white/70 w-full relative'
+							'flex select-none items-center justify-between rounded-md px-3 py-2 text-black/70 dark:text-white/70 w-full relative'
 						)}
 					>
 						{selectedIndexMap[selected] == i && (
