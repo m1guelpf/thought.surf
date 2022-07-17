@@ -16,10 +16,8 @@ const DevMode = () => {
 		name: 'Toggle Debug Info',
 		icon: <CubeTransparentIcon />,
 		section: Sections.Canvas,
-		keywords: 'debug dev mode',
-		perform: () => {
-			setDevMode(i => !i)
-		},
+		keywords: ['debug', 'dev', 'mode'],
+		perform: () => setDevMode(i => !i),
 	})
 
 	if (!devMode) return null

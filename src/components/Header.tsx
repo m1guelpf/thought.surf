@@ -1,21 +1,19 @@
-import { useKBar } from 'kbar'
 import { classNames } from '@/lib/utils'
 import { useRoom } from '@/lib/liveblocks'
 import CommandIcon from './Icons/CommandIcon'
 import { memo, useEffect, useRef, useState } from 'react'
+import { useCommandBar } from '@/context/CommandBarContext'
 
 const Header = () => {
 	const room = useRoom()
-	const { query, isShowing: commandBarOpen } = useKBar(state => {
-		return { isShowing: state.visualState === 'showing' }
-	})
+	const { open, setOpen } = useCommandBar()
 
 	const headerRef = useRef<HTMLDivElement>(null)
 	const [isVisible, setVisible] = useState<boolean>(false)
 
 	useEffect(() => {
 		const onMouseMove = (event: MouseEvent) => {
-			if (commandBarOpen) return
+			if (open) return
 
 			setVisible(event.clientY < 200)
 		}
@@ -40,7 +38,7 @@ const Header = () => {
 				<p className="text-gray-700 dark:text-gray-300">{room.id}</p>
 			</div>
 			<button
-				onClick={() => query.toggle()}
+				onClick={() => setOpen(true)}
 				className="bg-white dark:bg-black/70 border border-transparent dark:border-white/20 p-3 rounded-lg shadow dark:shadow-none"
 			>
 				<CommandIcon className="w-4 h-4 dark:text-gray-400" />

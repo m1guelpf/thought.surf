@@ -15,7 +15,7 @@ const EthereumProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
 		autoConnect: true,
 		provider,
 		connectors: [
-			new InjectedConnector({ chains }),
+			new InjectedConnector({ chains, options: { shimDisconnect: true } }),
 			new WalletConnectConnector({ chains, options: { qrcode: true } }),
 		],
 	})

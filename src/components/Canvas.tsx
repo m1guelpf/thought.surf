@@ -27,7 +27,6 @@ const Canvas: FC = () => {
 
 			const { clientX: x, clientY: y, deltaX, deltaY } = event
 			const isZoom = ctrlKey || metaKey
-			console.log({ x, y })
 
 			if (isZoom) setCamera(camera => zoomCamera(camera, { x, y }, deltaY / 100))
 			else setCamera(camera => panCamera(camera, deltaX, deltaY))

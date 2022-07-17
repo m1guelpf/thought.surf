@@ -16,11 +16,7 @@ const useAuthCommands = () => {
 
 	const { address, isConnected } = useAccount()
 	const { signMessageAsync } = useSignMessage()
-	const { connectAsync, connectors } = useConnect({
-		onSuccess: () => {
-			toast.success('Connected!')
-		},
-	})
+	const { connectAsync, connectors } = useConnect()
 
 	useRegisterAction(
 		{
@@ -29,7 +25,7 @@ const useAuthCommands = () => {
 			icon: <LightningBoltIcon />,
 			section: Sections.Account,
 			priority: Priority.HIGH,
-			keywords: 'account save ethereum wallet login sign-in',
+			keywords: ['account', 'save', 'ethereum', 'wallet', 'login', 'sign-in'],
 		},
 		[],
 		!isConnected
@@ -41,8 +37,11 @@ const useAuthCommands = () => {
 			icon: <LogoutIcon />,
 			section: Sections.Account,
 			priority: Priority.HIGH,
-			keywords: 'logout disconnect wallet ethereum',
-			perform: () => disconnect(),
+			keywords: ['logout', 'disconnect', 'wallet', 'ethereum'],
+			perform: () => {
+				disconnect()
+				localStorage.removeItem('walletconnect')
+			},
 		},
 		[],
 		isConnected
@@ -60,7 +59,7 @@ const useAuthCommands = () => {
 
 				const signature = await signMessageAsync({ message: 'test' })
 
-				console.log(signature)
+				toast.success('Connected!')
 			},
 		})),
 		[],

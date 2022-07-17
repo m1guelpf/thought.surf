@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import Header from './Header'
-import { KBarProvider } from 'kbar'
 import CommandBar from './CommandBar'
 import { APP_NAME } from '@/lib/consts'
 import LoadingScreen from './LoadingScreen'
@@ -26,13 +25,11 @@ const Layout: FC<PropsWithChildren<{ roomId: string }>> = ({ children, roomId })
 			</Head>
 			<LiveProvider roomId={roomId}>
 				<CanvasProvider roomId={roomId}>
-					<KBarProvider>
-						<CommandBar />
-						<div className="w-full h-screen overflow-hidden bg-gray-100 dark:bg-black">
-							<Header />
-							{children}
-						</div>
-					</KBarProvider>
+					<CommandBar />
+					<div className="w-full h-screen overflow-hidden bg-gray-100 dark:bg-black">
+						<Header />
+						{children}
+					</div>
 				</CanvasProvider>
 			</LiveProvider>
 		</>
