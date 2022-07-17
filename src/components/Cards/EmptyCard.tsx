@@ -9,7 +9,7 @@ const EmptyCard = () => {
 }
 
 export const createEmptyCard = (camera: Camera): Card => ({
-	type: CardType.TEXT,
+	type: CardType.EMPTY,
 	size: { width: 500, height: 500 },
 	point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
 })

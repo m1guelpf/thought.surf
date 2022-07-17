@@ -3,8 +3,8 @@ import { Json } from '@liveblocks/client'
 import { JSONContent } from '@tiptap/core'
 
 export enum CardType {
-	EMPTY,
-	TEXT,
+	TEXT = 'text',
+	EMPTY = 'empty',
 }
 
 export type Card<T extends Record<string, Json> = Record<string, Json>> = {

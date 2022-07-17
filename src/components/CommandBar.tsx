@@ -266,6 +266,7 @@ const OptionRenderer = ({ actions, className, query, parents, onClick }) => {
 			{actions.map((action, i) =>
 				typeof action == 'string' ? (
 					<p
+						key={i}
 						className={classNames(
 							actions[0] === action ? '' : 'mt-2',
 							'pb-1 pl-3 text-[.65rem] uppercase text-black/50 tracking-wide dark:text-neutral-300/50'
