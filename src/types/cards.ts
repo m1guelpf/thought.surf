@@ -1,6 +1,23 @@
 import { Point, Size } from './canvas'
+import { Json } from '@liveblocks/client'
+import { JSONContent } from '@tiptap/core'
 
-export type Card = {
+export enum CardType {
+	EMPTY,
+	TEXT,
+}
+
+export type Card<T extends Record<string, Json> = Record<string, Json>> = {
 	point: Point
 	size: Size
+	type: CardType
+	attributes?: T
 }
+
+export type CardOptions = {
+	resizeAxis: { x: boolean; y: boolean }
+}
+
+export type TextCard = Card<{
+	doc: JSONContent
+}>

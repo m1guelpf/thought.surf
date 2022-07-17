@@ -74,7 +74,7 @@ export const zoomCameraTo = (camera: Camera, point: Point, zoom: number): Camera
 export const zoomOn = (camera: Camera, point: Point, size: Size): Camera => {
 	return {
 		x: -point.x + window.innerWidth / 2 - size.width / 2 / camera.z,
-		y: -point.y + window.innerHeight / 2 - size.heigth / 2 / camera.z,
+		y: -point.y + window.innerHeight / 2 - size.height / 2 / camera.z,
 		z: 1,
 	}
 }

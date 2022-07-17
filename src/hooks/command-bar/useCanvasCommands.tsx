@@ -1,13 +1,16 @@
 import toast from 'react-hot-toast'
 import { randomId } from '@/lib/utils'
 import { Sections } from '@/types/command-bar'
+import { zoomIn, zoomOut } from '@/lib/canvas'
 import { useCamera } from '@/context/CanvasContext'
 import useRegisterAction from '../useRegisterAction'
+import { createTextCard } from '@/components/Cards/TextCard'
 import { LiveMap, LiveObject, Lson } from '@liveblocks/client'
-import { screenToCanvas, zoomIn, zoomOut } from '@/lib/canvas'
+import { createEmptyCard } from '@/components/Cards/EmptyCard'
 import { useBatch, useHistory, useUpdateMyPresence } from '@/lib/liveblocks'
 import {
 	CameraIcon,
+	DocumentAddIcon,
 	DocumentSearchIcon,
 	ReplyIcon,
 	ViewGridAddIcon,
@@ -58,28 +61,40 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 		[history]
 	)
 	useRegisterAction(
-		{
-			id: 'test-add',
-			name: 'Add Item',
-			icon: <ViewGridAddIcon />,
-			section: Sections.Canvas,
-			perform: () => {
-				if (!items) throw toast.error('Canvas not loaded yet')
+		[
+			{
+				id: 'add-empty',
+				name: 'Add Empty Card (for testing)',
+				icon: <ViewGridAddIcon />,
+				section: Sections.Canvas,
+				perform: () => {
+					if (!items) throw toast.error('Canvas not loaded yet')
 
-				batch(() => {
-					const id = randomId()
+					batch(() => {
+						const id = randomId()
 
-					items.set(
-						id,
-						new LiveObject({
-							point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
-							size: { width: 500, heigth: 500 },
-						})
-					)
-					updateMyPresence({ selectedItem: id }, { addToHistory: true })
-				})
+						items.set(id, new LiveObject(createEmptyCard(camera)))
+						updateMyPresence({ selectedItem: id }, { addToHistory: true })
+					})
+				},
 			},
-		},
+			{
+				id: 'add-text',
+				name: 'Add Text Card',
+				icon: <DocumentAddIcon />,
+				section: Sections.Canvas,
+				perform: () => {
+					if (!items) throw toast.error('Canvas not loaded yet')
+
+					batch(() => {
+						const id = randomId()
+
+						items.set(id, new LiveObject(createTextCard(camera)))
+						updateMyPresence({ selectedItem: id }, { addToHistory: true })
+					})
+				},
+			},
+		],
 		[items, camera]
 	)
 	useRegisterAction(
