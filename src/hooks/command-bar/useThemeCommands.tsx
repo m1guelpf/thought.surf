@@ -1,7 +1,6 @@
-import { Priority } from 'kbar'
 import { useTheme } from 'next-themes'
-import { Sections } from '@/types/command-bar'
 import useRegisterAction from '../useRegisterAction'
+import { Priority, Sections } from '@/types/command-bar'
 import { DesktopComputerIcon, MoonIcon, SunIcon } from '@heroicons/react/outline'
 
 const useThemeCommands = () => {

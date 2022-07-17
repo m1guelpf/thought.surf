@@ -96,10 +96,8 @@ const CommandBar: FC<{}> = () => {
 	})
 
 	const onLeave = () => {
-		setTimeout(() => {
-			setQuery('')
-			setMenu(null)
-		}, 500)
+		setQuery('')
+		setMenu(null)
 	}
 
 	const executeAction = (action: Action) => {
@@ -208,7 +206,7 @@ const CommandBar: FC<{}> = () => {
 								{query !== '' && filteredActions.length == 0 && (
 									<ul className="max-h-[700px] scroll-py-2 divide-gray-500 divide-opacity-10 overflow-y-auto">
 										<li className="p-2">
-											<p className="mt-2 mb-2 px-3 text-xs font-medium text-gray-700">
+											<p className="mt-2 mb-2 px-3 text-xs font-medium text-gray-700 dark:text-white/30">
 												No results for &quot;{query}&quot;.
 												{fallbackActions.length > 0 && ' Try one of the actions below:'}
 											</p>
@@ -312,7 +310,7 @@ const OptionRenderer = ({ actions, className, query, parents, onClick }) => {
 									)}
 									<span>{resolveName(action, query)}</span>
 									{action.subtitle && (
-										<span className="p-0.5 px-1 bg-black/5 text-black/50 dark:bg-white/10 dark:text-white/40 rounded-md text-xs">
+										<span className="ml-2 p-0.5 px-1 bg-black/5 text-black/50 dark:bg-white/10 dark:text-white/40 rounded-md text-xs">
 											{action.subtitle}
 										</span>
 									)}

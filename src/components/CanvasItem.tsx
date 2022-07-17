@@ -36,22 +36,23 @@ const CanvasItem: FC<PropsWithChildren<{ id: string; item: LiveObject<Card>; onD
 		return room.subscribe(item, onChange)
 	}, [room, item])
 
-	const kbarAction = {
-		id: `canvas-item-${id}`,
-		name: 'Untitled',
-		icon: <DocumentTextIcon />,
-		parent: 'canvas',
-		section: Sections.Canvas,
-		perform: () => {
-			const rect = containerRef.current.getBoundingClientRect()
+	useRegisterAction(
+		{
+			id: `canvas-item-${id}`,
+			name: 'Untitled',
+			icon: <DocumentTextIcon />,
+			parent: 'canvas',
+			section: Sections.Canvas,
+			perform: () => {
+				const rect = containerRef.current.getBoundingClientRect()
 
-			withTransition(() => {
-				setCamera(camera => zoomOn(camera, item.get('point'), { width: rect.width, heigth: rect.height }))
-			})
+				withTransition(() => {
+					setCamera(camera => zoomOn(camera, item.get('point'), { width: rect.width, heigth: rect.height }))
+				})
+			},
 		},
-	}
-
-	useRegisterAction(kbarAction, [item])
+		[item]
+	)
 
 	useGesture(
 		{

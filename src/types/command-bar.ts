@@ -7,7 +7,7 @@ export enum Sections {
 	Social = 'social',
 }
 
-enum Priority {
+export enum Priority {
 	LOW = -1,
 	HIGH = 1,
 	REGULAR = 0,
