@@ -1,8 +1,10 @@
 import { Card } from '@/types/cards'
 import { Point } from '@/types/canvas'
-import { FC, PropsWithChildren } from 'react'
 import { createRoomContext } from '@liveblocks/react'
+import { FC, PropsWithChildren, useEffect, useState } from 'react'
 import { createClient, LiveMap, LiveObject } from '@liveblocks/client'
+
+type ConnectionState = 'closed' | 'authenticating' | 'unavailable' | 'failed' | 'open' | 'connecting'
 
 type Presence = {
 	cursor: Point | null
@@ -32,8 +34,43 @@ const client = createClient({
 export const { RoomProvider, useOthers, useUpdateMyPresence, useMap, useHistory, useRoom, useBatch } =
 	createRoomContext<Presence, Storage, UserMeta>(client)
 
-export const LiveProvider: FC<PropsWithChildren<{ roomId: string }>> = ({ children, roomId }) => (
-	<RoomProvider id={roomId} initialStorage={{ items: new LiveMap() }}>
-		{children}
-	</RoomProvider>
-)
+export const LiveProvider: FC<PropsWithChildren<{ roomId: string; onAuthFailure?: () => void }>> = ({
+	roomId,
+	children,
+	onAuthFailure,
+}) => {
+	const [state, setState] = useState<ConnectionState>(null)
+
+	useEffect(() => {
+		if (state != 'unavailable') return
+
+		onAuthFailure && onAuthFailure()
+	}, [state, onAuthFailure])
+
+	return (
+		<RoomProvider id={roomId} initialStorage={{ items: new LiveMap() }}>
+			<RoomStateWatcher state={state} setState={setState} />
+			{children}
+		</RoomProvider>
+	)
+}
+
+export const RoomStateWatcher = ({ state, setState }) => {
+	const room = useRoom()
+
+	useEffect(() => {
+		const checkState = (state, newState) => {
+			if (state == newState) return
+
+			setState(newState)
+		}
+
+		const interval = setInterval(() => checkState(state, room.getConnectionState()), 1000)
+
+		return () => {
+			clearInterval(interval)
+		}
+	})
+
+	return null
+}
