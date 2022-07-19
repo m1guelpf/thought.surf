@@ -10,8 +10,8 @@ import { addPoint, subPoint, zoomOn } from '@/lib/canvas'
 import { Card, CardOptions, CardType } from '@/types/cards'
 import TextCard, { textCardOptions } from './Cards/TextCard'
 import EmptyCard, { emptyCardOptions } from './Cards/EmptyCard'
-import { DocumentTextIcon, XIcon } from '@heroicons/react/outline'
 import { useHistory, useRoom, useUpdateMyPresence } from '@/lib/liveblocks'
+import { CubeTransparentIcon, DocumentTextIcon, XIcon } from '@heroicons/react/outline'
 import { useCallback, useEffect, useState, memo, MutableRefObject, FC, useRef } from 'react'
 
 const CardRenderers = {
@@ -46,7 +46,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 		{
 			id: `canvas-item-${id}`,
 			name: 'Untitled',
-			icon: <DocumentTextIcon />,
+			icon: type === 'text' ? <DocumentTextIcon /> : <CubeTransparentIcon />,
 			parent: 'canvas',
 			section: Sections.Canvas,
 			perform: () => {
@@ -113,7 +113,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 		<motion.div
 			ref={containerRef}
 			animate={{ scale }}
-			className="group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-white/10 absolute will-change-transform cursor-grab [content-visibility:auto] [contain:layout_style_paint] rounded-lg shadow-md backdrop-blur backdrop-filter"
+			className="group p-3 min-w-[300px] min-h-[150px] bg-white/30 dark:bg-white/10 absolute will-change-transform cursor-grab [content-visibility:auto] [contain:layout_style_paint] rounded-lg shadow-md backdrop-blur backdrop-filter"
 			style={{
 				width: size.width,
 				height: size.height,
@@ -124,7 +124,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 		>
 			<button
 				onClick={deleteItem}
-				className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-gray-100 dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
+				className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-gray-100/80 dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
 			>
 				<XIcon className="w-4 h-4 text-gray-900 dark:text-gray-100" />
 			</button>
@@ -187,7 +187,7 @@ const ResizeButton: FC<{
 	return (
 		<button
 			{...listeners()}
-			className="opacity-0 z-20 group-hover:opacity-100 transition-opacity absolute bg-gray-100 dark:bg-black/60 bottom-2 right-2 cursor-se-resize flex items-center justify-center dark:shadow rounded p-2"
+			className="opacity-0 z-20 group-hover:opacity-100 transition-opacity absolute bg-gray-100/80 dark:bg-black/60 bottom-2 right-2 cursor-se-resize flex items-center justify-center dark:shadow rounded p-2"
 		>
 			<ResizeIcon className="w-2 h-2 text-gray-900 dark:text-gray-100" />
 		</button>
