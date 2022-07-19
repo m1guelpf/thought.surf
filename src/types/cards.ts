@@ -1,6 +1,6 @@
 import { Point, Size } from './canvas'
 import { Json } from '@liveblocks/client'
-import { JSONContent } from '@tiptap/core'
+import { JSONContent } from '@tiptap/react'
 
 export enum CardType {
 	TEXT = 'text',

@@ -124,7 +124,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 		>
 			<button
 				onClick={deleteItem}
-				className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-gray-100/80 dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
+				className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-white/30 shadow dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
 			>
 				<XIcon className="w-4 h-4 text-gray-900 dark:text-gray-100" />
 			</button>
@@ -187,7 +187,7 @@ const ResizeButton: FC<{
 	return (
 		<button
 			{...listeners()}
-			className="opacity-0 z-20 group-hover:opacity-100 transition-opacity absolute bg-gray-100/80 dark:bg-black/60 bottom-2 right-2 cursor-se-resize flex items-center justify-center dark:shadow rounded p-2"
+			className="opacity-0 z-20 group-hover:opacity-100 transition-opacity absolute bg-white/30 shadow dark:bg-black/60 bottom-2 right-2 cursor-se-resize flex items-center justify-center dark:shadow rounded p-2"
 		>
 			<ResizeIcon className="w-2 h-2 text-gray-900 dark:text-gray-100" />
 		</button>
