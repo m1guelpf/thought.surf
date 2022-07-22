@@ -1,3 +1,4 @@
+import { LinkIcon } from '@heroicons/react/solid'
 import { Editor } from '@tiptap/react'
 import BoldIcon from './Icons/BoldIcon'
 import ItalicIcon from './Icons/ItalicIcon'
@@ -22,6 +23,19 @@ export const TipTapMenu = ({ editor, className }: { editor: Editor; className?: 
 				icon={StrikethroughIcon}
 				isActive={editor.isActive('strike')}
 				onClick={() => editor.chain().focus().toggleStrike().run()}
+			/>
+			<MenuItem
+				icon={LinkIcon}
+				isActive={editor.isActive('link')}
+				onClick={() =>
+					editor.isActive('link')
+						? editor.chain().focus().unsetLink().run()
+						: editor
+								.chain()
+								.focus()
+								.toggleLink({ href: prompt('What URL should the text link to?') })
+								.run()
+				}
 			/>
 		</div>
 	)

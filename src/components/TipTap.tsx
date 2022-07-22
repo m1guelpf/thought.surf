@@ -1,4 +1,5 @@
 import { FC, useEffect } from 'react'
+import { Link } from '@/lib/tiptap/Link'
 import { TipTapMenu } from './TipTapMenu'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -20,7 +21,11 @@ const TipTap: FC<{
 		onUpdate: ({ editor }) => {
 			setDoc(editor.getJSON())
 		},
-		extensions: [Placeholder.configure({ placeholder: "What's on your mind?" }), StarterKit],
+		extensions: [
+			Link.configure({ HTMLAttributes: { target: '_blank' } }),
+			Placeholder.configure({ placeholder: "What's on your mind?" }),
+			StarterKit,
+		],
 	})
 
 	useEffect(() => {
