@@ -34,7 +34,7 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 		return room.subscribe(item, onChange)
 	}, [room, item])
 
-	const { data } = useSWRImmutable<MqlResponseData>(() => url && `/api/link-preview?url=${url}`)
+	const { data, isLoading } = useSWRImmutable<MqlResponseData>(() => url && `/api/link-preview?url=${url}`)
 
 	useRegisterAction(
 		{
@@ -51,36 +51,40 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	return (
 		<div className="w-full h-full space-y-3 flex flex-col">
 			<div className="flex items-center space-x-3">
-				<div className="relative overflow-hidden rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
-					{data?.logo ? (
-						<>
-							<img
-								className="absolute inset-0 w-full h-full transform filter scale-150 opacity-50 blur-lg rounded-lg -z-10"
-								src={data?.logo?.url}
-								alt={data?.title}
-							/>
-							<img className="rounded-lg w-3/4 h-3/4" src={data?.logo?.url} alt={data?.title} />
-						</>
-					) : (
-						<Skeleton />
-					)}
-				</div>
+				{(isLoading || data?.logo) && (
+					<div className="relative overflow-hidden rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
+						{data?.logo ? (
+							<>
+								<img
+									className="absolute inset-0 w-full h-full transform filter scale-150 opacity-50 blur-lg rounded-lg -z-10"
+									src={data?.logo?.url}
+									alt={data?.title}
+								/>
+								<img className="rounded-lg w-3/4 h-3/4" src={data?.logo?.url} alt={data?.title} />
+							</>
+						) : (
+							<Skeleton className="rounded-lg" width={48} height={48} />
+						)}
+					</div>
+				)}
 				<div className="overflow-hidden">
 					<p className="select-none">{data?.title ?? <Skeleton />}</p>
 					<p className="text-black/60 dark:text-white/40 text-sm select-none whitespace-nowrap truncate min-w-0">
-						{data?.description ?? <Skeleton />}
+						{data?.description ?? <Skeleton width={250} />}
 					</p>
 				</div>
 			</div>
-			{data?.screenshot ? (
-				<img
-					className="min-h-0 flex-1 rounded-lg block object-cover select-none pointer-events-none"
-					src={data?.screenshot?.url}
-					alt={data?.screenshot?.url}
-				/>
-			) : (
-				<Skeleton />
-			)}
+			<div className="min-h-0 flex-1">
+				{data?.screenshot ? (
+					<img
+						className="h-full rounded-lg block object-cover select-none pointer-events-none"
+						src={data?.screenshot?.url}
+						alt={data?.screenshot?.url}
+					/>
+				) : (
+					<Skeleton className="rounded-lg" width="100%" height="100%" />
+				)}
+			</div>
 		</div>
 	)
 }
