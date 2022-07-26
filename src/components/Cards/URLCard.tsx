@@ -40,12 +40,12 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 		{
 			id: `canvas-item-${id}`,
 			name: data?.title ?? getDomain(url),
-			icon: <LinkIcon />,
+			icon: data?.logo ? <img className="rounded w-full h-full" src={data.logo.url} alt="" /> : <LinkIcon />,
 			parent: 'canvas',
 			section: Sections.Canvas,
 			perform: navigateTo,
 		},
-		[item, data?.title]
+		[item, data?.title, data?.logo]
 	)
 
 	return (
