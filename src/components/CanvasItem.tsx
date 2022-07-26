@@ -1,38 +1,46 @@
 import { motion } from 'framer-motion'
-import ResizeIcon from './Icons/ResizeIcon'
 import { Point } from '@/types/canvas'
-import { Sections } from '@/types/command-bar'
+import ResizeIcon from './Icons/ResizeIcon'
 import { useGesture } from '@use-gesture/react'
 import { LiveObject } from '@liveblocks/client'
+import { XIcon } from '@heroicons/react/outline'
 import { useCamera } from '@/context/CanvasContext'
-import useRegisterAction from '@/hooks/useRegisterAction'
+import { useHistory, useRoom } from '@/lib/liveblocks'
+import URLCard, { urlCardOptions } from './Cards/URLCard'
 import { addPoint, subPoint, zoomOn } from '@/lib/canvas'
 import { Card, CardOptions, CardType } from '@/types/cards'
 import TextCard, { textCardOptions } from './Cards/TextCard'
 import EmptyCard, { emptyCardOptions } from './Cards/EmptyCard'
-import { useHistory, useRoom, useUpdateMyPresence } from '@/lib/liveblocks'
-import { CubeTransparentIcon, DocumentTextIcon, XIcon } from '@heroicons/react/outline'
-import { useCallback, useEffect, useState, memo, MutableRefObject, FC, useRef } from 'react'
+import { useCallback, useEffect, useState, memo, MutableRefObject, FC, useRef, ReactNode } from 'react'
 
-const CardRenderers = {
+const CardRenderers: Record<string, (props) => ReactNode> = {
 	[CardType.EMPTY]: props => <EmptyCard {...props} />,
 	[CardType.TEXT]: props => <TextCard {...props} />,
+	[CardType.URL]: props => <URLCard {...props} />,
 }
 
 const CardOptions: Record<CardType, CardOptions> = {
 	[CardType.EMPTY]: emptyCardOptions,
 	[CardType.TEXT]: textCardOptions,
+	[CardType.URL]: urlCardOptions,
 }
 
 const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unknown }> = ({ id, item, onDelete }) => {
 	const room = useRoom()
 	const history = useHistory()
 	const [scale, setScale] = useState(1)
-	const updateMyPresence = useUpdateMyPresence()
 	const containerRef = useRef<HTMLDivElement>(null)
 	const { camera, setCamera, withTransition } = useCamera()
 	const dragData = useRef<{ start: Point; origin: Point }>(null)
 	const [{ point, size, type }, setItem] = useState(item.toObject())
+
+	const navigateTo = useCallback(() => {
+		const rect = containerRef.current.getBoundingClientRect()
+
+		withTransition(() => {
+			setCamera(camera => zoomOn(camera, item.get('point'), { width: rect.width, height: rect.height }))
+		})
+	}, [item, setCamera, withTransition])
 
 	useEffect(() => {
 		function onChange() {
@@ -42,29 +50,15 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 		return room.subscribe(item, onChange)
 	}, [room, item])
 
-	useRegisterAction(
-		{
-			id: `canvas-item-${id}`,
-			name: 'Untitled',
-			icon: type === 'text' ? <DocumentTextIcon /> : <CubeTransparentIcon />,
-			parent: 'canvas',
-			section: Sections.Canvas,
-			perform: () => {
-				const rect = containerRef.current.getBoundingClientRect()
-
-				withTransition(() => {
-					setCamera(camera => zoomOn(camera, item.get('point'), { width: rect.width, height: rect.height }))
-				})
-			},
-		},
-		[item]
-	)
-
 	useGesture(
 		{
 			onPointerDown: ({ event }) => {
-				updateMyPresence({ selectedItem: id }, { addToHistory: true })
-				if (event.target != event.currentTarget) return
+				// hack to ignore bubbled pointer events
+				if (event.target != event.currentTarget) {
+					if (!CardOptions[type].childrenDraggable) return
+					if ((event.target as HTMLDivElement).closest('[data-no-drag]')) return
+				}
+
 				const target = event.currentTarget as HTMLDivElement
 
 				history.pause()
@@ -89,7 +83,6 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 				item.update({ point: addPoint(dragData.current.start, delta) })
 			},
 			onPointerUp: ({ event }) => {
-				updateMyPresence({ selectedItem: null }, { addToHistory: true })
 				const target = event.currentTarget as HTMLDivElement
 
 				history.resume()
@@ -104,16 +97,11 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 		{ target: containerRef, eventOptions: { passive: false } }
 	)
 
-	const deleteItem = useCallback(() => {
-		updateMyPresence({ selectedItem: id }, { addToHistory: true })
-		onDelete()
-	}, [id, onDelete, updateMyPresence])
-
 	return (
 		<motion.div
 			ref={containerRef}
 			animate={{ scale }}
-			className="group p-3 min-w-[300px] min-h-[150px] bg-white/30 dark:bg-white/10 absolute will-change-transform cursor-grab [content-visibility:auto] [contain:layout_style_paint] rounded-lg shadow-md backdrop-blur backdrop-filter"
+			className="group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-gray-900/90 absolute will-change-transform cursor-grab [content-visibility:auto] [contain:layout_style_paint] rounded-lg shadow-card backdrop-blur backdrop-filter"
 			style={{
 				width: size.width,
 				height: size.height,
@@ -123,13 +111,14 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 			}}
 		>
 			<button
-				onClick={deleteItem}
+				onClick={onDelete}
 				className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-white/30 shadow dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
+				data-no-drag
 			>
 				<XIcon className="w-4 h-4 text-gray-900 dark:text-gray-100" />
 			</button>
 			<ResizeButton item={item} containerRef={containerRef} />
-			{CardRenderers[type]({ item, id })}
+			{CardRenderers[type]({ item, id, navigateTo })}
 		</motion.div>
 	)
 }
@@ -187,7 +176,8 @@ const ResizeButton: FC<{
 	return (
 		<button
 			{...listeners()}
-			className="opacity-0 z-20 group-hover:opacity-100 transition-opacity absolute bg-white/30 shadow dark:bg-black/60 bottom-2 right-2 cursor-se-resize flex items-center justify-center dark:shadow rounded p-2"
+			data-no-drag
+			className="opacity-0 z-20 group-hover:opacity-100 transition-opacity absolute bg-white shadow dark:bg-black/60 bottom-2 right-2 cursor-se-resize flex items-center justify-center dark:shadow rounded p-2"
 		>
 			<ResizeIcon className="w-2 h-2 text-gray-900 dark:text-gray-100" />
 		</button>

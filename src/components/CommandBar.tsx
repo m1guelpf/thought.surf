@@ -118,8 +118,6 @@ const CommandBar: FC<{}> = () => {
 			{open && (
 				<Dialog open={open} as="div" className="relative z-40" onClose={setOpen}>
 					<Dialog.Overlay
-						key="overlay"
-						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						as={motion.div}
@@ -147,7 +145,7 @@ const CommandBar: FC<{}> = () => {
 									duration: 0.1,
 								},
 							}}
-							className="flex-1 mx-auto max-w-2xl transform overflow-hidden rounded-xl bg-white/10 shadow-2xl ring-1 ring-black ring-opacity-5 backdrop-filter backdrop-blur-2xl backdrop-saturate-150"
+							className="flex-1 mx-auto max-w-2xl transform overflow-hidden rounded-xl bg-white/30 dark:bg-gray-900/60 shadow-2xl ring-1 ring-black ring-opacity-5 backdrop-filter backdrop-blur-2xl backdrop-saturate-150"
 						>
 							<AnimateResize className="divide-y divide-gray-500/10">
 								<div className="relative">

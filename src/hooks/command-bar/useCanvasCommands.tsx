@@ -1,28 +1,28 @@
 import toast from 'react-hot-toast'
-import { randomId } from '@/lib/utils'
+import { ask, randomId } from '@/lib/utils'
+import { useHistory } from '@/lib/liveblocks'
 import { Sections } from '@/types/command-bar'
 import { zoomIn, zoomOut } from '@/lib/canvas'
 import { useCamera } from '@/context/CanvasContext'
 import useRegisterAction from '../useRegisterAction'
+import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
 import { LiveMap, LiveObject, Lson } from '@liveblocks/client'
 import { createEmptyCard } from '@/components/Cards/EmptyCard'
-import { useBatch, useHistory, useUpdateMyPresence } from '@/lib/liveblocks'
 import {
-	CameraIcon,
-	DocumentAddIcon,
-	DocumentSearchIcon,
+	LinkIcon,
 	ReplyIcon,
-	ViewGridAddIcon,
+	CameraIcon,
 	ZoomInIcon,
 	ZoomOutIcon,
+	DocumentAddIcon,
+	ViewGridAddIcon,
+	DocumentSearchIcon,
 } from '@heroicons/react/outline'
 
 const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
-	const batch = useBatch()
 	const history = useHistory()
 	const { camera } = useCamera()
-	const updateMyPresence = useUpdateMyPresence()
 	const { setCamera, withTransition } = useCamera()
 
 	useRegisterAction(
@@ -70,12 +70,7 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 				perform: () => {
 					if (!items) throw toast.error('Canvas not loaded yet')
 
-					batch(() => {
-						const id = randomId()
-
-						items.set(id, new LiveObject(createEmptyCard(camera)))
-						updateMyPresence({ selectedItem: id }, { addToHistory: true })
-					})
+					items.set(randomId(), new LiveObject(createEmptyCard(camera)))
 				},
 			},
 			{
@@ -86,12 +81,18 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 				perform: () => {
 					if (!items) throw toast.error('Canvas not loaded yet')
 
-					batch(() => {
-						const id = randomId()
+					items.set(randomId(), new LiveObject(createTextCard(camera)))
+				},
+			},
+			{
+				id: 'add-url',
+				name: 'Add URL Card',
+				icon: <LinkIcon />,
+				section: Sections.Canvas,
+				perform: async () => {
+					if (!items) throw toast.error('Canvas not loaded yet')
 
-						items.set(id, new LiveObject(createTextCard(camera)))
-						updateMyPresence({ selectedItem: id }, { addToHistory: true })
-					})
+					items.set(randomId(), new LiveObject(createURLCard(camera, await ask('What URL should we add?'))))
 				},
 			},
 		],

@@ -4,15 +4,19 @@ import { useRoom } from '@/lib/liveblocks'
 import useMeasure from '@/hooks/useMeasure'
 import { DEFAULT_TEXT } from '@/lib/consts'
 import { screenToCanvas } from '@/lib/canvas'
+import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
 import { FC, memo, useEffect, useState } from 'react'
+import useRegisterAction from '@/hooks/useRegisterAction'
+import { DocumentTextIcon } from '@heroicons/react/outline'
 import { CardOptions, CardType, TextCard } from '@/types/cards'
 
 export const textCardOptions: CardOptions = {
 	resizeAxis: { x: true, y: false },
+	childrenDraggable: false,
 }
 
-const TextCard: FC<{ item: LiveObject<TextCard>; id: string }> = ({ item }) => {
+const TextCard: FC<{ item: LiveObject<TextCard>; id: string; navigateTo: () => void }> = ({ id, item, navigateTo }) => {
 	const room = useRoom()
 	const [measureRef, { height }] = useMeasure<HTMLDivElement>()
 	const [
@@ -35,6 +39,18 @@ const TextCard: FC<{ item: LiveObject<TextCard>; id: string }> = ({ item }) => {
 
 		item.set('size', { width, height: height + 20 })
 	}, [item, height])
+
+	useRegisterAction(
+		{
+			id: `canvas-item-${id}`,
+			name: 'Untitled',
+			icon: <DocumentTextIcon />,
+			parent: 'canvas',
+			section: Sections.Canvas,
+			perform: navigateTo,
+		},
+		[item]
+	)
 
 	return (
 		<div className="w-full" ref={measureRef}>

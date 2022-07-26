@@ -1,6 +1,6 @@
-import { FC, useEffect } from 'react'
 import { Link } from '@/lib/tiptap/Link'
 import { TipTapMenu } from './TipTapMenu'
+import { FC, memo, useEffect } from 'react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, JSONContent, useEditor } from '@tiptap/react'
@@ -52,4 +52,4 @@ const TipTap: FC<{
 	)
 }
 
-export default TipTap
+export default memo(TipTap)
