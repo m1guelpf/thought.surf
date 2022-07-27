@@ -71,6 +71,7 @@ const Canvas: FC = () => {
 				setCamera(camera => panCamera(camera, delta[0] * -1, delta[1] * -1))
 			},
 			onPaste: ({ event }) => {
+				console.log(event, eventAlreadyHandled(event))
 				if (eventAlreadyHandled(event)) return
 
 				items.set(randomId(), new LiveObject(cardFromPaste(event, camera)))
