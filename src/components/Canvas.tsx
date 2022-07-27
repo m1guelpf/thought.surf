@@ -2,15 +2,17 @@ import Cursor from './Cursor'
 import DevMode from './DevMode'
 import { FC, useRef } from 'react'
 import CanvasItem from './CanvasItem'
-import { classNames } from '@/lib/utils'
+import { cardFromPaste } from '@/lib/cards'
 import LoadingScreen from './LoadingScreen'
 import { CURSOR_COLORS } from '@/lib/consts'
+import { LiveObject } from '@liveblocks/client'
+import { classNames, randomId } from '@/lib/utils'
 import { useCamera } from '@/context/CanvasContext'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useGesture, useWheel } from '@use-gesture/react'
-import { panCamera, screenToCanvas, zoomCamera } from '@/lib/canvas'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
 import { useMap, useOthers, useUpdateMyPresence } from '@/lib/liveblocks'
+import { eventAlreadyHandled, panCamera, screenToCanvas, zoomCamera } from '@/lib/canvas'
 
 const Canvas: FC = () => {
 	const others = useOthers()
@@ -48,6 +50,11 @@ const Canvas: FC = () => {
 				if (event.type === 'wheel') return
 
 				setCamera(zoomCamera(camera, { x: origin[0], y: origin[1] }, 0.05 * -direction[1]))
+			},
+			onPaste: ({ event }) => {
+				if (eventAlreadyHandled(event)) return
+
+				items.set(randomId(), new LiveObject(cardFromPaste(event, camera)))
 			},
 		},
 		{ target: canvasRef }

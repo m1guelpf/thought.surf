@@ -62,11 +62,16 @@ const TextCard: FC<{ item: LiveObject<TextCard>; id: string; navigateTo: () => v
 	)
 }
 
-export const createTextCard = (camera: Camera): TextCard => ({
+export const createTextCard = (camera: Camera, text: string = 'What are you thinking about?'): TextCard => ({
 	point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
 	size: { width: 500, height: 500 },
 	type: CardType.TEXT,
-	attributes: { doc: DEFAULT_TEXT },
+	attributes: {
+		doc: {
+			type: 'doc',
+			content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+		},
+	},
 })
 
 export default memo(TextCard)

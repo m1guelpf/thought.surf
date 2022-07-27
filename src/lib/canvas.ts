@@ -109,7 +109,7 @@ export const resetZoom = (camera: Camera): Camera => {
 	return zoomCamera(camera, center, camera.z - 1)
 }
 
-export const eventAlreadyHandled = (event: MouseEvent | TouchEvent): boolean => {
+export const eventAlreadyHandled = (event: Event): boolean => {
 	const ignoreEl = ['button', 'a', 'input', 'textarea', 'select', 'option']
 
 	return event
