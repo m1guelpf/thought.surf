@@ -1,6 +1,7 @@
 import Cursor from './Cursor'
 import DevMode from './DevMode'
 import CanvasItem from './CanvasItem'
+import usePaste from '@/hooks/usePaste'
 import { cardFromPaste } from '@/lib/cards'
 import LoadingScreen from './LoadingScreen'
 import { CURSOR_COLORS } from '@/lib/consts'
@@ -70,14 +71,17 @@ const Canvas: FC = () => {
 
 				setCamera(camera => panCamera(camera, delta[0] * -1, delta[1] * -1))
 			},
-			onPaste: ({ event }) => {
-				console.log(event, eventAlreadyHandled(event))
-				if (eventAlreadyHandled(event)) return
-
-				items.set(randomId(), new LiveObject(cardFromPaste(event, camera)))
-			},
 		},
 		{ target: canvasRef }
+	)
+
+	usePaste(
+		event => {
+			if (eventAlreadyHandled(event)) return
+
+			items.set(randomId(), new LiveObject(cardFromPaste(event, camera)))
+		},
+		[items]
 	)
 
 	return (

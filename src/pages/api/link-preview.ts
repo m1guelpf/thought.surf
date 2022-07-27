@@ -6,7 +6,10 @@ const handler = async ({ query: { url, screenshot } }: NextApiRequest, res: Next
 	if (!url) return res.status(404).send('')
 
 	try {
-		const { status, data } = await mql(url as string, { screenshot: !!screenshot })
+		const { status, data } = await mql(url as string, {
+			screenshot: !!screenshot,
+			apiKey: process.env.MICROLINK_KEY,
+		})
 		if (status == 'fail') return res.status(404).send('')
 
 		res.status(200).json(data)

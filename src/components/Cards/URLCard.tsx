@@ -1,3 +1,4 @@
+import IconBox from '../IconBox'
 import { REGEX } from '@/lib/consts'
 import { getDomain } from '@/lib/utils'
 import { Camera } from '@/types/canvas'
@@ -54,22 +55,7 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	return (
 		<div className="w-full h-full space-y-3 flex flex-col">
 			<div className="flex items-center space-x-3">
-				{(isLoading || data?.logo) && (
-					<div className="relative overflow-hidden rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
-						{data?.logo ? (
-							<>
-								<img
-									className="absolute inset-0 w-full h-full transform filter scale-150 opacity-50 blur-lg rounded-lg -z-10"
-									src={data?.logo?.url}
-									alt={data?.title}
-								/>
-								<img className="rounded-lg w-3/4 h-3/4" src={data?.logo?.url} alt={data?.title} />
-							</>
-						) : (
-							<Skeleton className="rounded-lg" width={48} height={48} />
-						)}
-					</div>
-				)}
+				{(isLoading || data?.logo) && <IconBox src={data?.logo?.url} alt={data?.title} />}
 				<div className="overflow-hidden">
 					<p className="select-none">{data?.title ?? <Skeleton />}</p>
 					<p className="text-black/60 dark:text-white/40 text-sm select-none whitespace-nowrap truncate min-w-0">
@@ -93,6 +79,8 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 }
 
 export const createURLCard = (camera: Camera, url: string): URLCard => {
+	url = url.startsWith('http') ? url : `https://${url}`
+
 	if (REGEX.TWEET_URL.test(url)) return createTweetCard(camera, url)
 
 	return {

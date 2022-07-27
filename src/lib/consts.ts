@@ -20,7 +20,7 @@ export const DEFAULT_TEXT: JSONContent = {
 }
 
 export const REGEX = {
-	URL: /^(?:https?:\/\/.)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*$/g,
+	URL: /^(?:https?:\/\/.)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*$/,
 	TWEET_URL: /twitter\.com\/\w+\/status(?:es)?\/\d+/,
 }
 

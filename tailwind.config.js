@@ -15,6 +15,7 @@ module.exports = {
 			},
 			boxShadow: {
 				card: '0 8px 30px rgba(0, 0, 0, 0.12)',
+				border: 'inset 0 0 1px 1px rgba(0, 0, 0, 0.015)',
 			},
 			keyframes: {
 				loading: {
