@@ -1,15 +1,15 @@
 import Cursor from './Cursor'
 import DevMode from './DevMode'
-import { FC, useRef } from 'react'
 import CanvasItem from './CanvasItem'
 import { cardFromPaste } from '@/lib/cards'
 import LoadingScreen from './LoadingScreen'
 import { CURSOR_COLORS } from '@/lib/consts'
+import { FC, useEffect, useRef } from 'react'
 import { LiveObject } from '@liveblocks/client'
 import { classNames, randomId } from '@/lib/utils'
 import { useCamera } from '@/context/CanvasContext'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useGesture, useWheel } from '@use-gesture/react'
+import { useGesture, usePinch, useWheel } from '@use-gesture/react'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
 import { useMap, useOthers, useUpdateMyPresence } from '@/lib/liveblocks'
 import { eventAlreadyHandled, panCamera, screenToCanvas, zoomCamera } from '@/lib/canvas'
@@ -20,6 +20,20 @@ const Canvas: FC = () => {
 	const canvasRef = useRef<HTMLDivElement>()
 	const updateMyPresence = useUpdateMyPresence()
 	const { camera, setCamera, shouldTransition, onTransitionEnd } = useCamera()
+
+	useEffect(() => {
+		const handler = e => e.preventDefault()
+
+		document.addEventListener('gesturestart', handler)
+		document.addEventListener('gesturechange', handler)
+		document.addEventListener('gestureend', handler)
+
+		return () => {
+			document.removeEventListener('gesturestart', handler)
+			document.removeEventListener('gesturechange', handler)
+			document.removeEventListener('gestureend', handler)
+		}
+	}, [])
 
 	useCanvasCommands(items)
 
@@ -36,6 +50,16 @@ const Canvas: FC = () => {
 		{ target: canvasRef, eventOptions: { passive: false } }
 	)
 
+	usePinch(
+		({ event, distance: [, deltaY], direction: [direction] }) => {
+			if (event.type == 'wheel') return
+
+			const { x, y } = event as PointerEvent
+			setCamera(camera => zoomCamera(camera, { x, y }, (deltaY * -direction) / 100))
+		},
+		{ target: canvasRef, eventOptions: { passive: false } }
+	)
+
 	useGesture(
 		{
 			onPointerMove: ({ event }) => {
@@ -44,12 +68,7 @@ const Canvas: FC = () => {
 			onDrag: ({ event, delta }) => {
 				if (event.target != event.currentTarget) return
 
-				setCamera(panCamera(camera, delta[0] * -1, delta[1] * -1))
-			},
-			onPinch: ({ origin, direction, event }) => {
-				if (event.type === 'wheel') return
-
-				setCamera(zoomCamera(camera, { x: origin[0], y: origin[1] }, 0.05 * -direction[1]))
+				setCamera(camera => panCamera(camera, delta[0] * -1, delta[1] * -1))
 			},
 			onPaste: ({ event }) => {
 				if (eventAlreadyHandled(event)) return
