@@ -35,7 +35,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 	const [scale, setScale] = useState(1)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const { camera, setCamera, withTransition } = useCamera()
-	const dragData = useRef<{ start: Point; origin: Point }>(null)
+	const dragData = useRef<{ start: Point; origin: Point; pointerId: number }>(null)
 	const [{ point, size, type }, setItem] = useState(item.toObject())
 
 	const navigateTo = useCallback(() => {
@@ -70,6 +70,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 				dragData.current = {
 					start: item.get('point'),
 					origin: { x: event.clientX / camera.z, y: event.clientY / camera.z },
+					pointerId: event.pointerId,
 				}
 			},
 			onPointerMove: ({ event }) => {
@@ -86,11 +87,23 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 				if (eventAlreadyHandled(event)) return
 				const target = event.currentTarget as HTMLDivElement
 
-				history.resume()
-				target.releasePointerCapture(event.pointerId)
-				target.style.setProperty('cursor', 'grab')
-				target.style.setProperty('z-index', '0')
 				setScale(1)
+				history.resume()
+				target.style.setProperty('z-index', '0')
+				target.style.setProperty('cursor', 'grab')
+				target.releasePointerCapture(event.pointerId)
+
+				dragData.current = null
+			},
+			onPointerOut: ({ event }) => {
+				if (eventAlreadyHandled(event) || !dragData.current) return
+				const target = event.currentTarget as HTMLDivElement
+
+				setScale(1)
+				history.resume()
+				target.style.setProperty('z-index', '0')
+				target.style.setProperty('cursor', 'grab')
+				target.releasePointerCapture(dragData.current.pointerId)
 
 				dragData.current = null
 			},
