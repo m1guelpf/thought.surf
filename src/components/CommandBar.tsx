@@ -278,7 +278,7 @@ const OptionRenderer = ({ actions, className, query, parents, onClick }) => {
 						onMouseEnter={() => setSelected(selectedIndexMap.findIndex(id => id == i))}
 						onClick={() => onClick(action)}
 						className={classNames(
-							'flex select-none items-center justify-between rounded-md px-3 py-2 text-black/70 dark:text-white/70 w-full relative'
+							'flex select-none items-center justify-between rounded-md px-3 py-2 text-black/70 dark:text-white/70 w-full relative w-full'
 						)}
 					>
 						{selectedIndexMap[selected] == i && (
@@ -288,7 +288,7 @@ const OptionRenderer = ({ actions, className, query, parents, onClick }) => {
 								className="absolute inset-0 bg-black/5 dark:bg-white/10 rounded-lg"
 							/>
 						)}
-						<div className="flex items-center">
+						<div className="flex items-center w-full">
 							<div
 								className={classNames(
 									'h-6 w-6 flex-none transition duration-200',
@@ -300,7 +300,7 @@ const OptionRenderer = ({ actions, className, query, parents, onClick }) => {
 							>
 								{action.icon}
 							</div>
-							<div className="flex items-center">
+							<div className="flex items-center w-full pr-4 text-left">
 								<span className="ml-3 flex-auto truncate">
 									{action.parent && (
 										<span className="text-black/50 dark:text-white/50">
@@ -308,7 +308,7 @@ const OptionRenderer = ({ actions, className, query, parents, onClick }) => {
 											<span className="mr-0.5"> &rsaquo; </span>
 										</span>
 									)}
-									<span>{resolveName(action, query)}</span>
+									<span className="truncate min-w-0">{resolveName(action, query)}</span>
 									{action.subtitle && (
 										<span className="ml-2 p-0.5 px-1 bg-black/5 text-black/50 dark:bg-white/10 dark:text-white/40 rounded-md text-xs">
 											{action.subtitle}

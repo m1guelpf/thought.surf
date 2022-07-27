@@ -18,3 +18,9 @@ export const DEFAULT_TEXT: JSONContent = {
 		},
 	],
 }
+
+export const REGEX = {
+	TWEET_URL: /twitter\.com\/\w+\/status(?:es)?\/\d+/,
+}
+
+export const uriExpandBlacklist = ['giphy.com/', 'twitter.com/']

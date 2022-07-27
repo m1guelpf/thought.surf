@@ -5,6 +5,7 @@ import { JSONContent } from '@tiptap/react'
 export enum CardType {
 	URL = 'url',
 	TEXT = 'text',
+	TWEET = 'tweet',
 	EMPTY = 'empty',
 }
 
@@ -17,7 +18,6 @@ export type Card<T extends Record<string, Json> = Record<string, Json>> = {
 
 export type CardOptions = {
 	resizeAxis: { x: boolean; y: boolean }
-	childrenDraggable: boolean
 }
 
 export type TextCard = Card<{

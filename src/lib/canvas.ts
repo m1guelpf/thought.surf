@@ -16,6 +16,12 @@ export const canvasToScreen = (point: Point, camera: Camera): Point => ({
 	y: (point.y + camera.y) * camera.z,
 })
 
+export const isOnScreen = (camera: Camera, point: Point, size: Size): boolean => {
+	const { minX, minY, maxX, maxY } = getBrowserViewport(camera)
+
+	return point.x + size.width > minX && point.x < maxX && point.y + size.height > minY && point.y < maxY
+}
+
 export const getViewport = (camera: Camera, box: Box): Box => {
 	const topLeft = screenToCanvas({ x: box.minX, y: box.minY }, camera)
 	const bottomRight = screenToCanvas({ x: box.maxX, y: box.maxY }, camera)
@@ -101,4 +107,12 @@ export const resetZoom = (camera: Camera): Camera => {
 	const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
 
 	return zoomCamera(camera, center, camera.z - 1)
+}
+
+export const eventAlreadyHandled = (event: MouseEvent | TouchEvent): boolean => {
+	const ignoreEl = ['button', 'a', 'input', 'textarea', 'select', 'option']
+
+	return event
+		.composedPath()
+		.some((item: HTMLElement) => ignoreEl.includes(item.tagName?.toLowerCase()) || item.isContentEditable)
 }

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Point } from '@/types/canvas'
+import { classNames } from '@/lib/utils'
 import ResizeIcon from './Icons/ResizeIcon'
 import { useGesture } from '@use-gesture/react'
 import { LiveObject } from '@liveblocks/client'
@@ -7,22 +8,25 @@ import { XIcon } from '@heroicons/react/outline'
 import { useCamera } from '@/context/CanvasContext'
 import { useHistory, useRoom } from '@/lib/liveblocks'
 import URLCard, { urlCardOptions } from './Cards/URLCard'
-import { addPoint, subPoint, zoomOn } from '@/lib/canvas'
+import TweetCard, { tweetCardOptions } from './Cards/TweetCard'
 import { Card, CardOptions, CardType } from '@/types/cards'
 import TextCard, { textCardOptions } from './Cards/TextCard'
 import EmptyCard, { emptyCardOptions } from './Cards/EmptyCard'
+import { addPoint, eventAlreadyHandled, isOnScreen, subPoint, zoomOn } from '@/lib/canvas'
 import { useCallback, useEffect, useState, memo, MutableRefObject, FC, useRef, ReactNode } from 'react'
 
 const CardRenderers: Record<string, (props) => ReactNode> = {
 	[CardType.EMPTY]: props => <EmptyCard {...props} />,
 	[CardType.TEXT]: props => <TextCard {...props} />,
 	[CardType.URL]: props => <URLCard {...props} />,
+	[CardType.TWEET]: props => <TweetCard {...props} />,
 }
 
 const CardOptions: Record<CardType, CardOptions> = {
-	[CardType.EMPTY]: emptyCardOptions,
-	[CardType.TEXT]: textCardOptions,
 	[CardType.URL]: urlCardOptions,
+	[CardType.TEXT]: textCardOptions,
+	[CardType.EMPTY]: emptyCardOptions,
+	[CardType.TWEET]: tweetCardOptions,
 }
 
 const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unknown }> = ({ id, item, onDelete }) => {
@@ -53,11 +57,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 	useGesture(
 		{
 			onPointerDown: ({ event }) => {
-				// hack to ignore bubbled pointer events
-				if (event.target != event.currentTarget) {
-					if (!CardOptions[type].childrenDraggable) return
-					if ((event.target as HTMLDivElement).closest('[data-no-drag]')) return
-				}
+				if (eventAlreadyHandled(event)) return
 
 				const target = event.currentTarget as HTMLDivElement
 
@@ -83,6 +83,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 				item.update({ point: addPoint(dragData.current.start, delta) })
 			},
 			onPointerUp: ({ event }) => {
+				if (eventAlreadyHandled(event)) return
 				const target = event.currentTarget as HTMLDivElement
 
 				history.resume()
@@ -101,7 +102,10 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 		<motion.div
 			ref={containerRef}
 			animate={{ scale }}
-			className="group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-gray-900/90 absolute will-change-transform cursor-grab [content-visibility:auto] [contain:layout_style_paint] rounded-lg shadow-card backdrop-blur backdrop-filter"
+			className={classNames(
+				isOnScreen(camera, point, size) ? '[content-visibility:auto]' : '[content-visibility:hidden]',
+				'group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-gray-900/90 absolute will-change-transform cursor-grab  [contain:layout_style_paint] rounded-lg shadow-card backdrop-blur backdrop-filter'
+			)}
 			style={{
 				width: size.width,
 				height: size.height,

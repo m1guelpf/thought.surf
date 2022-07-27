@@ -1,7 +1,9 @@
+import { REGEX } from '@/lib/consts'
 import { getDomain } from '@/lib/utils'
 import { Camera } from '@/types/canvas'
 import { useRoom } from '@/lib/liveblocks'
 import useSWRImmutable from 'swr/immutable'
+import { createTweetCard } from './TweetCard'
 import Skeleton from 'react-loading-skeleton'
 import { screenToCanvas } from '@/lib/canvas'
 import { Sections } from '@/types/command-bar'
@@ -14,7 +16,6 @@ import { CardOptions, CardType, URLCard } from '@/types/cards'
 
 export const urlCardOptions: CardOptions = {
 	resizeAxis: { x: true, y: true },
-	childrenDraggable: true,
 }
 
 const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => void }> = ({ id, item, navigateTo }) => {
@@ -34,7 +35,9 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 		return room.subscribe(item, onChange)
 	}, [room, item])
 
-	const { data, isLoading } = useSWRImmutable<MqlResponseData>(() => url && `/api/link-preview?url=${url}`)
+	const { data, isLoading } = useSWRImmutable<MqlResponseData>(
+		() => url && `/api/link-preview?url=${url}&screenshot=true`
+	)
 
 	useRegisterAction(
 		{
@@ -89,11 +92,15 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	)
 }
 
-export const createURLCard = (camera: Camera, url: string): URLCard => ({
-	point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
-	size: { width: 500, height: 500 },
-	type: CardType.URL,
-	attributes: { url },
-})
+export const createURLCard = (camera: Camera, url: string): URLCard => {
+	if (REGEX.TWEET_URL.test(url)) return createTweetCard(camera, url)
+
+	return {
+		point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
+		size: { width: 500, height: 500 },
+		type: CardType.URL,
+		attributes: { url },
+	}
+}
 
 export default memo(URLCard)

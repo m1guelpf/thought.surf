@@ -13,7 +13,6 @@ import { CardOptions, CardType, TextCard } from '@/types/cards'
 
 export const textCardOptions: CardOptions = {
 	resizeAxis: { x: true, y: false },
-	childrenDraggable: false,
 }
 
 const TextCard: FC<{ item: LiveObject<TextCard>; id: string; navigateTo: () => void }> = ({ id, item, navigateTo }) => {

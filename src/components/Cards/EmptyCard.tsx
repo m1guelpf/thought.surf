@@ -7,7 +7,7 @@ import { LiveObject } from '@liveblocks/client'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { CubeTransparentIcon } from '@heroicons/react/outline'
 
-export const emptyCardOptions = { resizeAxis: { x: true, y: true }, childrenDraggable: true }
+export const emptyCardOptions = { resizeAxis: { x: true, y: true } }
 
 const EmptyCard: FC<{ item: LiveObject<Card>; id: string; navigateTo: () => void }> = ({ id, item, navigateTo }) => {
 	useRegisterAction(
