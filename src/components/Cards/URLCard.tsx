@@ -1,9 +1,10 @@
-import { FC, memo } from 'react'
 import IconBox from '../IconBox'
+import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
 import useItem from '@/hooks/useItem'
 import { getDomain } from '@/lib/utils'
 import { Camera } from '@/types/canvas'
+import { FC, memo, useEffect } from 'react'
 import useSWRImmutable from 'swr/immutable'
 import { createTweetCard } from './TweetCard'
 import { screenToCanvas } from '@/lib/canvas'
@@ -11,10 +12,10 @@ import Skeleton from 'react-loading-skeleton'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
 import { MqlResponseData } from '@microlink/mql'
-import { LinkIcon } from '@heroicons/react/outline'
+import useDirtyState from '@/hooks/useDirtyState'
 import useRegisterAction from '@/hooks/useRegisterAction'
-import { ArrowUpIcon, XIcon } from '@heroicons/react/solid'
 import { CardOptions, CardType, URLCard } from '@/types/cards'
+import { ArrowUpIcon, XIcon, LinkIcon } from '@heroicons/react/solid'
 
 export const urlCardOptions: CardOptions = {
 	hasDeleteButton: true,
@@ -31,9 +32,27 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 		attributes: { url },
 	} = useItem(item)
 
+	const [_url, setUrl, urlDirty] = useDirtyState(url)
+
+	useEffect(() => {
+		if (!urlDirty) setUrl(url, { isClean: true })
+	}, [setUrl, url, urlDirty])
+
 	const { data, isLoading } = useSWRImmutable<MqlResponseData>(
 		() => url && `/api/link-preview?url=${url}&screenshot=true`
 	)
+
+	const handleUrlBlur = () => {
+		if (!urlDirty) return
+
+		if (!REGEX.URL.test(_url)) {
+			setUrl(url, { isClean: true })
+			return toast.error('Invalid URL')
+		}
+
+		setUrl(_url, { isClean: true })
+		item.update({ attributes: { url: _url } })
+	}
 
 	useRegisterAction(
 		{
@@ -50,7 +69,20 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	return (
 		<>
 			<div className="absolute bottom-4 inset-x-4 bg-white dark:bg-gray-800 shadow py-2 px-2 rounded-lg opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-between overflow-hidden space-x-6">
-				<input className="dark:bg-gray-800 rounded-lg flex-1 p-1 px-2" type="url" value={url} />
+				<div className="flex items-center space-x-2 flex-1 ml-2 relative">
+					<LinkIcon className="w-4 h-4 absolute left-0 inset-y-1/4" />
+					<input
+						className="dark:bg-gray-800 rounded-lg flex-1 p-1 px-2 pl-7 !-ml-2"
+						type="url"
+						value={_url}
+						onBlur={handleUrlBlur}
+						onKeyDown={e => {
+							if (e.key !== 'Enter') return
+							;(e.target as HTMLInputElement).blur()
+						}}
+						onChange={event => setUrl(event.target.value.trim())}
+					/>
+				</div>
 				<div className="flex items-center space-x-1">
 					<a
 						href={url}
