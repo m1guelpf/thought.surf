@@ -70,9 +70,9 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 		<>
 			<div className="absolute bottom-4 inset-x-4 bg-white dark:bg-gray-800 shadow py-2 px-2 rounded-lg opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-between overflow-hidden space-x-6">
 				<div className="flex items-center space-x-2 flex-1 ml-2 relative">
-					<LinkIcon className="w-4 h-4 absolute left-0 inset-y-1/4" />
+					<LinkIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
 					<input
-						className="dark:bg-gray-800 rounded-lg flex-1 p-1 px-2 pl-7 !-ml-2"
+						className="bg-transparent rounded-lg flex-1 p-1 px-2 pl-7 !-ml-2 text-gray-600 dark:text-gray-400 z-[2]"
 						type="url"
 						value={_url}
 						onBlur={handleUrlBlur}
@@ -87,14 +87,14 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 					<a
 						href={url}
 						target="_blank"
-						className="bg-gray-700/60 shadow rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
+						className="bg-gray-300/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
 						rel="noreferrer"
 					>
 						<ArrowUpIcon className="w-4 h-4 transform rotate-45" />
 					</a>
 					<button
 						onClick={onDelete}
-						className="bg-gray-700/60 shadow rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
+						className="bg-gray-300/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
 					>
 						<XIcon className="w-4 h-4" />
 					</button>
