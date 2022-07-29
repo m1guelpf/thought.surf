@@ -1,15 +1,14 @@
 import useSWR from 'swr'
 import Tweet from '../Tweet'
+import useItem from '@/hooks/useItem'
 import { Camera } from '@/types/canvas'
-import TweetLoader from '../TweetLoader'
-import { useRoom } from '@/lib/liveblocks'
+import { FC, memo, useEffect } from 'react'
 import useMeasure from '@/hooks/useMeasure'
 import { screenToCanvas } from '@/lib/canvas'
 import { TweetDetails } from '@/types/twitter'
 import { Sections } from '@/types/command-bar'
 import TwitterIcon from '../Icons/TwitterIcon'
 import { LiveObject } from '@liveblocks/client'
-import { FC, memo, useEffect, useState } from 'react'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { CardOptions, CardType, URLCard } from '@/types/cards'
 
@@ -18,22 +17,10 @@ export const tweetCardOptions: CardOptions = {
 }
 
 const TweetCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => void }> = ({ id, item, navigateTo }) => {
-	const room = useRoom()
 	const [measureRef, { height }] = useMeasure<HTMLDivElement>()
-	const [
-		{
-			attributes: { url },
-		},
-		setItem,
-	] = useState(item.toObject())
-
-	useEffect(() => {
-		function onChange() {
-			setItem(item.toObject())
-		}
-
-		return room.subscribe(item, onChange)
-	}, [room, item])
+	const {
+		attributes: { url },
+	} = useItem(item)
 
 	useEffect(() => {
 		const { width } = item.get('size')

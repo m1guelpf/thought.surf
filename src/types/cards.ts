@@ -19,6 +19,7 @@ export type Card<T extends Record<string, Json> = Record<string, Json>> = {
 
 export type CardOptions = {
 	menuItems?: Menu
+	hasDeleteButton?: boolean
 	resizeAxis: { x: boolean; y: boolean }
 }
 

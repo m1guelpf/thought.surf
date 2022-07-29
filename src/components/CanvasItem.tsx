@@ -1,20 +1,21 @@
+import useItem from '@/hooks/useItem'
 import { motion } from 'framer-motion'
 import { Point } from '@/types/canvas'
 import { classNames } from '@/lib/utils'
 import ResizeIcon from './Icons/ResizeIcon'
 import RightClickMenu from './RightClickMenu'
+import { useHistory } from '@/lib/liveblocks'
 import { useGesture } from '@use-gesture/react'
 import { LiveObject } from '@liveblocks/client'
 import { XIcon } from '@heroicons/react/outline'
 import { useCamera } from '@/context/CanvasContext'
-import { useHistory, useRoom } from '@/lib/liveblocks'
 import URLCard, { urlCardOptions } from './Cards/URLCard'
 import { Card, CardOptions, CardType } from '@/types/cards'
 import TextCard, { textCardOptions } from './Cards/TextCard'
 import TweetCard, { tweetCardOptions } from './Cards/TweetCard'
 import EmptyCard, { emptyCardOptions } from './Cards/EmptyCard'
 import { addPoint, eventAlreadyHandled, isOnScreen, subPoint, zoomOn } from '@/lib/canvas'
-import { useCallback, useEffect, useState, memo, MutableRefObject, FC, useRef, ReactNode } from 'react'
+import { useCallback, useState, memo, MutableRefObject, FC, useRef, ReactNode } from 'react'
 
 const CardRenderers: Record<string, (props) => ReactNode> = {
 	[CardType.URL]: props => <URLCard {...props} />,
@@ -31,12 +32,11 @@ const CardOptions: Record<CardType, CardOptions> = {
 }
 
 const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unknown }> = ({ id, item, onDelete }) => {
-	const room = useRoom()
 	const history = useHistory()
 	const [scale, setScale] = useState(1)
+	const { point, size, type } = useItem(item)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const { camera, setCamera, withTransition } = useCamera()
-	const [{ point, size, type }, setItem] = useState(item.toObject())
 	const dragData = useRef<{ start: Point; origin: Point; pointerId: number }>(null)
 
 	const navigateTo = useCallback(() => {
@@ -46,14 +46,6 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 			setCamera(camera => zoomOn(camera, item.get('point'), { width: rect.width, height: rect.height }))
 		})
 	}, [item, setCamera, withTransition])
-
-	useEffect(() => {
-		function onChange() {
-			setItem(item.toObject())
-		}
-
-		return room.subscribe(item, onChange)
-	}, [room, item])
 
 	useGesture(
 		{
@@ -126,23 +118,19 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 					isOnScreen(camera, point, size) ? '[content-visibility:auto]' : '[content-visibility:hidden]',
 					'group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-gray-900/90 absolute will-change-transform cursor-grab  [contain:layout_style_paint] rounded-lg shadow-card backdrop-blur backdrop-filter'
 				)}
-				style={{
-					width: size.width,
-					height: size.height,
-					x: point.x,
-					y: point.y,
-					scale,
-				}}
+				style={{ scale, x: point.x, y: point.y, width: size.width, height: size.height }}
 			>
-				<button
-					onClick={onDelete}
-					className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-white/30 shadow dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
-					data-no-drag
-				>
-					<XIcon className="w-4 h-4 text-gray-900 dark:text-gray-100" />
-				</button>
+				{!CardOptions[type].hasDeleteButton && (
+					<button
+						onClick={onDelete}
+						className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-white/30 shadow dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
+						data-no-drag
+					>
+						<XIcon className="w-4 h-4 text-gray-900 dark:text-gray-100" />
+					</button>
+				)}
 				<ResizeButton item={item} containerRef={containerRef} />
-				{CardRenderers[type]({ item, id, navigateTo })}
+				{CardRenderers[type]({ item, id, navigateTo, onDelete })}
 			</motion.div>
 		</RightClickMenu>
 	)
@@ -202,9 +190,9 @@ const ResizeButton: FC<{
 		<button
 			{...listeners()}
 			data-no-drag
-			className="opacity-0 z-20 group-hover:opacity-100 transition-opacity absolute bg-white shadow dark:bg-black/60 bottom-2 right-2 cursor-se-resize flex items-center justify-center dark:shadow rounded p-2"
+			className="opacity-0 z-20 group-hover:opacity-100 transition-opacity absolute bottom-0 right-0 cursor-se-resize flex items-center justify-center p-1"
 		>
-			<ResizeIcon className="w-2 h-2 text-gray-900 dark:text-gray-100" />
+			<ResizeIcon className="w-2.5 h-2.5 text-gray-900 dark:text-gray-100" />
 		</button>
 	)
 })

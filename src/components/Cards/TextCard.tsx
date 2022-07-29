@@ -1,12 +1,11 @@
 import TipTap from '../TipTap'
+import useItem from '@/hooks/useItem'
 import { Camera } from '@/types/canvas'
-import { useRoom } from '@/lib/liveblocks'
-import { DEFAULT_TEXT } from '@/lib/consts'
+import { FC, memo, useEffect } from 'react'
 import useMeasure from '@/hooks/useMeasure'
 import { screenToCanvas } from '@/lib/canvas'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
-import { FC, memo, useEffect, useState } from 'react'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { DocumentTextIcon } from '@heroicons/react/outline'
 import { CardOptions, CardType, TextCard } from '@/types/cards'
@@ -16,22 +15,10 @@ export const textCardOptions: CardOptions = {
 }
 
 const TextCard: FC<{ item: LiveObject<TextCard>; id: string; navigateTo: () => void }> = ({ id, item, navigateTo }) => {
-	const room = useRoom()
 	const [measureRef, { height }] = useMeasure<HTMLDivElement>()
-	const [
-		{
-			attributes: { doc },
-		},
-		setItem,
-	] = useState(item.toObject())
-
-	useEffect(() => {
-		function onChange() {
-			setItem(item.toObject())
-		}
-
-		return room.subscribe(item, onChange)
-	}, [room, item])
+	const {
+		attributes: { doc },
+	} = useItem(item)
 
 	useEffect(() => {
 		const { width } = item.get('size')
