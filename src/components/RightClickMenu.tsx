@@ -1,7 +1,7 @@
 import { classNames } from '@/lib/utils'
 import { Menu, MenuItem } from '@/types/right-click'
-import * as ContextMenu from '@radix-ui/react-context-menu'
 import { ChevronRightIcon } from '@heroicons/react/outline'
+import * as ContextMenu from '@radix-ui/react-context-menu'
 import { FC, memo, PointerEventHandler, PropsWithChildren, ReactNode } from 'react'
 
 const RightClickMenu: FC<PropsWithChildren<{ menu?: Menu }>> = ({ children, menu = [] }) => {

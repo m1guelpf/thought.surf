@@ -1,7 +1,7 @@
-import { LinkIcon } from '@heroicons/react/solid'
 import { Editor } from '@tiptap/react'
 import BoldIcon from './Icons/BoldIcon'
 import ItalicIcon from './Icons/ItalicIcon'
+import { LinkIcon } from '@heroicons/react/solid'
 import StrikethroughIcon from './Icons/StrikethroughIcon'
 
 export const TipTapMenu = ({ editor, className }: { editor: Editor; className?: string }) => {

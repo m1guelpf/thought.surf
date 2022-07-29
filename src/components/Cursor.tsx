@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react'
-import { Point } from '@/types/canvas'
 import { motion } from 'framer-motion'
+import { Point } from '@/types/canvas'
 import { canvasToScreen } from '@/lib/canvas'
 import { useCamera } from '@/context/CanvasContext'
 

@@ -1,7 +1,7 @@
 import Cursor from './Cursor'
 import { FC, memo, RefObject } from 'react'
-import { useOthers } from '@/lib/liveblocks'
 import { CURSOR_COLORS } from '@/lib/consts'
+import { useOthers } from '@/lib/liveblocks'
 import useTrackCursor from '@/hooks/canvas/useTrackCursor'
 
 const MultiplayerCursors: FC<{ canvas: RefObject<HTMLDivElement> }> = ({ canvas }) => {
