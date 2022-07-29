@@ -1,5 +1,5 @@
 import { useTheme } from 'next-themes'
-import { FC, PropsWithChildren } from 'react'
+import { FC, memo, PropsWithChildren } from 'react'
 import { SkeletonTheme } from 'react-loading-skeleton'
 
 const SkeletonProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
@@ -16,4 +16,4 @@ const SkeletonProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
 	)
 }
 
-export default SkeletonProvider
+export default memo(SkeletonProvider)

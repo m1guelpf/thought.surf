@@ -89,6 +89,7 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 				name: 'Add URL Card',
 				icon: <LinkIcon />,
 				section: Sections.Canvas,
+				keywords: ['link', 'bookmark'],
 				perform: async () => {
 					if (!items) throw toast.error('Canvas not loaded yet')
 

@@ -1,5 +1,5 @@
 import { Action } from '@/types/command-bar'
-import { createContext, Dispatch, FC, PropsWithChildren, SetStateAction, useContext, useState } from 'react'
+import { createContext, Dispatch, FC, memo, PropsWithChildren, SetStateAction, useContext, useState } from 'react'
 
 const CommandBarContext = createContext<{
 	commands: Action[]
@@ -9,7 +9,7 @@ const CommandBarContext = createContext<{
 }>(null)
 CommandBarContext.displayName = 'CommandBarContext'
 
-export const CommandBarProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
+const BaseCommandBarProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
 	const [commands, setCommands] = useState([])
 	const [open, setOpen] = useState<boolean>(false)
 
@@ -19,6 +19,8 @@ export const CommandBarProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
 		</CommandBarContext.Provider>
 	)
 }
+
+export const CommandBarProvider = memo(BaseCommandBarProvider)
 
 export const useCommandBar = () => {
 	const { commands, setCommands, open, setOpen } = useContext(CommandBarContext)

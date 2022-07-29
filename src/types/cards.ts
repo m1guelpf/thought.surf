@@ -1,3 +1,4 @@
+import { Menu } from './right-click'
 import { Point, Size } from './canvas'
 import { Json } from '@liveblocks/client'
 import { JSONContent } from '@tiptap/react'
@@ -17,6 +18,7 @@ export type Card<T extends Record<string, Json> = Record<string, Json>> = {
 }
 
 export type CardOptions = {
+	menuItems?: Menu
 	resizeAxis: { x: boolean; y: boolean }
 }
 

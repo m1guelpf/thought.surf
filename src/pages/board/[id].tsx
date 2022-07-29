@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, memo } from 'react'
 import Canvas from '@/components/Canvas'
 import Layout from '@/components/Layout'
 import { GetStaticPaths, GetStaticProps } from 'next'
@@ -26,4 +26,4 @@ export const getStaticProps: GetStaticProps = async ({ params: { id } }) => {
 	}
 }
 
-export default BoardPage
+export default memo(BoardPage)

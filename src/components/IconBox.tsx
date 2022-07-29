@@ -25,7 +25,7 @@ const IconBox = ({ className = '', src, alt }) => {
 					/>
 				</>
 			) : (
-				<Skeleton className="rounded-lg" />
+				<Skeleton className="rounded-lg" width={48} height={48} />
 			)}
 		</div>
 	)

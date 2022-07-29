@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Point } from '@/types/canvas'
 import { classNames } from '@/lib/utils'
 import ResizeIcon from './Icons/ResizeIcon'
+import RightClickMenu from './RightClickMenu'
 import { useGesture } from '@use-gesture/react'
 import { LiveObject } from '@liveblocks/client'
 import { XIcon } from '@heroicons/react/outline'
@@ -16,9 +17,9 @@ import { addPoint, eventAlreadyHandled, isOnScreen, subPoint, zoomOn } from '@/l
 import { useCallback, useEffect, useState, memo, MutableRefObject, FC, useRef, ReactNode } from 'react'
 
 const CardRenderers: Record<string, (props) => ReactNode> = {
-	[CardType.EMPTY]: props => <EmptyCard {...props} />,
-	[CardType.TEXT]: props => <TextCard {...props} />,
 	[CardType.URL]: props => <URLCard {...props} />,
+	[CardType.TEXT]: props => <TextCard {...props} />,
+	[CardType.EMPTY]: props => <EmptyCard {...props} />,
 	[CardType.TWEET]: props => <TweetCard {...props} />,
 }
 
@@ -35,8 +36,8 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 	const [scale, setScale] = useState(1)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const { camera, setCamera, withTransition } = useCamera()
-	const dragData = useRef<{ start: Point; origin: Point; pointerId: number }>(null)
 	const [{ point, size, type }, setItem] = useState(item.toObject())
+	const dragData = useRef<{ start: Point; origin: Point; pointerId: number }>(null)
 
 	const navigateTo = useCallback(() => {
 		const rect = containerRef.current.getBoundingClientRect()
@@ -112,31 +113,38 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 	)
 
 	return (
-		<motion.div
-			ref={containerRef}
-			animate={{ scale }}
-			className={classNames(
-				isOnScreen(camera, point, size) ? '[content-visibility:auto]' : '[content-visibility:hidden]',
-				'group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-gray-900/90 absolute will-change-transform cursor-grab  [contain:layout_style_paint] rounded-lg shadow-card backdrop-blur backdrop-filter'
-			)}
-			style={{
-				width: size.width,
-				height: size.height,
-				x: point.x,
-				y: point.y,
-				scale,
-			}}
+		<RightClickMenu
+			menu={[
+				...(CardOptions[type].menuItems ?? []),
+				{ icon: <XIcon className="h-3.5 w-3.5" />, label: 'Delete', action: onDelete },
+			]}
 		>
-			<button
-				onClick={onDelete}
-				className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-white/30 shadow dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
-				data-no-drag
+			<motion.div
+				ref={containerRef}
+				animate={{ scale }}
+				className={classNames(
+					isOnScreen(camera, point, size) ? '[content-visibility:auto]' : '[content-visibility:hidden]',
+					'group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-gray-900/90 absolute will-change-transform cursor-grab  [contain:layout_style_paint] rounded-lg shadow-card backdrop-blur backdrop-filter'
+				)}
+				style={{
+					width: size.width,
+					height: size.height,
+					x: point.x,
+					y: point.y,
+					scale,
+				}}
 			>
-				<XIcon className="w-4 h-4 text-gray-900 dark:text-gray-100" />
-			</button>
-			<ResizeButton item={item} containerRef={containerRef} />
-			{CardRenderers[type]({ item, id, navigateTo })}
-		</motion.div>
+				<button
+					onClick={onDelete}
+					className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-white/30 shadow dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
+					data-no-drag
+				>
+					<XIcon className="w-4 h-4 text-gray-900 dark:text-gray-100" />
+				</button>
+				<ResizeButton item={item} containerRef={containerRef} />
+				{CardRenderers[type]({ item, id, navigateTo })}
+			</motion.div>
+		</RightClickMenu>
 	)
 }
 

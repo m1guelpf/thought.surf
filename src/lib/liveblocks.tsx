@@ -1,5 +1,6 @@
 import { Card } from '@/types/cards'
 import { Point } from '@/types/canvas'
+import { DEFAULT_ROOM_CONTENT } from './consts'
 import { createRoomContext } from '@liveblocks/react'
 import { FC, PropsWithChildren, useEffect, useState } from 'react'
 import { createClient, LiveMap, LiveObject } from '@liveblocks/client'
@@ -48,7 +49,7 @@ export const LiveProvider: FC<PropsWithChildren<{ roomId: string; onAuthFailure?
 	}, [state, onAuthFailure])
 
 	return (
-		<RoomProvider id={roomId} initialStorage={{ items: new LiveMap() }}>
+		<RoomProvider id={roomId} initialStorage={{ items: DEFAULT_ROOM_CONTENT }}>
 			<RoomStateWatcher state={state} setState={setState} />
 			{children}
 		</RoomProvider>

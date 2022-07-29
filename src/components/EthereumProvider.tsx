@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from 'react'
+import { FC, memo, PropsWithChildren } from 'react'
 import { infuraProvider } from 'wagmi/providers/infura'
 import { publicProvider } from 'wagmi/providers/public'
 import { InjectedConnector } from 'wagmi/connectors/injected'
@@ -23,4 +23,4 @@ const EthereumProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
 	return <WagmiConfig client={wagmiClient}>{children}</WagmiConfig>
 }
 
-export default EthereumProvider
+export default memo(EthereumProvider)
