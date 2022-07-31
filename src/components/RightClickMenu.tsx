@@ -1,14 +1,18 @@
+import { Point } from '@/types/canvas'
 import { classNames } from '@/lib/utils'
 import { Menu, MenuItem } from '@/types/right-click'
 import { ChevronRightIcon } from '@heroicons/react/outline'
 import * as ContextMenu from '@radix-ui/react-context-menu'
-import { FC, memo, PointerEventHandler, PropsWithChildren, ReactNode } from 'react'
+import { FC, memo, PointerEventHandler, PropsWithChildren, ReactNode, RefObject, useRef } from 'react'
 
 const RightClickMenu: FC<PropsWithChildren<{ menu?: Menu }>> = ({ children, menu = [] }) => {
+	const mousePos = useRef<Point>({ x: 0, y: 0 })
+
 	if (menu.length == 0) return <>{children}</>
 
 	const handlePointerDown: PointerEventHandler<HTMLSpanElement> = event => {
 		event.stopPropagation()
+		mousePos.current = { x: event.clientX, y: event.clientY }
 	}
 
 	return (
@@ -26,7 +30,7 @@ const RightClickMenu: FC<PropsWithChildren<{ menu?: Menu }>> = ({ children, menu
 					)}
 				>
 					{menu.map((item, i) => (
-						<MenuRenderer key={i} item={item} isFirst={i == 0} />
+						<MenuRenderer key={i} item={item} isFirst={i == 0} mouse={mousePos} />
 					))}
 				</ContextMenu.Content>
 			</ContextMenu.Portal>
@@ -34,12 +38,16 @@ const RightClickMenu: FC<PropsWithChildren<{ menu?: Menu }>> = ({ children, menu
 	)
 }
 
-const MenuRenderer: FC<{ item: MenuItem; isFirst?: boolean }> = ({ item, isFirst = false }) => {
+const MenuRenderer: FC<{ item: MenuItem; isFirst?: boolean; mouse?: RefObject<Point> }> = ({
+	item,
+	isFirst = false,
+	mouse,
+}) => {
 	if (item.submenu) {
 		return (
 			<>
 				{!isFirst && <ContextMenu.Separator className="my-1 h-px bg-gray-200 dark:bg-gray-700" />}
-				<SubMenuRenderer item={item} />
+				<SubMenuRenderer item={item} mouse={mouse} />
 			</>
 		)
 	}
@@ -61,7 +69,7 @@ const MenuRenderer: FC<{ item: MenuItem; isFirst?: boolean }> = ({ item, isFirst
 	return (
 		<ContextMenu.Item asChild>
 			<button
-				onClick={item.action}
+				onClick={event => item.action(event, mouse.current)}
 				className={classNames(
 					'w-full text-left',
 					'text-gray-400 focus:bg-gray-50 dark:text-gray-500 dark:focus:bg-gray-900',
@@ -76,7 +84,7 @@ const MenuRenderer: FC<{ item: MenuItem; isFirst?: boolean }> = ({ item, isFirst
 	)
 }
 
-const SubMenuRenderer: FC<{ item: MenuItem }> = ({ item }) => (
+const SubMenuRenderer: FC<{ item: MenuItem; mouse?: RefObject<Point> }> = ({ item, mouse }) => (
 	<ContextMenu.Sub>
 		<ContextMenu.SubTrigger
 			className={classNames(
@@ -97,7 +105,7 @@ const SubMenuRenderer: FC<{ item: MenuItem }> = ({ item }) => (
 				)}
 			>
 				{item.submenu.map((item, i) => (
-					<MenuRenderer key={i} item={item} />
+					<MenuRenderer key={i} item={item} mouse={mouse} />
 				))}
 			</ContextMenu.SubContent>
 		</ContextMenu.Portal>

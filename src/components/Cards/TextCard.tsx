@@ -1,9 +1,9 @@
 import TipTap from '../TipTap'
 import useItem from '@/hooks/useItem'
-import { Camera } from '@/types/canvas'
 import { FC, memo, useEffect } from 'react'
 import useMeasure from '@/hooks/useMeasure'
 import { screenToCanvas } from '@/lib/canvas'
+import { Camera, Point } from '@/types/canvas'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
 import useRegisterAction from '@/hooks/useRegisterAction'
@@ -49,8 +49,11 @@ const TextCard: FC<{ item: LiveObject<TextCard>; id: string; navigateTo: () => v
 	)
 }
 
-export const createTextCard = (camera: Camera, text: string = 'What are you thinking about?'): TextCard => ({
-	point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
+export const createTextCard = (
+	camera: Camera,
+	{ text = 'What are you thinking about?', point }: { text?: string; point?: Point } = {}
+): TextCard => ({
+	point: screenToCanvas(point ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
 	size: { width: 500, height: 500 },
 	type: CardType.TEXT,
 	attributes: {

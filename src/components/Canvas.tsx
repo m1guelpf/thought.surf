@@ -35,24 +35,26 @@ const Canvas: FC = () => {
 					{
 						label: 'Empty (testing)',
 						icon: <ViewGridAddIcon className="w-3.5 h-3.5" />,
-						action: () => {
-							items.set(randomId(), new LiveObject(createEmptyCard(camera)))
+						action: (_, point) => {
+							items.set(randomId(), new LiveObject(createEmptyCard(camera, { point })))
 						},
 					},
 					{
 						label: 'Note',
 						icon: <DocumentAddIcon className="w-3.5 h-3.5" />,
-						action: () => {
-							items.set(randomId(), new LiveObject(createTextCard(camera)))
+						action: (_, point) => {
+							items.set(randomId(), new LiveObject(createTextCard(camera, { point })))
 						},
 					},
 					{
 						label: 'Link',
 						icon: <LinkIcon className="w-3.5 h-3.5" />,
-						action: async () => {
+						action: async (_, point) => {
 							items.set(
 								randomId(),
-								new LiveObject(createURLCard(camera, await ask('What URL should we add?')))
+								new LiveObject(
+									createURLCard(camera, { url: await ask('What URL should we add?'), point })
+								)
 							)
 						},
 					},

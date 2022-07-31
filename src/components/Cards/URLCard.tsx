@@ -3,12 +3,12 @@ import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
 import useItem from '@/hooks/useItem'
 import { getDomain } from '@/lib/utils'
-import { Camera } from '@/types/canvas'
 import { FC, memo, useEffect } from 'react'
 import useSWRImmutable from 'swr/immutable'
 import { createTweetCard } from './TweetCard'
 import { screenToCanvas } from '@/lib/canvas'
 import Skeleton from 'react-loading-skeleton'
+import { Camera, Point } from '@/types/canvas'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
 import { MqlResponseData } from '@microlink/mql'
@@ -127,13 +127,13 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	)
 }
 
-export const createURLCard = (camera: Camera, url: string): URLCard => {
+export const createURLCard = (camera: Camera, { url, point }: { url: string; point?: Point }): URLCard => {
 	url = url.startsWith('http') ? url : `https://${url}`
 
 	if (REGEX.TWEET_URL.test(url)) return createTweetCard(camera, url)
 
 	return {
-		point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
+		point: screenToCanvas(point ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
 		size: { width: 500, height: 500 },
 		type: CardType.URL,
 		attributes: { url },

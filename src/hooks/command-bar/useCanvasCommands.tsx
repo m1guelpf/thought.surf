@@ -93,7 +93,10 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 				perform: async () => {
 					if (!items) throw toast.error('Canvas not loaded yet')
 
-					items.set(randomId(), new LiveObject(createURLCard(camera, await ask('What URL should we add?'))))
+					items.set(
+						randomId(),
+						new LiveObject(createURLCard(camera, { url: await ask('What URL should we add?') }))
+					)
 				},
 			},
 		],
