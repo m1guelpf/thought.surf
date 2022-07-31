@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import Autolinker from 'autolinker'
 import OpenGraph from './OpenGraph'
 import { FC, memo, useMemo } from 'react'
+import Skeleton from 'react-loading-skeleton'
 import { TweetDetails } from '@/types/twitter'
 import { getText, getVideoSource } from '@/lib/twitter'
 
@@ -24,29 +25,33 @@ const Tweet: FC<{
 						<div className="flex items-center mb-3">
 							<a
 								className="mr-3 flex items-center justify-center"
-								href={`https://twitter.com/${tweet.user.screen_name}`}
+								href={tweet?.user ? `https://twitter.com/${tweet.user.screen_name}` : null}
 								target="_blank"
 								rel="noreferrer"
 							>
-								<Image
-									src={tweet.user.profile_image_url_https}
-									alt={tweet.user.name}
-									width={isMini ? 25 : 40}
-									height={isMini ? 25 : 40}
-									className="rounded-full"
-								/>
+								{tweet?.user ? (
+									<Image
+										src={tweet.user.profile_image_url_https}
+										alt={tweet.user.name}
+										width={isMini ? 25 : 40}
+										height={isMini ? 25 : 40}
+										className="rounded-full"
+									/>
+								) : (
+									<Skeleton width={isMini ? 25 : 40} height={isMini ? 25 : 40} circle />
+								)}
 							</a>
 							<div className={`${isMini ? 'flex items-center space-x-2' : 'space-y-1'}`}>
 								<div className="flex items-center space-x-1 leading-none">
 									<a
-										href={`https://twitter.com/${tweet.user.screen_name}`}
+										href={tweet?.user ? `https://twitter.com/${tweet.user.screen_name}` : null}
 										target="_blank"
 										className="font-semibold text-black/80 dark:text-white/90 hover:underline"
 										rel="noreferrer"
 									>
-										{tweet.user.name}
+										{tweet?.user?.name ?? <Skeleton width={200} />}
 									</a>
-									{tweet.user.verified && (
+									{tweet?.user?.verified && (
 										<svg
 											className="ml-1 w-4 h-4 text-blue-400"
 											fill="currentColor"
@@ -60,29 +65,33 @@ const Tweet: FC<{
 									)}
 								</div>
 								<span className="text-black/40 dark:text-white/50 text-sm block">
-									@{tweet.user.screen_name}
+									{tweet?.user ? `@${tweet?.user?.screen_name}` : <Skeleton width={70} />}
 								</span>
 							</div>
 						</div>
 					</div>
 					<div className="flex flex-wrap justify-start items-start flex-1 -mt-1.5">
 						<div className="w-full my-1">
-							<p
-								className={`text-black/80 dark:text-white/80 whitespace-pre-line ${
-									isMini ? 'text-sm lg:text-base' : ''
-								}`}
-								dangerouslySetInnerHTML={{
-									__html: Autolinker.link(
-										getText(tweet).replaceAll(endsWithLink?.display_url, '').toString().trim(),
-										{
-											mention: 'twitter',
-											hashtag: 'twitter',
-											sanitizeHtml: true,
-											className: 'underline',
-										}
-									),
-								}}
-							/>
+							{tweet?.full_text ? (
+								<p
+									className={`text-black/80 dark:text-white/80 whitespace-pre-line ${
+										isMini ? 'text-sm lg:text-base' : ''
+									}`}
+									dangerouslySetInnerHTML={{
+										__html: Autolinker.link(
+											getText(tweet).replaceAll(endsWithLink?.display_url, '').toString().trim(),
+											{
+												mention: 'twitter',
+												hashtag: 'twitter',
+												sanitizeHtml: true,
+												className: 'underline',
+											}
+										),
+									}}
+								/>
+							) : (
+								<Skeleton width="80%" count={3} />
+							)}
 							{endsWithLink && endsWithLink.display_url != tweet.quoted_status_permalink?.display && (
 								<div className="mt-2">
 									<OpenGraph url={endsWithLink.expanded_url}>{endsWithLink.display_url}</OpenGraph>
@@ -117,13 +126,26 @@ const Tweet: FC<{
 					</div>
 					{!isMini && (
 						<a
-							href={`https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`}
+							href={
+								tweet?.user
+									? `https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`
+									: null
+							}
 							target="_blank"
 							className="mt-2 text-sm text-gray-500 hover:underline"
 							rel="noreferrer"
 						>
-							{format(new Date(tweet.created_at), 'hh:mm a')} ·{' '}
-							{format(new Date(tweet.created_at), 'LLL d, yyyy')}
+							{tweet?.created_at ? (
+								format(new Date(tweet.created_at), 'hh:mm a')
+							) : (
+								<Skeleton inline width={20} />
+							)}{' '}
+							·{' '}
+							{tweet?.created_at ? (
+								format(new Date(tweet.created_at), 'LLL d, yyyy')
+							) : (
+								<Skeleton inline width={20} />
+							)}
 						</a>
 					)}
 				</div>

@@ -87,14 +87,14 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 					<a
 						href={url}
 						target="_blank"
-						className="bg-gray-300/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
+						className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
 						rel="noreferrer"
 					>
 						<ArrowUpIcon className="w-4 h-4 transform rotate-45" />
 					</a>
 					<button
 						onClick={onDelete}
-						className="bg-gray-300/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
+						className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
 					>
 						<XIcon className="w-4 h-4" />
 					</button>
@@ -113,9 +113,10 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 				<div className="min-h-0 flex-1">
 					{data?.screenshot ? (
 						<img
-							className="h-full w-full rounded-lg block object-cover select-none pointer-events-none"
+							draggable="false"
 							src={data?.screenshot?.url}
 							alt={data?.screenshot?.url}
+							className="h-full w-full rounded-lg block object-cover select-none pointer-events-none"
 						/>
 					) : (
 						<Skeleton className="rounded-lg" width="100%" height="100%" />

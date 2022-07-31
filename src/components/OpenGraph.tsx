@@ -53,11 +53,10 @@ const OpenGraph = ({ url, children }) => {
 					</svg>
 				</div>
 			) : (
-				<a className="block" href={url} target="_blank" rel="noreferrer">
+				<a className="block select-none" href={url} target="_blank" rel="noreferrer" draggable="false">
 					<div>
 						{data.image && (
 							<div className="pb-[50%] relative border-b dark:border-gray-700">
-								{/* eslint-disable-next-line @next/next/no-img-element */}
 								<img
 									className="object-cover absolute inset-0 h-full w-full"
 									src={data.image.url}

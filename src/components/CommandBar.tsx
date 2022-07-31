@@ -278,7 +278,7 @@ const OptionRenderer = ({ actions, className, query, parents, onClick }) => {
 						onMouseEnter={() => setSelected(selectedIndexMap.findIndex(id => id == i))}
 						onClick={() => onClick(action)}
 						className={classNames(
-							'flex select-none items-center justify-between rounded-md px-3 py-2 text-black/70 dark:text-white/70 w-full relative w-full'
+							'flex select-none items-center justify-between rounded-md px-3 py-2 text-black/70 dark:text-white/70 relative w-full'
 						)}
 					>
 						{selectedIndexMap[selected] == i && (
