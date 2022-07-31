@@ -7,7 +7,6 @@ export enum CardType {
 	URL = 'url',
 	TEXT = 'text',
 	TWEET = 'tweet',
-	EMPTY = 'empty',
 }
 
 export type CardCollection = LiveMap<string, LiveObject<Card>>

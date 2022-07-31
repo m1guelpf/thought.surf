@@ -1,6 +1,6 @@
 import { JSONContent } from '@tiptap/react'
-import { Card, CardCollection } from '@/types/cards'
-import { LiveMap, LiveObject } from '@liveblocks/client'
+import { LiveMap } from '@liveblocks/client'
+import { CardCollection } from '@/types/cards'
 
 export const APP_NAME = 'Infinite'
 

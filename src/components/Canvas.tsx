@@ -9,7 +9,6 @@ import { createURLCard } from './Cards/URLCard'
 import { LiveObject } from '@liveblocks/client'
 import { FC, memo, useMemo, useRef } from 'react'
 import { createTextCard } from './Cards/TextCard'
-import { createEmptyCard } from './Cards/EmptyCard'
 import { useCamera } from '@/context/CanvasContext'
 import MultiplayerCursors from './MultiplayerCursors'
 import { ask, classNames, randomId } from '@/lib/utils'
@@ -18,9 +17,9 @@ import usePanGestures from '@/hooks/canvas/usePanGestures'
 import useZoomGestures from '@/hooks/canvas/useZoomGestures'
 import useCreateOnDrop from '@/hooks/canvas/useCreateOnDrop'
 import useCreateOnPaste from '@/hooks/canvas/useCreateOnPaste'
+import { DocumentAddIcon, LinkIcon } from '@heroicons/react/solid'
 import usePreventGestures from '@/hooks/canvas/usePreventGestures'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
-import { DocumentAddIcon, LinkIcon, ViewGridAddIcon } from '@heroicons/react/solid'
 
 const Canvas: FC = () => {
 	const items = useMap('items')
@@ -34,13 +33,6 @@ const Canvas: FC = () => {
 			{
 				label: 'Add',
 				submenu: [
-					{
-						label: 'Empty (testing)',
-						icon: <ViewGridAddIcon className="w-3.5 h-3.5" />,
-						action: (_, point) => {
-							items.set(randomId(), new LiveObject(createEmptyCard(camera, { point })))
-						},
-					},
 					{
 						label: 'Note',
 						icon: <DocumentAddIcon className="w-3.5 h-3.5" />,

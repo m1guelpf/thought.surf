@@ -13,21 +13,18 @@ import URLCard, { urlCardOptions } from './Cards/URLCard'
 import { Card, CardOptions, CardType } from '@/types/cards'
 import TextCard, { textCardOptions } from './Cards/TextCard'
 import TweetCard, { tweetCardOptions } from './Cards/TweetCard'
-import EmptyCard, { emptyCardOptions } from './Cards/EmptyCard'
 import { addPoint, eventAlreadyHandled, isOnScreen, subPoint, zoomOn } from '@/lib/canvas'
 import { useCallback, useState, memo, MutableRefObject, FC, useRef, ReactNode } from 'react'
 
 const CardRenderers: Record<string, (props) => ReactNode> = {
 	[CardType.URL]: props => <URLCard {...props} />,
 	[CardType.TEXT]: props => <TextCard {...props} />,
-	[CardType.EMPTY]: props => <EmptyCard {...props} />,
 	[CardType.TWEET]: props => <TweetCard {...props} />,
 }
 
 const CardOptions: Record<CardType, CardOptions> = {
 	[CardType.URL]: urlCardOptions,
 	[CardType.TEXT]: textCardOptions,
-	[CardType.EMPTY]: emptyCardOptions,
 	[CardType.TWEET]: tweetCardOptions,
 }
 

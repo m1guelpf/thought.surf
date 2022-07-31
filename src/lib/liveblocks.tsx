@@ -1,9 +1,9 @@
 import { Point } from '@/types/canvas'
+import { CardCollection } from '@/types/cards'
 import { DEFAULT_ROOM_CONTENT } from './consts'
-import { Card, CardCollection } from '@/types/cards'
+import { createClient } from '@liveblocks/client'
 import { createRoomContext } from '@liveblocks/react'
 import { FC, PropsWithChildren, useEffect, useState } from 'react'
-import { createClient, LiveMap, LiveObject } from '@liveblocks/client'
 
 type ConnectionState = 'closed' | 'authenticating' | 'unavailable' | 'failed' | 'open' | 'connecting'
 

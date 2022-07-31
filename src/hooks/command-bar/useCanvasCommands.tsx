@@ -5,12 +5,11 @@ import { useHistory } from '@/lib/liveblocks'
 import { zoomIn, zoomOut } from '@/lib/canvas'
 import { CardCollection } from '@/types/cards'
 import { Sections } from '@/types/command-bar'
+import { LiveObject } from '@liveblocks/client'
 import { useCamera } from '@/context/CanvasContext'
 import useRegisterAction from '../useRegisterAction'
 import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
-import { LiveMap, LiveObject, Lson } from '@liveblocks/client'
-import { createEmptyCard } from '@/components/Cards/EmptyCard'
 import {
 	LinkIcon,
 	ReplyIcon,
@@ -18,7 +17,6 @@ import {
 	ZoomInIcon,
 	ZoomOutIcon,
 	DocumentAddIcon,
-	ViewGridAddIcon,
 	DocumentSearchIcon,
 } from '@heroicons/react/outline'
 
@@ -64,17 +62,6 @@ const useCanvasCommands = (items: CardCollection | null) => {
 	)
 	useRegisterAction(
 		[
-			{
-				id: 'add-empty',
-				name: 'Add Empty Card (for testing)',
-				icon: <ViewGridAddIcon />,
-				section: Sections.Canvas,
-				perform: () => {
-					if (!items) throw toast.error('Canvas not loaded yet')
-
-					items.set(randomId(), new LiveObject(createEmptyCard(camera)))
-				},
-			},
 			{
 				id: 'add-text',
 				name: 'Add Text Card',
