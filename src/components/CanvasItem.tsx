@@ -109,6 +109,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 			]}
 		>
 			<motion.div
+				data-card-id={id}
 				ref={containerRef}
 				animate={{ scale }}
 				className={classNames(
