@@ -10,7 +10,7 @@ export const cardFromPaste = (event: ClipboardEvent, camera: Camera): Card => {
 
 	const content = event.clipboardData.getData('text/plain').trim()
 
-	if (REGEX.URL.test(content)) return createURLCard(camera, content)
+	if (REGEX.URL.test(content)) return createURLCard(camera, { url: content })
 
-	return createTextCard(camera, content)
+	return createTextCard(camera, { text: content })
 }
