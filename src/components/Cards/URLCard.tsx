@@ -18,7 +18,6 @@ import { CardOptions, CardType, URLCard } from '@/types/cards'
 import { ArrowUpIcon, XIcon, LinkIcon } from '@heroicons/react/solid'
 
 export const urlCardOptions: CardOptions = {
-	hasDeleteButton: true,
 	resizeAxis: { x: true, y: true },
 }
 

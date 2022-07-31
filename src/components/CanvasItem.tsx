@@ -117,15 +117,6 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 				)}
 				style={{ scale, x: point.x, y: point.y, width: size.width, height: size.height }}
 			>
-				{!CardOptions[type].hasDeleteButton && (
-					<button
-						onClick={onDelete}
-						className="opacity-0 group-hover:opacity-100 transition-opacity absolute bg-white/30 shadow dark:bg-black/60 top-2 right-2 flex items-center justify-center dark:shadow rounded p-1 z-20"
-						data-no-drag
-					>
-						<XIcon className="w-4 h-4 text-gray-900 dark:text-gray-100" />
-					</button>
-				)}
 				<ResizeButton item={item} containerRef={containerRef} />
 				{CardRenderers[type]({ item, id, navigateTo, onDelete })}
 			</motion.div>

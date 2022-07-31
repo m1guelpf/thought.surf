@@ -13,7 +13,6 @@ import { DocumentTextIcon } from '@heroicons/react/outline'
 import { CardOptions, CardType, TextCard } from '@/types/cards'
 
 export const textCardOptions: CardOptions = {
-	hasDeleteButton: true,
 	resizeAxis: { x: true, y: false },
 }
 
