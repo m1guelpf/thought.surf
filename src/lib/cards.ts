@@ -1,7 +1,6 @@
 import { REGEX } from './consts'
 import toast from 'react-hot-toast'
 import { Camera } from '@/types/canvas'
-import { LiveMap, LiveObject } from '@liveblocks/client'
 import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
 import { Card, CardCollection, CardType, TextCard } from '@/types/cards'
@@ -14,6 +13,35 @@ export const cardFromPaste = (event: ClipboardEvent, camera: Camera, names: stri
 	if (REGEX.URL.test(content)) return createURLCard(camera, { url: content })
 
 	return createTextCard(camera, { text: content, names })
+}
+
+export const cardFromDrag = (event: DragEvent, camera: Camera, names: string[]): Card[] => {
+	if (event.dataTransfer.files.length > 0) {
+		toast.error('Dropping files is not supported yet.')
+		return []
+	}
+
+	if ([...event.dataTransfer.types].includes('text/uri-list')) {
+		const urlList = event.dataTransfer
+			.getData('text/uri-list')
+			.split('\n')
+			.filter(url => !url.startsWith('#'))
+
+		return urlList.map(url => createURLCard(camera, { point: { x: event.clientX, y: event.clientY }, url }))
+	}
+
+	if (![...event.dataTransfer.types].includes('text/plain')) {
+		toast.error('Unsupported element.')
+		return []
+	}
+
+	return [
+		createTextCard(camera, {
+			names,
+			point: { x: event.clientX, y: event.clientY },
+			text: event.dataTransfer.getData('text/plain'),
+		}),
+	]
 }
 
 export const getTextCards = (cards: CardCollection): TextCard[] => {

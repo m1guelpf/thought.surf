@@ -1,6 +1,5 @@
 import DevMode from './DevMode'
 import CanvasItem from './CanvasItem'
-import { CardType } from '@/types/cards'
 import { useMap } from '@/lib/liveblocks'
 import { getTextCards } from '@/lib/cards'
 import { Menu } from '@/types/right-click'
@@ -17,6 +16,7 @@ import { ask, classNames, randomId } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import usePanGestures from '@/hooks/canvas/usePanGestures'
 import useZoomGestures from '@/hooks/canvas/useZoomGestures'
+import useCreateOnDrop from '@/hooks/canvas/useCreateOnDrop'
 import useCreateOnPaste from '@/hooks/canvas/useCreateOnPaste'
 import usePreventGestures from '@/hooks/canvas/usePreventGestures'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
@@ -73,6 +73,7 @@ const Canvas: FC = () => {
 		]
 	}, [items, camera])
 
+	useCreateOnDrop()
 	useCreateOnPaste()
 	usePreventGestures()
 	useCanvasCommands(items)
