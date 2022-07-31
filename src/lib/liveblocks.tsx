@@ -1,6 +1,6 @@
-import { Card } from '@/types/cards'
 import { Point } from '@/types/canvas'
 import { DEFAULT_ROOM_CONTENT } from './consts'
+import { Card, CardCollection } from '@/types/cards'
 import { createRoomContext } from '@liveblocks/react'
 import { FC, PropsWithChildren, useEffect, useState } from 'react'
 import { createClient, LiveMap, LiveObject } from '@liveblocks/client'
@@ -13,7 +13,7 @@ type Presence = {
 }
 
 type Storage = {
-	items: LiveMap<string, LiveObject<Card>>
+	items: CardCollection
 }
 
 type UserMeta = {}

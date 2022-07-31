@@ -1,7 +1,7 @@
 import { Menu } from './right-click'
 import { Point, Size } from './canvas'
-import { Json } from '@liveblocks/client'
 import { JSONContent } from '@tiptap/react'
+import { Json, LiveMap, LiveObject } from '@liveblocks/client'
 
 export enum CardType {
 	URL = 'url',
@@ -9,6 +9,8 @@ export enum CardType {
 	TWEET = 'tweet',
 	EMPTY = 'empty',
 }
+
+export type CardCollection = LiveMap<string, LiveObject<Card>>
 
 export type Card<T extends Record<string, Json> = Record<string, Json>> = {
 	point: Point
@@ -25,6 +27,7 @@ export type CardOptions = {
 
 export type TextCard = Card<{
 	doc: JSONContent
+	title: string
 }>
 
 export type URLCard = Card<{

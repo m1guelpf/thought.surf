@@ -1,10 +1,10 @@
 import { randomId } from '@/lib/utils'
 import { useMap } from '@/lib/liveblocks'
-import { cardFromPaste } from '@/lib/cards'
 import { useCallback, useEffect } from 'react'
 import { LiveObject } from '@liveblocks/client'
 import { eventAlreadyHandled } from '@/lib/canvas'
 import { useCamera } from '@/context/CanvasContext'
+import { cardFromPaste, getTextCards } from '@/lib/cards'
 
 const useCreateOnPaste = () => {
 	const items = useMap('items')
@@ -14,7 +14,16 @@ const useCreateOnPaste = () => {
 		(event: ClipboardEvent) => {
 			if (eventAlreadyHandled(event)) return
 
-			items.set(randomId(), new LiveObject(cardFromPaste(event, camera)))
+			items.set(
+				randomId(),
+				new LiveObject(
+					cardFromPaste(
+						event,
+						camera,
+						getTextCards(items).map(({ attributes: { title } }) => title)
+					)
+				)
+			)
 		},
 		[items]
 	)

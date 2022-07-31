@@ -169,11 +169,6 @@ const CommandBar: FC<{}> = () => {
 										placeholder="Type a command or search..."
 										value={query}
 										onKeyDown={event => {
-											if (menu && event.key == 'Escape') {
-												event.preventDefault()
-												setQuery('')
-												return setMenu('')
-											}
 											if (query == '' && event.key == 'Escape') {
 												return setOpen(false)
 											}

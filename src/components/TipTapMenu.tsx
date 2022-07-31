@@ -1,14 +1,17 @@
 import { Editor } from '@tiptap/react'
+import { memo, RefObject } from 'react'
 import BoldIcon from './Icons/BoldIcon'
+import { createPortal } from 'react-dom'
+import { classNames } from '@/lib/utils'
 import ItalicIcon from './Icons/ItalicIcon'
 import { LinkIcon } from '@heroicons/react/solid'
 import StrikethroughIcon from './Icons/StrikethroughIcon'
 
-export const TipTapMenu = ({ editor, className }: { editor: Editor; className?: string }) => {
+export const TipTapMenu = ({ editor, renderAt }: { editor: Editor; renderAt: RefObject<HTMLDivElement> }) => {
 	if (!editor) return
 
-	return (
-		<div className={className}>
+	return createPortal(
+		<>
 			<MenuItem
 				icon={BoldIcon}
 				isActive={editor.isActive('bold')}
@@ -37,7 +40,8 @@ export const TipTapMenu = ({ editor, className }: { editor: Editor; className?: 
 								.run()
 				}
 			/>
-		</div>
+		</>,
+		renderAt.current
 	)
 }
 
@@ -45,13 +49,16 @@ const MenuItem = ({ onClick, isActive, icon: Icon }) => {
 	return (
 		<button
 			onClick={onClick}
-			className={`rounded p-1 transition ${
-				isActive ? 'bg-black/80 dark:bg-white/30' : 'hover:bg-black/5 hover:dark:bg-white/20'
-			}`}
+			className={classNames(
+				isActive
+					? 'opacity-100 bg-gray-300/60 dark:bg-gray-600/60'
+					: 'opacity-60 hover:opacity-80 bg-gray-200/60 dark:bg-gray-700/60',
+				`rounded p-1 opacity-60 transition`
+			)}
 		>
-			<Icon
-				className={`w-4 h-4 ${isActive ? 'text-white dark:text-white/80' : 'text-black dark:text-white/80'}`}
-			/>
+			<Icon className="w-4 h-4" />
 		</button>
 	)
 }
+
+export default memo(TipTapMenu)

@@ -1,7 +1,9 @@
 import toast from 'react-hot-toast'
+import { getTextCards } from '@/lib/cards'
 import { ask, randomId } from '@/lib/utils'
 import { useHistory } from '@/lib/liveblocks'
 import { zoomIn, zoomOut } from '@/lib/canvas'
+import { CardCollection } from '@/types/cards'
 import { Sections } from '@/types/command-bar'
 import { useCamera } from '@/context/CanvasContext'
 import useRegisterAction from '../useRegisterAction'
@@ -20,7 +22,7 @@ import {
 	DocumentSearchIcon,
 } from '@heroicons/react/outline'
 
-const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
+const useCanvasCommands = (items: CardCollection | null) => {
 	const history = useHistory()
 	const { camera } = useCamera()
 	const { setCamera, withTransition } = useCamera()
@@ -81,7 +83,14 @@ const useCanvasCommands = (items: LiveMap<string, Lson> | null) => {
 				perform: () => {
 					if (!items) throw toast.error('Canvas not loaded yet')
 
-					items.set(randomId(), new LiveObject(createTextCard(camera)))
+					items.set(
+						randomId(),
+						new LiveObject(
+							createTextCard(camera, {
+								names: getTextCards(items).map(({ attributes: { title } }) => title),
+							})
+						)
+					)
 				},
 			},
 			{

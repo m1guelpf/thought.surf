@@ -1,6 +1,8 @@
 import DevMode from './DevMode'
 import CanvasItem from './CanvasItem'
+import { CardType } from '@/types/cards'
 import { useMap } from '@/lib/liveblocks'
+import { getTextCards } from '@/lib/cards'
 import { Menu } from '@/types/right-click'
 import LoadingScreen from './LoadingScreen'
 import RightClickMenu from './RightClickMenu'
@@ -43,7 +45,15 @@ const Canvas: FC = () => {
 						label: 'Note',
 						icon: <DocumentAddIcon className="w-3.5 h-3.5" />,
 						action: (_, point) => {
-							items.set(randomId(), new LiveObject(createTextCard(camera, { point })))
+							items.set(
+								randomId(),
+								new LiveObject(
+									createTextCard(camera, {
+										point,
+										names: getTextCards(items).map(({ attributes: { title } }) => title),
+									})
+								)
+							)
 						},
 					},
 					{

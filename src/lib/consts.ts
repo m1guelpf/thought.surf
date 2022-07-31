@@ -1,12 +1,12 @@
-import { Card } from '@/types/cards'
 import { JSONContent } from '@tiptap/react'
+import { Card, CardCollection } from '@/types/cards'
 import { LiveMap, LiveObject } from '@liveblocks/client'
 
 export const APP_NAME = 'Infinite'
 
 export const CURSOR_COLORS = ['#DC2626', '#D97706', '#059669', '#7C3AED', '#DB2777']
 
-export const DEFAULT_ROOM_CONTENT: LiveMap<string, LiveObject<Card>> = new LiveMap()
+export const DEFAULT_ROOM_CONTENT: CardCollection = new LiveMap()
 
 export const DEFAULT_TEXT: JSONContent = {
 	type: 'doc',

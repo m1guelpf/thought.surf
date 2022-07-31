@@ -1,16 +1,17 @@
 import { Link } from '@/lib/tiptap/Link'
 import { TipTapMenu } from './TipTapMenu'
-import { FC, memo, useEffect } from 'react'
 import StarterKit from '@tiptap/starter-kit'
+import { FC, memo, RefObject, useEffect } from 'react'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, JSONContent, useEditor } from '@tiptap/react'
 
 const TipTap: FC<{
 	className?: string
+	renderMenu?: RefObject<HTMLDivElement>
 	editorClassName?: string
 	doc: JSONContent
 	setDoc: (doc: JSONContent) => void
-}> = ({ className = '', editorClassName = '', doc, setDoc }) => {
+}> = ({ className = '', editorClassName = '', doc, setDoc, renderMenu }) => {
 	const editor = useEditor({
 		editorProps: {
 			attributes: {
@@ -43,10 +44,7 @@ const TipTap: FC<{
 
 	return (
 		<div className={className}>
-			<TipTapMenu
-				className="absolute top-0 left-0 inline-flex border-r-2 border-b-2 border-transparent dark:border-white/10 bg-white/30 dark:bg-black/30 backdrop-filter backdrop-blur-xl p-1 rounded-br opacity-0 group-hover:opacity-100 transition space-x-2 shadow z-30"
-				editor={editor}
-			/>
+			<TipTapMenu renderAt={renderMenu} editor={editor} />
 			<EditorContent className={editorClassName} editor={editor} />
 		</div>
 	)
