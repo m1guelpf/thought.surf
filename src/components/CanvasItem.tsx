@@ -12,9 +12,9 @@ import URLCard, { urlCardOptions } from './Cards/URLCard'
 import { Card, CardOptions, CardType } from '@/types/cards'
 import TextCard, { textCardOptions } from './Cards/TextCard'
 import TweetCard, { tweetCardOptions } from './Cards/TweetCard'
-import useStore, { shallow, Store, useRefCamera } from '@/lib/store'
 import { addPoint, eventAlreadyHandled, subPoint } from '@/lib/canvas'
-import { useCallback, useState, memo, MutableRefObject, FC, useRef, ReactNode } from 'react'
+import useCamera, { shallow, CameraStore, useRefCamera } from '@/store/camera'
+import { useCallback, useState, memo, MutableRefObject, FC, useRef, ReactNode, useEffect } from 'react'
 
 const CardRenderers: Record<string, (props) => ReactNode> = {
 	[CardType.URL]: props => <URLCard {...props} />,
@@ -28,16 +28,22 @@ const CardOptions: Record<CardType, CardOptions> = {
 	[CardType.TWEET]: tweetCardOptions,
 }
 
-const getParams = (store: Store) => ({ zoomOn: store.zoomOnPoint, setTransition: store.setTransitioning })
+const getParams = (store: CameraStore) => ({ zoomOn: store.zoomOnPoint, setTransition: store.setTransitioning })
 
-const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unknown }> = ({ id, item, onDelete }) => {
+const CanvasItem: FC<{ id: string; item: LiveObject<Card>; removeCard: (id: string) => unknown }> = ({
+	id,
+	item,
+	removeCard,
+}) => {
 	const history = useHistory()
 	const camera = useRefCamera()
 	const [scale, setScale] = useState(1)
 	const { point, size, type } = useItem(item)
 	const containerRef = useRef<HTMLDivElement>(null)
-	const { zoomOn, setTransition } = useStore(getParams, shallow)
+	const { zoomOn, setTransition } = useCamera(getParams, shallow)
 	const dragData = useRef<{ start: Point; origin: Point; pointerId: number }>(null)
+
+	const onDelete = useCallback(() => removeCard(id), [id, removeCard])
 
 	const navigateTo = useCallback(() => {
 		const rect = containerRef.current.getBoundingClientRect()

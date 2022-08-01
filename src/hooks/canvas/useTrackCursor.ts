@@ -1,6 +1,6 @@
 import { RefObject } from 'react'
-import { useRefCamera } from '@/lib/store'
 import { screenToCanvas } from '@/lib/canvas'
+import { useRefCamera } from '@/store/camera'
 import { useGesture } from '@use-gesture/react'
 import { useUpdateMyPresence } from '@/lib/liveblocks'
 

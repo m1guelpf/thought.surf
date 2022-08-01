@@ -1,17 +1,17 @@
 import { memo, useState } from 'react'
 import { Camera } from '@/types/canvas'
 import { useOthers } from '@/lib/liveblocks'
-import useStore, { Store } from '@/lib/store'
 import { Sections } from '@/types/command-bar'
 import { getBrowserViewport } from '@/lib/canvas'
+import useCamera, { CameraStore } from '@/store/camera'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { CubeTransparentIcon } from '@heroicons/react/outline'
 
-const getCamera = (store: Store) => store.camera
+const getCamera = (store: CameraStore) => store.camera
 
 const DevMode = () => {
 	const others = useOthers()
-	const camera = useStore(getCamera)
+	const camera = useCamera(getCamera)
 	const [devMode, setDevMode] = useState<boolean>(false)
 
 	useRegisterAction({

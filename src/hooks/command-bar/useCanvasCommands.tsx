@@ -8,7 +8,7 @@ import { LiveObject } from '@liveblocks/client'
 import useRegisterAction from '../useRegisterAction'
 import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
-import useStore, { shallow, Store, useRefCamera } from '@/lib/store'
+import useCamera, { shallow, CameraStore, useRefCamera } from '@/store/camera'
 import {
 	LinkIcon,
 	ReplyIcon,
@@ -19,7 +19,7 @@ import {
 	DocumentSearchIcon,
 } from '@heroicons/react/outline'
 
-const getParams = (store: Store) => ({
+const getParams = (store: CameraStore) => ({
 	zoomIn: store.zoomCameraIn,
 	zoomOut: store.zoomCameraOut,
 	resetCamera: store.resetCamera,
@@ -29,7 +29,7 @@ const getParams = (store: Store) => ({
 const useCanvasCommands = (items: CardCollection | null) => {
 	const history = useHistory()
 	const camera = useRefCamera()
-	const { zoomIn, zoomOut, resetCamera, setTransition } = useStore(getParams, shallow)
+	const { zoomIn, zoomOut, resetCamera, setTransition } = useCamera(getParams, shallow)
 
 	useRegisterAction(
 		{

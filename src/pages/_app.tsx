@@ -5,7 +5,6 @@ import { ThemeProvider } from 'next-themes'
 import { localStorageProvider } from '@/lib/swr-cache'
 import EthereumProvider from '@/components/EthereumProvider'
 import SkeletonProvider from '@/components/SkeletonProvider'
-import { CommandBarProvider } from '@/context/CommandBarContext'
 
 const App = ({ Component, pageProps }) => {
 	return (
@@ -13,10 +12,8 @@ const App = ({ Component, pageProps }) => {
 			<ThemeProvider defaultTheme="dark" attribute="class">
 				<SkeletonProvider>
 					<EthereumProvider>
-						<CommandBarProvider>
-							<Toaster />
-							<Component {...pageProps} />
-						</CommandBarProvider>
+						<Toaster />
+						<Component {...pageProps} />
 					</EthereumProvider>
 				</SkeletonProvider>
 			</ThemeProvider>

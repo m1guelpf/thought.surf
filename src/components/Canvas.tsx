@@ -1,27 +1,28 @@
 import DevMode from './DevMode'
 import CanvasItem from './CanvasItem'
 import shallow from 'zustand/shallow'
+import { isOnScreen } from '@/lib/canvas'
 import { useMap } from '@/lib/liveblocks'
 import { getTextCards } from '@/lib/cards'
 import { Menu } from '@/types/right-click'
 import LoadingScreen from './LoadingScreen'
-import useStore, { Store } from '@/lib/store'
 import RightClickMenu from './RightClickMenu'
 import { createURLCard } from './Cards/URLCard'
 import { LiveObject } from '@liveblocks/client'
-import { FC, memo, useMemo, useRef } from 'react'
 import { createTextCard } from './Cards/TextCard'
 import MultiplayerCursors from './MultiplayerCursors'
 import { ask, classNames, randomId } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
+import useCamera, { CameraStore } from '@/store/camera'
 import useCreateOnDrop from '@/hooks/canvas/useCreateOnDrop'
 import useCreateOnPaste from '@/hooks/canvas/useCreateOnPaste'
 import useCameraGestures from '@/hooks/canvas/useCameraGestures'
 import { DocumentAddIcon, LinkIcon } from '@heroicons/react/solid'
 import usePreventGestures from '@/hooks/canvas/usePreventGestures'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
+import { FC, memo, useCallback, useEffect, useMemo, useRef } from 'react'
 
-const getParams = (store: Store) => ({
+const getParams = (store: CameraStore) => ({
 	camera: store.camera,
 	shouldTransition: store.isTransitioning,
 	setTransition: store.setTransitioning,
@@ -30,7 +31,7 @@ const getParams = (store: Store) => ({
 const Canvas: FC = () => {
 	const items = useMap('items')
 	const canvasRef = useRef<HTMLDivElement>()
-	const { camera, shouldTransition, setTransition } = useStore(getParams, shallow)
+	const { camera, shouldTransition, setTransition } = useCamera(getParams, shallow)
 
 	const menu = useMemo<Menu>(() => {
 		if (!items) return []
@@ -77,6 +78,20 @@ const Canvas: FC = () => {
 	useCanvasCommands(items)
 	useCameraGestures(canvasRef)
 
+	const removeCard = useCallback(cardId => items.delete(cardId), [items])
+
+	useEffect(() => {
+		if (!items) return
+
+		Array.from(items).forEach(([itemId, item]) => {
+			const onScreen = isOnScreen(camera, item.get('point'), item.get('size'))
+			const el = document.querySelector<HTMLDivElement>(`[data-card-id="${itemId}"]`)
+			if (!el) return
+
+			el.style.contentVisibility = onScreen ? 'auto' : 'hidden'
+		})
+	}, [items, camera])
+
 	return (
 		<>
 			<LoadingScreen loading={!items} />
@@ -105,7 +120,7 @@ const Canvas: FC = () => {
 											animate={{ opacity: 1 }}
 											exit={{ opacity: 0 }}
 										>
-											<CanvasItem id={itemId} item={item} onDelete={() => items.delete(itemId)} />
+											<CanvasItem id={itemId} item={item} removeCard={removeCard} />
 										</motion.div>
 									))}
 							</AnimatePresence>

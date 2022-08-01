@@ -1,12 +1,12 @@
 import { RefObject, useCallback } from 'react'
-import useStore, { shallow } from '@/lib/store'
 import { useGesture } from '@use-gesture/react'
 import { eventAlreadyHandled } from '@/lib/canvas'
+import useCamera, { shallow } from '@/store/camera'
 
 const getParams = store => ({ panCamera: store.panCamera, zoomCamera: store.zoomCamera })
 
 const useCameraGestures = (canvasRef: RefObject<HTMLDivElement>) => {
-	const { panCamera, zoomCamera } = useStore(getParams, shallow)
+	const { panCamera, zoomCamera } = useCamera(getParams, shallow)
 
 	const onDrag = useCallback(
 		({ event, delta }) => {

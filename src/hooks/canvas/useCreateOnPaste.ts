@@ -1,6 +1,6 @@
 import { randomId } from '@/lib/utils'
 import { useMap } from '@/lib/liveblocks'
-import { useRefCamera } from '@/lib/store'
+import { useRefCamera } from '@/store/camera'
 import { useCallback, useEffect } from 'react'
 import { LiveObject } from '@liveblocks/client'
 import { eventAlreadyHandled } from '@/lib/canvas'

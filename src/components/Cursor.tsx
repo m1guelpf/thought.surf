@@ -1,8 +1,8 @@
 import { FC, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Point } from '@/types/canvas'
-import { useRefCamera } from '@/lib/store'
 import { canvasToScreen } from '@/lib/canvas'
+import { useRefCamera } from '@/store/camera'
 
 const Cursor: FC<{ pos: Point; color: string }> = ({ pos, color }) => {
 	const camera = useRefCamera()

@@ -1,17 +1,20 @@
 import { classNames } from '@/lib/utils'
 import CommandIcon from './Icons/CommandIcon'
-import { useCommandBar } from '@/context/CommandBarContext'
 import { FC, memo, useEffect, useRef, useState } from 'react'
+import useCommandBar, { CommandBarStore, useRefOpen } from '@/store/command-bar'
+
+const getSetOpen = (store: CommandBarStore) => store.setOpen
 
 const Header: FC<{ roomId: string }> = ({ roomId }) => {
-	// const { open, setOpen } = useCommandBar()
+	const open = useRefOpen()
+	const setOpen = useCommandBar(getSetOpen)
 
 	const headerRef = useRef<HTMLDivElement>(null)
 	const [isVisible, setVisible] = useState<boolean>(false)
 
 	useEffect(() => {
 		const onMouseMove = (event: MouseEvent) => {
-			// if (open) return
+			if (open.current) return
 
 			setVisible(event.clientY < 200)
 		}
@@ -36,7 +39,7 @@ const Header: FC<{ roomId: string }> = ({ roomId }) => {
 				<p className="text-gray-700 dark:text-gray-300">{roomId}</p>
 			</div>
 			<button
-				// onClick={() => setOpen(true)}
+				onClick={() => setOpen(true)}
 				className="bg-white dark:bg-black/70 border border-transparent dark:border-white/20 p-3 rounded-lg shadow dark:shadow-none"
 			>
 				<CommandIcon className="w-4 h-4 dark:text-gray-400" />

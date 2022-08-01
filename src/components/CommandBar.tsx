@@ -8,9 +8,9 @@ import useShortcuts from '@/hooks/useShortcuts'
 import { classNames, normalizeKey } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronRightIcon } from '@heroicons/react/solid'
-import { useCommandBar } from '@/context/CommandBarContext'
 import useAuthCommands from '@/hooks/command-bar/useAuthCommands'
 import useThemeCommands from '@/hooks/command-bar/useThemeCommands'
+import useCommandBar, { CommandBarStore, shallow } from '@/store/command-bar'
 
 const resolveName = (action: Action, query: string): string => {
 	return typeof action.name === 'string' ? action.name : action.name(query)
@@ -24,10 +24,12 @@ const getParents = (actions: Array<Action | string>, commands: Action[]): Record
 	)
 }
 
+const getParams = (store: CommandBarStore) => ({ open: store.open, setOpen: store.setOpen, commands: store.commands })
+
 const CommandBar: FC<{}> = () => {
 	const [query, setQuery] = useState('')
 	const [menu, setMenu] = useState(null)
-	const { open, setOpen, commands } = useCommandBar()
+	const { open, setOpen, commands } = useCommandBar(getParams, shallow)
 
 	useAuthCommands()
 	useThemeCommands()
@@ -80,7 +82,7 @@ const CommandBar: FC<{}> = () => {
 		'$mod+KeyK': event => {
 			event.preventDefault()
 
-			setOpen(open => !open)
+			setOpen(!open)
 		},
 		...Object.fromEntries(
 			commands.map(command => [
@@ -131,19 +133,13 @@ const CommandBar: FC<{}> = () => {
 							exit={{
 								opacity: 0,
 								scale: 0.75,
-								transition: {
-									ease: 'easeIn',
-									duration: 0.1,
-								},
+								transition: { ease: 'easeIn', duration: 0.1 },
 							}}
 							initial={{ opacity: 0, scale: 0.75 }}
 							animate={{
 								opacity: 1,
 								scale: 1,
-								transition: {
-									ease: 'easeOut',
-									duration: 0.1,
-								},
+								transition: { ease: 'easeOut', duration: 0.1 },
 							}}
 							className="flex-1 mx-auto max-w-2xl transform overflow-hidden rounded-xl bg-white/30 dark:bg-gray-900/60 shadow-2xl ring-1 ring-black ring-opacity-5 backdrop-filter backdrop-blur-2xl backdrop-saturate-150"
 						>

@@ -1,4 +1,5 @@
 import { Point } from '@/types/canvas'
+import useCamera from '../store/camera'
 import { CardCollection } from '@/types/cards'
 import { DEFAULT_ROOM_CONTENT } from './consts'
 import { createClient } from '@liveblocks/client'
@@ -41,6 +42,13 @@ export const LiveProvider: FC<PropsWithChildren<{ roomId: string; onAuthFailure?
 	onAuthFailure,
 }) => {
 	const [state, setState] = useState<ConnectionState>(null)
+
+	useEffect(() => {
+		if (!roomId) return
+
+		useCamera.persist.setOptions({ name: `camera-${roomId}` })
+		useCamera.persist.rehydrate()
+	}, [roomId])
 
 	useEffect(() => {
 		if (state != 'unavailable') return
