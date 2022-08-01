@@ -1,14 +1,14 @@
 import { randomId } from '@/lib/utils'
 import { useMap } from '@/lib/liveblocks'
+import { useRefCamera } from '@/lib/store'
 import { useCallback, useEffect } from 'react'
 import { LiveObject } from '@liveblocks/client'
 import { eventAlreadyHandled } from '@/lib/canvas'
-import { useCamera } from '@/context/CanvasContext'
 import { cardFromDrag, getTextCards } from '@/lib/cards'
 
 const useCreateOnDrop = () => {
 	const items = useMap('items')
-	const { camera } = useCamera()
+	const camera = useRefCamera()
 
 	const onDrop = useCallback(
 		(event: DragEvent) => {
@@ -17,7 +17,7 @@ const useCreateOnDrop = () => {
 
 			const cards = cardFromDrag(
 				event,
-				camera,
+				camera.current,
 				getTextCards(items).map(({ attributes: { title } }) => title)
 			)
 

@@ -1,14 +1,14 @@
 import { randomId } from '@/lib/utils'
 import { useMap } from '@/lib/liveblocks'
+import { useRefCamera } from '@/lib/store'
 import { useCallback, useEffect } from 'react'
 import { LiveObject } from '@liveblocks/client'
 import { eventAlreadyHandled } from '@/lib/canvas'
-import { useCamera } from '@/context/CanvasContext'
 import { cardFromPaste, getTextCards } from '@/lib/cards'
 
 const useCreateOnPaste = () => {
 	const items = useMap('items')
-	const { camera } = useCamera()
+	const camera = useRefCamera()
 
 	const onPaste = useCallback(
 		(event: ClipboardEvent) => {
@@ -19,7 +19,7 @@ const useCreateOnPaste = () => {
 				new LiveObject(
 					cardFromPaste(
 						event,
-						camera,
+						camera.current,
 						getTextCards(items).map(({ attributes: { title } }) => title)
 					)
 				)

@@ -8,11 +8,11 @@ import { useHistory } from '@/lib/liveblocks'
 import { useGesture } from '@use-gesture/react'
 import { LiveObject } from '@liveblocks/client'
 import { XIcon } from '@heroicons/react/outline'
-import { useCamera } from '@/context/CanvasContext'
 import URLCard, { urlCardOptions } from './Cards/URLCard'
 import { Card, CardOptions, CardType } from '@/types/cards'
 import TextCard, { textCardOptions } from './Cards/TextCard'
 import TweetCard, { tweetCardOptions } from './Cards/TweetCard'
+import useStore, { shallow, Store, useRefCamera } from '@/lib/store'
 import { addPoint, eventAlreadyHandled, isOnScreen, subPoint, zoomOn } from '@/lib/canvas'
 import { useCallback, useState, memo, MutableRefObject, FC, useRef, ReactNode } from 'react'
 
@@ -28,21 +28,23 @@ const CardOptions: Record<CardType, CardOptions> = {
 	[CardType.TWEET]: tweetCardOptions,
 }
 
+const getParams = (store: Store) => ({ zoomOn: store.zoomOnPoint, setTransition: store.setTransitioning })
+
 const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unknown }> = ({ id, item, onDelete }) => {
 	const history = useHistory()
+	const camera = useRefCamera()
 	const [scale, setScale] = useState(1)
 	const { point, size, type } = useItem(item)
 	const containerRef = useRef<HTMLDivElement>(null)
-	const { camera, setCamera, withTransition } = useCamera()
+	const { zoomOn, setTransition } = useStore(getParams, shallow)
 	const dragData = useRef<{ start: Point; origin: Point; pointerId: number }>(null)
 
 	const navigateTo = useCallback(() => {
 		const rect = containerRef.current.getBoundingClientRect()
 
-		withTransition(() => {
-			setCamera(camera => zoomOn(camera, item.get('point'), { width: rect.width, height: rect.height }))
-		})
-	}, [item, setCamera, withTransition])
+		setTransition(true)
+		zoomOn(item.get('point'), { width: rect.width, height: rect.height })
+	}, [item, zoomOn, setTransition])
 
 	useGesture(
 		{
@@ -59,7 +61,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 
 				dragData.current = {
 					start: item.get('point'),
-					origin: { x: event.clientX / camera.z, y: event.clientY / camera.z },
+					origin: { x: event.clientX / camera.current.z, y: event.clientY / camera.current.z },
 					pointerId: event.pointerId,
 				}
 			},
@@ -67,7 +69,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 				if (!dragData.current) return
 
 				const delta = subPoint(
-					{ x: event.clientX / camera.z, y: event.clientY / camera.z },
+					{ x: event.clientX / camera.current.z, y: event.clientY / camera.current.z },
 					dragData.current.origin
 				)
 
@@ -113,7 +115,7 @@ const CanvasItem: FC<{ id: string; item: LiveObject<Card>; onDelete: () => unkno
 				ref={containerRef}
 				animate={{ scale }}
 				className={classNames(
-					isOnScreen(camera, point, size) ? '[content-visibility:auto]' : '[content-visibility:hidden]',
+					// isOnScreen(camera, point, size) ? '[content-visibility:auto]' : '[content-visibility:hidden]',
 					'group p-3 min-w-[300px] min-h-[150px] bg-white/50 dark:bg-gray-900/90 absolute will-change-transform cursor-grab  [contain:layout_style_paint] rounded-lg shadow-card backdrop-blur backdrop-filter'
 				)}
 				style={{ scale, x: point.x, y: point.y, width: size.width, height: size.height }}
@@ -130,7 +132,7 @@ const ResizeButton: FC<{
 	containerRef: MutableRefObject<HTMLDivElement>
 }> = memo(({ item, containerRef }) => {
 	const history = useHistory()
-	const { camera } = useCamera()
+	const camera = useRefCamera()
 	const resizeData = useRef<{ start: Point; origin: Point }>(null)
 
 	const listeners = useGesture(
@@ -144,7 +146,7 @@ const ResizeButton: FC<{
 						x: parseInt(getComputedStyle(containerRef.current).width, 10),
 						y: parseInt(getComputedStyle(containerRef.current).height, 10),
 					},
-					origin: { x: event.clientX / camera.z, y: event.clientY / camera.z },
+					origin: { x: event.clientX / camera.current.z, y: event.clientY / camera.current.z },
 				}
 			},
 			onPointerMove: ({ event }) => {
@@ -156,10 +158,14 @@ const ResizeButton: FC<{
 				item.update({
 					size: {
 						width: options.resizeAxis.x
-							? resizeData.current.start.x + event.clientX / camera.z - resizeData.current.origin.x
+							? resizeData.current.start.x +
+							  event.clientX / camera.current.z -
+							  resizeData.current.origin.x
 							: width,
 						height: options.resizeAxis.y
-							? resizeData.current.start.y + event.clientY / camera.z - resizeData.current.origin.y
+							? resizeData.current.start.y +
+							  event.clientY / camera.current.z -
+							  resizeData.current.origin.y
 							: height,
 					},
 				})

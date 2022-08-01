@@ -1,15 +1,17 @@
 import DevMode from './DevMode'
 import CanvasItem from './CanvasItem'
+import shallow from 'zustand/shallow'
+import { Camera } from '@/types/canvas'
 import { useMap } from '@/lib/liveblocks'
 import { getTextCards } from '@/lib/cards'
 import { Menu } from '@/types/right-click'
 import LoadingScreen from './LoadingScreen'
+import useStore, { Store } from '@/lib/store'
 import RightClickMenu from './RightClickMenu'
 import { createURLCard } from './Cards/URLCard'
 import { LiveObject } from '@liveblocks/client'
 import { FC, memo, useMemo, useRef } from 'react'
 import { createTextCard } from './Cards/TextCard'
-import { useCamera } from '@/context/CanvasContext'
 import MultiplayerCursors from './MultiplayerCursors'
 import { ask, classNames, randomId } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -20,10 +22,16 @@ import { DocumentAddIcon, LinkIcon } from '@heroicons/react/solid'
 import usePreventGestures from '@/hooks/canvas/usePreventGestures'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
 
+const getParams = (store: Store) => ({
+	camera: store.camera,
+	shouldTransition: store.isTransitioning,
+	setTransition: store.setTransitioning,
+})
+
 const Canvas: FC = () => {
 	const items = useMap('items')
 	const canvasRef = useRef<HTMLDivElement>()
-	const { camera, shouldTransition, onTransitionEnd } = useCamera()
+	const { camera, shouldTransition, setTransition } = useStore(getParams, shallow)
 
 	const menu = useMemo<Menu>(() => {
 		if (!items) return []
@@ -85,7 +93,7 @@ const Canvas: FC = () => {
 							shouldTransition && 'transition-transform duration-1000',
 							'absolute will-change-transform'
 						)}
-						onTransitionEnd={onTransitionEnd}
+						onTransitionEnd={() => setTransition(false)}
 						style={{ scale: camera.z, x: camera.x, y: camera.y }}
 					>
 						<div className="pointer-events-[all]">

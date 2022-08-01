@@ -2,14 +2,13 @@ import toast from 'react-hot-toast'
 import { getTextCards } from '@/lib/cards'
 import { ask, randomId } from '@/lib/utils'
 import { useHistory } from '@/lib/liveblocks'
-import { zoomIn, zoomOut } from '@/lib/canvas'
 import { CardCollection } from '@/types/cards'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
-import { useCamera } from '@/context/CanvasContext'
 import useRegisterAction from '../useRegisterAction'
 import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
+import useStore, { shallow, Store, useRefCamera } from '@/lib/store'
 import {
 	LinkIcon,
 	ReplyIcon,
@@ -20,10 +19,17 @@ import {
 	DocumentSearchIcon,
 } from '@heroicons/react/outline'
 
+const getParams = (store: Store) => ({
+	zoomIn: store.zoomCameraIn,
+	zoomOut: store.zoomCameraOut,
+	resetCamera: store.resetCamera,
+	setTransition: store.setTransitioning,
+})
+
 const useCanvasCommands = (items: CardCollection | null) => {
 	const history = useHistory()
-	const { camera } = useCamera()
-	const { setCamera, withTransition } = useCamera()
+	const camera = useRefCamera()
+	const { zoomIn, zoomOut, resetCamera, setTransition } = useStore(getParams, shallow)
 
 	useRegisterAction(
 		{
@@ -73,7 +79,7 @@ const useCanvasCommands = (items: CardCollection | null) => {
 					items.set(
 						randomId(),
 						new LiveObject(
-							createTextCard(camera, {
+							createTextCard(camera.current, {
 								names: getTextCards(items).map(({ attributes: { title } }) => title),
 							})
 						)
@@ -91,7 +97,7 @@ const useCanvasCommands = (items: CardCollection | null) => {
 
 					items.set(
 						randomId(),
-						new LiveObject(createURLCard(camera, { url: await ask('What URL should we add?') }))
+						new LiveObject(createURLCard(camera.current, { url: await ask('What URL should we add?') }))
 					)
 				},
 			},
@@ -103,20 +109,20 @@ const useCanvasCommands = (items: CardCollection | null) => {
 			{
 				id: 'zoom-in',
 				name: 'Zoom In',
-				icon: <ZoomInIcon />,
-				section: Sections.Canvas,
+				perform: zoomIn,
 				shortcut: 'Equal',
+				icon: <ZoomInIcon />,
 				keywords: ['bigger'],
-				perform: () => setCamera(zoomIn),
+				section: Sections.Canvas,
 			},
 			{
 				id: 'zoom-out',
 				name: 'Zoom Out',
-				icon: <ZoomOutIcon />,
-				section: Sections.Canvas,
+				perform: zoomOut,
 				shortcut: 'Minus',
+				icon: <ZoomOutIcon />,
 				keywords: ['smaller'],
-				perform: () => setCamera(zoomOut),
+				section: Sections.Canvas,
 			},
 		],
 		[camera]
@@ -128,7 +134,8 @@ const useCanvasCommands = (items: CardCollection | null) => {
 		section: Sections.Canvas,
 		keywords: ['reset'],
 		perform: () => {
-			withTransition(() => setCamera({ x: 1, y: 1, z: 1 }))
+			resetCamera()
+			setTransition(true)
 		},
 	})
 }

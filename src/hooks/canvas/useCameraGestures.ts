@@ -1,37 +1,47 @@
-import { RefObject } from 'react'
+import { RefObject, useCallback } from 'react'
+import useStore, { shallow } from '@/lib/store'
 import { useGesture } from '@use-gesture/react'
-import { useCamera } from '@/context/CanvasContext'
-import { eventAlreadyHandled, panCamera, zoomCamera } from '@/lib/canvas'
+import { eventAlreadyHandled } from '@/lib/canvas'
+
+const getParams = store => ({ panCamera: store.panCamera, zoomCamera: store.zoomCamera })
 
 const useCameraGestures = (canvasRef: RefObject<HTMLDivElement>) => {
-	const { setCamera } = useCamera()
+	const { panCamera, zoomCamera } = useStore(getParams, shallow)
 
-	useGesture(
-		{
-			onDrag: ({ event, delta }) => {
-				if ((event as PointerEvent)?.pointerType == 'mouse' || eventAlreadyHandled(event)) return
+	const onDrag = useCallback(
+		({ event, delta }) => {
+			if ((event as PointerEvent)?.pointerType == 'mouse' || eventAlreadyHandled(event)) return
 
-				setCamera(camera => panCamera(camera, delta[0] * -1, delta[1] * -1))
-			},
-			onWheel: ({ event, ctrlKey, metaKey }) => {
-				event.preventDefault()
-
-				const { clientX: x, clientY: y, deltaX, deltaY } = event
-				const isZoom = ctrlKey || metaKey
-
-				if (isZoom) setCamera(camera => zoomCamera(camera, { x, y }, deltaY / 100))
-				else setCamera(camera => panCamera(camera, deltaX, deltaY))
-			},
-			onPinch: ({ event, distance: [, deltaY], direction: [direction] }) => {
-				if (event.type == 'wheel') return
-				event.preventDefault()
-
-				const { x, y } = event as PointerEvent
-				setCamera(camera => zoomCamera(camera, { x, y }, (deltaY * -direction) / 100))
-			},
+			panCamera(delta[0] * -1, delta[1] * -1)
 		},
-		{ target: canvasRef }
+		[panCamera]
 	)
+
+	const onWheel = useCallback(
+		({ event, ctrlKey, metaKey }) => {
+			event.preventDefault()
+
+			const { clientX: x, clientY: y, deltaX, deltaY } = event
+			const isZoom = ctrlKey || metaKey
+
+			if (isZoom) zoomCamera({ x, y }, deltaY / 100)
+			else panCamera(deltaX, deltaY)
+		},
+		[zoomCamera, panCamera]
+	)
+
+	const onPinch = useCallback(
+		({ event, distance: [, deltaY], direction: [direction, _] }) => {
+			if (event.type == 'wheel') return
+			event.preventDefault()
+
+			const { x, y } = event as PointerEvent
+			zoomCamera({ x, y }, (deltaY * -direction) / 100)
+		},
+		[zoomCamera]
+	)
+
+	useGesture({ onDrag, onWheel, onPinch }, { target: canvasRef, eventOptions: { passive: false } })
 }
 
 export default useCameraGestures
