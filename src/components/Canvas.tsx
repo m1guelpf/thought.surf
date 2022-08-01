@@ -1,7 +1,6 @@
 import DevMode from './DevMode'
 import CanvasItem from './CanvasItem'
 import shallow from 'zustand/shallow'
-import { Camera } from '@/types/canvas'
 import { useMap } from '@/lib/liveblocks'
 import { getTextCards } from '@/lib/cards'
 import { Menu } from '@/types/right-click'

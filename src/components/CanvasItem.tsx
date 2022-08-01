@@ -13,7 +13,7 @@ import { Card, CardOptions, CardType } from '@/types/cards'
 import TextCard, { textCardOptions } from './Cards/TextCard'
 import TweetCard, { tweetCardOptions } from './Cards/TweetCard'
 import useStore, { shallow, Store, useRefCamera } from '@/lib/store'
-import { addPoint, eventAlreadyHandled, isOnScreen, subPoint, zoomOn } from '@/lib/canvas'
+import { addPoint, eventAlreadyHandled, subPoint } from '@/lib/canvas'
 import { useCallback, useState, memo, MutableRefObject, FC, useRef, ReactNode } from 'react'
 
 const CardRenderers: Record<string, (props) => ReactNode> = {

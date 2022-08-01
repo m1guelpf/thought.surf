@@ -18,7 +18,7 @@ type Storage = {
 
 type UserMeta = {}
 
-const client = createClient({
+export const client = createClient({
 	authEndpoint: async room => {
 		const response = await fetch('/api/auth', {
 			method: 'POST',
