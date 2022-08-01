@@ -13,10 +13,9 @@ import { useCamera } from '@/context/CanvasContext'
 import MultiplayerCursors from './MultiplayerCursors'
 import { ask, classNames, randomId } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
-import usePanGestures from '@/hooks/canvas/usePanGestures'
-import useZoomGestures from '@/hooks/canvas/useZoomGestures'
 import useCreateOnDrop from '@/hooks/canvas/useCreateOnDrop'
 import useCreateOnPaste from '@/hooks/canvas/useCreateOnPaste'
+import useCameraGestures from '@/hooks/canvas/useCameraGestures'
 import { DocumentAddIcon, LinkIcon } from '@heroicons/react/solid'
 import usePreventGestures from '@/hooks/canvas/usePreventGestures'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
@@ -69,8 +68,7 @@ const Canvas: FC = () => {
 	useCreateOnPaste()
 	usePreventGestures()
 	useCanvasCommands(items)
-	usePanGestures(canvasRef)
-	useZoomGestures(canvasRef)
+	useCameraGestures(canvasRef)
 
 	return (
 		<>
