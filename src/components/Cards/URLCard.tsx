@@ -163,7 +163,7 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 				<div className="min-h-0 flex-1">
 					{(() => {
 						// if response hasn't loaded yet, show placeholder
-						if (!data.url) {
+						if (!data?.url) {
 							return <Skeleton className="rounded-lg" width="100%" height="100%" />
 						}
 
