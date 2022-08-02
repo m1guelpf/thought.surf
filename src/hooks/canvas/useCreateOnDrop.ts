@@ -23,6 +23,7 @@ const useCreateOnDrop = () => {
 
 			cards.forEach(card => items.set(randomId(), new LiveObject(card)))
 		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[items]
 	)
 
