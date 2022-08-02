@@ -93,7 +93,7 @@ const Card: FC<PropsWithChildren<Props>> = ({ id, item, header, options, onDelet
 			ref={cardRef}
 			data-card-id={id}
 			style={{ x: point.x, y: point.y, width: size.width }}
-			className="group absolute will-change-transform [contain:layout_style_paint] space-y-2"
+			className="group absolute will-change-transform [contain:layout_style_paint] space-y-2 min-w-[300px]"
 		>
 			{header}
 			<RightClickMenu
