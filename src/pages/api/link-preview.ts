@@ -2,7 +2,7 @@ import mql, { MqlResponseData } from '@microlink/mql'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 const handler = async (
-	{ query: { url, screenshot, video } }: NextApiRequest,
+	{ query: { url, screenshot, video, embed } }: NextApiRequest,
 	res: NextApiResponse<MqlResponseData | ''>
 ) => {
 	res.setHeader('Cache-Control', 'max-age=86400, s-maxage=86400, stale-while-revalidate')
@@ -11,6 +11,7 @@ const handler = async (
 	try {
 		const { status, data } = await mql(url as string, {
 			video: !!video,
+			iframe: !!embed,
 			screenshot: !!screenshot,
 			apiKey: process.env.MICROLINK_KEY,
 		})

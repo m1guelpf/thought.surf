@@ -3,8 +3,8 @@
 @tailwind utilities;
 @import 'react-loading-skeleton/dist/skeleton.css';
 
-.plyr video {
-	@apply w-full h-full object-cover;
+[data-iframe-container] > iframe {
+	@apply !w-full !h-full;
 }
 
 .walletconnect-qrcode__base {

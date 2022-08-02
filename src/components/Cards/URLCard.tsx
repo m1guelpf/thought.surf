@@ -19,7 +19,7 @@ import { FC, memo, useEffect, useMemo } from 'react'
 import { motion, useAnimation } from 'framer-motion'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { CardOptions, CardType, URLCard } from '@/types/cards'
-import { ArrowUpIcon, XIcon, LinkIcon, VideoCameraIcon, GlobeAltIcon } from '@heroicons/react/solid'
+import { ArrowUpIcon, XIcon, LinkIcon, GlobeAltIcon } from '@heroicons/react/solid'
 
 export const urlCardOptions: CardOptions = {
 	resizeAxis: { x: true, y: true },
@@ -38,14 +38,18 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	} = useItem(item)
 
 	const [_url, setUrl, urlDirty] = useDirtyState(url)
-	const isVideo = useMemo<boolean>(() => REGEX.YOUTUBE_URL.test(url), [url])
 
 	useEffect(() => {
 		if (!urlDirty) setUrl(url, { isClean: true })
 	}, [setUrl, url, urlDirty])
 
 	const { data, isLoading } = useSWRImmutable<MqlResponseData>(
-		() => url && `/api/link-preview?url=${url}&screenshot=true${isVideo ? '&video=true' : ''}`
+		() => url && `/api/link-preview?url=${url}&screenshot=true&video=true&embed=true`
+	)
+
+	const hasValidEmbed = useMemo<boolean>(
+		() => !data?.video && data?.iframe && data?.iframe?.scripts?.length == 0,
+		[data?.video, data?.iframe]
 	)
 
 	const handleUrlBlur = () => {
@@ -73,14 +77,14 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	)
 
 	useEffect(() => {
-		if (!isVideo) return
+		if (!data?.video) return
 
 		controls.set({ y: isLive ? -height + 75 : 0 })
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [height])
 
 	useEffect(() => {
-		if (!isVideo) return
+		if (!data?.video) return
 
 		controls.start({ y: isLive ? -height + 75 : 0 })
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,8 +101,8 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 				)}
 			>
 				<div className="flex items-center space-x-2 flex-1 ml-2 relative">
-					{isLive && isVideo ? (
-						<VideoCameraIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
+					{isLive && data?.video ? (
+						<PlayIcon className="w-4 h-4 absolute -left-0.5 inset-y-1/4 text-gray-400 z-[1]" />
 					) : isLive ? (
 						<GlobeAltIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
 					) : (
@@ -117,17 +121,19 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 					/>
 				</div>
 				<div className="flex items-center space-x-1">
-					<button
-						onClick={() => item.update({ attributes: { url, isLive: !isLive } })}
-						className={classNames(
-							isLive
-								? 'opacity-100 bg-gray-300/60 dark:bg-gray-500/60'
-								: 'opacity-60 hover:opacity-80 bg-gray-200/60 dark:bg-gray-700/60',
-							'rounded p-1 opacity-60 transition'
-						)}
-					>
-						{isLive ? <PauseIcon className="w-4 h-4 p-0.5" /> : <PlayIcon className="w-4 h-4 p-0.5" />}
-					</button>
+					{!hasValidEmbed && (
+						<button
+							onClick={() => item.update({ attributes: { url, isLive: !isLive } })}
+							className={classNames(
+								isLive
+									? 'opacity-100 bg-gray-300/60 dark:bg-gray-500/60'
+									: 'opacity-60 hover:opacity-80 bg-gray-200/60 dark:bg-gray-700/60',
+								'rounded p-1 opacity-60 transition'
+							)}
+						>
+							{isLive ? <PauseIcon className="w-4 h-4 p-0.5" /> : <PlayIcon className="w-4 h-4 p-0.5" />}
+						</button>
+					)}
 					<a
 						href={url}
 						target="_blank"
@@ -150,31 +156,67 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 					<div className="overflow-hidden">
 						<p className="select-none">{data?.title ?? <Skeleton />}</p>
 						<p className="text-black/60 dark:text-white/40 text-sm select-none whitespace-nowrap truncate min-w-0">
-							{(isVideo ? data?.author : data?.description) ?? <Skeleton width={250} />}
+							{data?.author ?? data?.description ?? <Skeleton width={250} />}
 						</p>
 					</div>
 				</div>
 				<div className="min-h-0 flex-1">
-					{!data?.video && !data?.image && !data?.screenshot && (
-						<Skeleton className="rounded-lg" width="100%" height="100%" />
-					)}
-					{!isLive && data?.image && data?.screenshot && (
-						<img
-							alt={data?.title}
-							draggable="false"
-							src={isVideo ? data?.image?.url : data?.screenshot?.url}
-							className="h-full w-full rounded-lg block object-cover select-none pointer-events-none"
-						/>
-					)}
-					{isLive && isVideo && data?.video && <Video src={data.video.url} poster={data?.image?.url} />}
-					{isLive && !isVideo && (
-						<iframe
-							src={url}
-							title={data?.title}
-							className="h-full w-full rounded-lg block object-cover"
-							loading="lazy"
-						/>
-					)}
+					{(() => {
+						// if response hasn't loaded yet, show placeholder
+						if (!data.url) {
+							return <Skeleton className="rounded-lg" width="100%" height="100%" />
+						}
+
+						// if we're in live mode with a video, show the video
+						if (isLive && data.video) {
+							return <Video src={data.video.url} poster={data?.image?.url} />
+						}
+
+						// if we're in live mode with no video, embed the page
+						if (isLive) {
+							return (
+								<iframe
+									src={url}
+									loading="lazy"
+									title={data?.title}
+									className="h-full w-full rounded-lg block object-cover"
+								/>
+							)
+						}
+
+						// if we're not in live mode with a video, show the poster
+						if (data?.video) {
+							return (
+								<img
+									alt={data?.title}
+									draggable="false"
+									src={data?.image?.url ?? data?.screenshot?.url}
+									className="h-full w-full rounded-lg block object-cover select-none pointer-events-none"
+								/>
+							)
+						}
+
+						// if we're not in a video and have an embed, show the embed
+						if (hasValidEmbed) {
+							return (
+								<span
+									data-iframe-container
+									className="h-full w-full rounded-lg overflow-hidden block object-cover"
+									dangerouslySetInnerHTML={{ __html: data?.iframe?.html }}
+								/>
+							)
+						}
+
+						// else, show the screenshot (fallback to the image)
+						return (
+							<img
+								alt={data?.title}
+								draggable="false"
+								src={data?.screenshot?.url ?? data?.image?.url}
+								className="h-full w-full rounded-lg block object-cover select-none pointer-events-none"
+							/>
+						)
+					})()}
 				</div>
 			</div>
 		</>

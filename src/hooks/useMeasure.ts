@@ -1,6 +1,6 @@
-import { Ref, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { RefObject, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-const useMeasure = <T>(): [Ref<T>, { height: number }] => {
+const useMeasure = <T>(): [RefObject<T>, { height: number }] => {
 	const ref = useRef<T>(null)
 	const [height, setHeight] = useState<number>(0)
 
