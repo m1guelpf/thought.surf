@@ -1,4 +1,5 @@
 import useSWR from 'swr'
+import Card from '../Card'
 import Tweet from '../Tweet'
 import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
@@ -10,22 +11,15 @@ import { TweetDetails } from '@/types/twitter'
 import { Sections } from '@/types/command-bar'
 import TwitterIcon from '../Icons/TwitterIcon'
 import { LiveObject } from '@liveblocks/client'
+import { CardType, URLCard } from '@/types/cards'
 import useDirtyState from '@/hooks/useDirtyState'
 import { FC, memo, useEffect, useState } from 'react'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { ArrowUpIcon, XIcon } from '@heroicons/react/solid'
-import { CardOptions, CardType, URLCard } from '@/types/cards'
 
-export const tweetCardOptions: CardOptions = {
-	resizeAxis: { x: true, y: false },
-}
+type Props = { item: LiveObject<URLCard>; id: string; navigateTo: () => void; onDelete: () => void }
 
-const TweetCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => void; onDelete: () => void }> = ({
-	id,
-	item,
-	navigateTo,
-	onDelete,
-}) => {
+const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
 	const [isFocused, setFocused] = useState(false)
 	const [measureRef, { height }] = useMeasure<HTMLDivElement>()
 	const {
@@ -45,6 +39,7 @@ const TweetCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => v
 	}, [setUrl, url, urlDirty])
 
 	const { data, isLoading } = useSWR<TweetDetails>(`https://miguelpiedrafita.com/api/tweet-details?tweet_url=${url}`)
+
 	useRegisterAction(
 		{
 			id: `canvas-item-${id}`,
@@ -80,7 +75,7 @@ const TweetCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => v
 	if (isLoading) return null
 
 	return (
-		<>
+		<Card id={id} item={item} onDelete={onDelete} options={{ resizeAxis: { x: true, y: false } }}>
 			<div
 				onPaste={event => event.stopPropagation()}
 				className="absolute bottom-4 inset-x-4 bg-white dark:bg-gray-800 shadow py-2 px-2 rounded-lg opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-between overflow-hidden space-x-6 z-20"
@@ -127,7 +122,7 @@ const TweetCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => v
 			<div className="select-none" ref={measureRef}>
 				<Tweet tweet={data} />
 			</div>
-		</>
+		</Card>
 	)
 }
 

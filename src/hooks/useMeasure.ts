@@ -1,14 +1,17 @@
 import { RefObject, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-const useMeasure = <T>(): [RefObject<T>, { height: number }] => {
+const useMeasure = <T>(): [RefObject<T>, { width: number; height: number }] => {
 	const ref = useRef<T>(null)
+	const [width, setWidth] = useState<number>(0)
 	const [height, setHeight] = useState<number>(0)
 
 	const observer = useMemo(
 		() =>
 			new (window as any).ResizeObserver(entries => {
 				if (entries[0]) {
-					const { height } = entries[0].contentRect
+					const { height, width } = entries[0].contentRect
+
+					setWidth(width)
 					setHeight(height)
 				}
 			}),
@@ -24,7 +27,7 @@ const useMeasure = <T>(): [RefObject<T>, { height: number }] => {
 		}
 	})
 
-	return [ref, { height }]
+	return [ref, { width, height }]
 }
 
 export default useMeasure

@@ -5,7 +5,19 @@ const Video = ({ src, poster, inline = false }) => {
 	const player = useRef<ReactPlayer>(null)
 
 	const props = inline
-		? { loop: true, muted: true, playsinline: true, playing: true }
+		? {
+				loop: true,
+				muted: true,
+				playsinline: true,
+				playing: true,
+				config: {
+					file: {
+						attributes: {
+							style: { objectFit: 'cover', width: '100%', height: '100%' },
+						},
+					},
+				},
+		  }
 		: {
 				playing: true,
 				config: {
