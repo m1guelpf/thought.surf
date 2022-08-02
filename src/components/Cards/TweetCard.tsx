@@ -74,14 +74,17 @@ const TweetCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => v
 		}
 
 		setUrl(_url, { isClean: true })
-		item.update({ attributes: { url: _url } })
+		item.update({ attributes: { url: _url, isLive: false } })
 	}
 
 	if (isLoading) return null
 
 	return (
 		<>
-			<div className="absolute bottom-4 inset-x-4 bg-white dark:bg-gray-800 shadow py-2 px-2 rounded-lg opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-between overflow-hidden space-x-6 z-20">
+			<div
+				onPaste={event => event.stopPropagation()}
+				className="absolute bottom-4 inset-x-4 bg-white dark:bg-gray-800 shadow py-2 px-2 rounded-lg opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-between overflow-hidden space-x-6 z-20"
+			>
 				<div className="flex items-center space-x-2 flex-1 ml-2 relative">
 					<TwitterIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
 					<input
@@ -129,7 +132,7 @@ const TweetCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => v
 }
 
 export const createTweetCard = (camera: Camera, url: string): URLCard => ({
-	attributes: { url },
+	attributes: { url, isLive: false },
 	type: CardType.TWEET,
 	size: { width: 500, height: 500 },
 	point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),

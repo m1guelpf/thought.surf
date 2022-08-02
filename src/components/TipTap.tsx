@@ -43,7 +43,7 @@ const TipTap: FC<{
 	}, [doc])
 
 	return (
-		<div className={className}>
+		<div className={className} onPaste={event => event.stopPropagation()}>
 			<TipTapMenu renderAt={renderMenu} editor={editor} />
 			<EditorContent className={editorClassName} editor={editor} />
 		</div>

@@ -30,4 +30,5 @@ export type TextCard = Card<{
 
 export type URLCard = Card<{
 	url: string
+	isLive: boolean
 }>

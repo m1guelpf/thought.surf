@@ -26,6 +26,8 @@ export const DEFAULT_TEXT: JSONContent = {
 export const REGEX = {
 	URL: /^(?:https?:\/\/.)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*$/,
 	TWEET_URL: /twitter\.com\/\w+\/status(?:es)?\/\d+/,
+	YOUTUBE_URL:
+		/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))[a-zA-Z0-9\_-]{7,15}(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*(?:[&\/\#].*)?$/,
 }
 
 export const uriExpandBlacklist = ['giphy.com/', 'twitter.com/']

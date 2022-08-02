@@ -1,12 +1,23 @@
 import ReactPlayer from 'react-player'
 import { forwardRef, PropsWithChildren, useRef } from 'react'
 
-const Video = ({ src, poster }) => {
+const Video = ({ src, poster, inline = false }) => {
 	const player = useRef<ReactPlayer>(null)
 
-	return (
-		<ReactPlayer loop muted controls url={src} playsinline ref={player} poster={poster} playing wrapper={Wrapper} />
-	)
+	const props = inline
+		? { loop: true, muted: true, playsinline: true, playing: true }
+		: {
+				playing: true,
+				config: {
+					file: {
+						attributes: {
+							style: { objectFit: 'cover', width: '100%', height: '100%' },
+						},
+					},
+				},
+		  }
+
+	return <ReactPlayer controls url={src} {...props} ref={player} poster={poster} wrapper={Wrapper} />
 }
 
 const Wrapper = forwardRef<HTMLSpanElement, PropsWithChildren<{}>>(({ children }, ref) => (

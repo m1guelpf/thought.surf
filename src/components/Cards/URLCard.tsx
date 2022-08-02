@@ -2,8 +2,9 @@ import IconBox from '../IconBox'
 import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
 import useItem from '@/hooks/useItem'
-import { getDomain } from '@/lib/utils'
-import { FC, memo, useEffect } from 'react'
+import Video from '@/components/Video'
+import PlayIcon from '../Icons/PlayIcon'
+import PauseIcon from '../Icons/PauseIcon'
 import useSWRImmutable from 'swr/immutable'
 import { createTweetCard } from './TweetCard'
 import { screenToCanvas } from '@/lib/canvas'
@@ -13,9 +14,12 @@ import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
 import { MqlResponseData } from '@microlink/mql'
 import useDirtyState from '@/hooks/useDirtyState'
+import { classNames, getDomain } from '@/lib/utils'
+import { FC, memo, useEffect, useMemo } from 'react'
+import { motion, useAnimation } from 'framer-motion'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { CardOptions, CardType, URLCard } from '@/types/cards'
-import { ArrowUpIcon, XIcon, LinkIcon } from '@heroicons/react/solid'
+import { ArrowUpIcon, XIcon, LinkIcon, VideoCameraIcon, GlobeAltIcon } from '@heroicons/react/solid'
 
 export const urlCardOptions: CardOptions = {
 	resizeAxis: { x: true, y: true },
@@ -27,18 +31,21 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	onDelete,
 	navigateTo,
 }) => {
+	const controls = useAnimation()
 	const {
-		attributes: { url },
+		size: { height },
+		attributes: { url, isLive },
 	} = useItem(item)
 
 	const [_url, setUrl, urlDirty] = useDirtyState(url)
+	const isVideo = useMemo<boolean>(() => REGEX.YOUTUBE_URL.test(url), [url])
 
 	useEffect(() => {
 		if (!urlDirty) setUrl(url, { isClean: true })
 	}, [setUrl, url, urlDirty])
 
 	const { data, isLoading } = useSWRImmutable<MqlResponseData>(
-		() => url && `/api/link-preview?url=${url}&screenshot=true`
+		() => url && `/api/link-preview?url=${url}&screenshot=true${isVideo ? '&video=true' : ''}`
 	)
 
 	const handleUrlBlur = () => {
@@ -50,7 +57,7 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 		}
 
 		setUrl(_url, { isClean: true })
-		item.update({ attributes: { url: _url } })
+		item.update({ attributes: { url: _url, isLive } })
 	}
 
 	useRegisterAction(
@@ -65,11 +72,38 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 		[item, data?.title, data?.logo]
 	)
 
+	useEffect(() => {
+		if (!isVideo) return
+
+		controls.set({ y: isLive ? -height + 75 : 0 })
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [height])
+
+	useEffect(() => {
+		if (!isVideo) return
+
+		controls.start({ y: isLive ? -height + 75 : 0 })
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isLive])
+
 	return (
 		<>
-			<div className="absolute bottom-4 inset-x-4 bg-white dark:bg-gray-800 shadow py-2 px-2 rounded-lg opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-between overflow-hidden space-x-6">
+			<motion.div
+				onPaste={event => event.stopPropagation()}
+				animate={controls}
+				className={classNames(
+					// isLive ? 'top-2' : 'bottom-4',
+					'bottom-4 absolute inset-x-4 bg-white dark:bg-gray-800 shadow py-2 px-2 rounded-lg opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-between overflow-hidden space-x-6 z-30'
+				)}
+			>
 				<div className="flex items-center space-x-2 flex-1 ml-2 relative">
-					<LinkIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
+					{isLive && isVideo ? (
+						<VideoCameraIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
+					) : isLive ? (
+						<GlobeAltIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
+					) : (
+						<LinkIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
+					)}
 					<input
 						className="bg-transparent rounded-lg flex-1 p-1 px-2 pl-7 !-ml-2 text-gray-600 dark:text-gray-400 z-[2]"
 						type="url"
@@ -83,6 +117,17 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 					/>
 				</div>
 				<div className="flex items-center space-x-1">
+					<button
+						onClick={() => item.update({ attributes: { url, isLive: !isLive } })}
+						className={classNames(
+							isLive
+								? 'opacity-100 bg-gray-300/60 dark:bg-gray-500/60'
+								: 'opacity-60 hover:opacity-80 bg-gray-200/60 dark:bg-gray-700/60',
+							'rounded p-1 opacity-60 transition'
+						)}
+					>
+						{isLive ? <PauseIcon className="w-4 h-4 p-0.5" /> : <PlayIcon className="w-4 h-4 p-0.5" />}
+					</button>
 					<a
 						href={url}
 						target="_blank"
@@ -98,27 +143,37 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 						<XIcon className="w-4 h-4" />
 					</button>
 				</div>
-			</div>
+			</motion.div>
 			<div className="w-full h-full space-y-3 flex flex-col">
 				<div className="flex items-center space-x-3">
 					{(isLoading || data?.logo) && <IconBox src={data?.logo?.url} alt={data?.title} />}
 					<div className="overflow-hidden">
 						<p className="select-none">{data?.title ?? <Skeleton />}</p>
 						<p className="text-black/60 dark:text-white/40 text-sm select-none whitespace-nowrap truncate min-w-0">
-							{data?.description ?? <Skeleton width={250} />}
+							{(isVideo ? data?.author : data?.description) ?? <Skeleton width={250} />}
 						</p>
 					</div>
 				</div>
 				<div className="min-h-0 flex-1">
-					{data?.screenshot ? (
+					{!data?.video && !data?.image && !data?.screenshot && (
+						<Skeleton className="rounded-lg" width="100%" height="100%" />
+					)}
+					{!isLive && data?.image && data?.screenshot && (
 						<img
+							alt={data?.title}
 							draggable="false"
-							src={data?.screenshot?.url}
-							alt={data?.screenshot?.url}
+							src={isVideo ? data?.image?.url : data?.screenshot?.url}
 							className="h-full w-full rounded-lg block object-cover select-none pointer-events-none"
 						/>
-					) : (
-						<Skeleton className="rounded-lg" width="100%" height="100%" />
+					)}
+					{isLive && isVideo && data?.video && <Video src={data.video.url} poster={data?.image?.url} />}
+					{isLive && !isVideo && (
+						<iframe
+							src={url}
+							title={data?.title}
+							className="h-full w-full rounded-lg block object-cover"
+							loading="lazy"
+						/>
 					)}
 				</div>
 			</div>
@@ -132,10 +187,10 @@ export const createURLCard = (camera: Camera, { url, point }: { url: string; poi
 	if (REGEX.TWEET_URL.test(url)) return createTweetCard(camera, url)
 
 	return {
-		point: screenToCanvas(point ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
-		size: { width: 500, height: 500 },
 		type: CardType.URL,
-		attributes: { url },
+		size: { width: 500, height: 500 },
+		attributes: { url, isLive: false },
+		point: screenToCanvas(point ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
 	}
 }
 

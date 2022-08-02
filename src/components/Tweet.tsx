@@ -110,7 +110,11 @@ const Tweet: FC<{
 													key={i}
 													className="relative flex-1 object-cover h-64 pointer-events-auto"
 												>
-													<Video src={getVideoSource(media)} poster={media.media_url_https} />
+													<Video
+														inline
+														src={getVideoSource(media)}
+														poster={media.media_url_https}
+													/>
 												</div>
 											) : (
 												<TweetImage key={i} media={media} />
