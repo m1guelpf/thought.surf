@@ -5,13 +5,15 @@ import { FC, memo, RefObject, useEffect } from 'react'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, JSONContent, useEditor } from '@tiptap/react'
 
-const TipTap: FC<{
-	className?: string
-	renderMenu?: RefObject<HTMLDivElement>
-	editorClassName?: string
+type Props = {
 	doc: JSONContent
+	className?: string
+	editorClassName?: string
 	setDoc: (doc: JSONContent) => void
-}> = ({ className = '', editorClassName = '', doc, setDoc, renderMenu }) => {
+	renderMenu?: RefObject<HTMLDivElement>
+}
+
+const TipTap: FC<Props> = ({ className = '', editorClassName = '', doc, setDoc, renderMenu }) => {
 	const editor = useEditor({
 		editorProps: {
 			attributes: {

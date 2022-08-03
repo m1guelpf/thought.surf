@@ -44,6 +44,13 @@ export const cardFromDrag = (event: DragEvent, camera: Camera, names: string[]):
 	]
 }
 
+export const findCardIndex = (cards: CardCollection, id: string): number => {
+	return cards.findIndex(card => card.get('id') === id)
+}
+export const findCard = (cards: CardCollection, id: string): Card | undefined => {
+	return cards.find(card => card.get('id') === id).toObject()
+}
+
 export const getTextCards = (cards: CardCollection): TextCard[] => {
-	return [...cards.values()].map(item => item.toObject()).filter(({ type }) => type === CardType.TEXT) as TextCard[]
+	return cards.map(card => card.toObject()).filter(({ type }) => type === CardType.TEXT) as TextCard[]
 }

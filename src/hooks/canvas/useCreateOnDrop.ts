@@ -1,13 +1,13 @@
-import { randomId } from '@/lib/utils'
-import { useMap } from '@/lib/liveblocks'
 import { useRefCamera } from '@/store/camera'
 import { useCallback, useEffect } from 'react'
 import { LiveObject } from '@liveblocks/client'
 import { eventAlreadyHandled } from '@/lib/canvas'
+import { useBatch, useList } from '@/lib/liveblocks'
 import { cardFromDrag, getTextCards } from '@/lib/cards'
 
 const useCreateOnDrop = () => {
-	const items = useMap('items')
+	const batch = useBatch()
+	const cards = useList('cards')
 	const camera = useRefCamera()
 
 	const onDrop = useCallback(
@@ -15,16 +15,16 @@ const useCreateOnDrop = () => {
 			if (eventAlreadyHandled(event)) return
 			event.preventDefault()
 
-			const cards = cardFromDrag(
+			const addCards = cardFromDrag(
 				event,
 				camera.current,
-				getTextCards(items).map(({ attributes: { title } }) => title)
+				getTextCards(cards).map(({ attributes: { title } }) => title)
 			)
 
-			cards.forEach(card => items.set(randomId(), new LiveObject(card)))
+			batch(() => addCards.forEach(card => cards.insert(new LiveObject(card), 0)))
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[items]
+		[cards]
 	)
 
 	const onDragOver = event => event.preventDefault()

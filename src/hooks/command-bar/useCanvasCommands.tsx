@@ -1,6 +1,6 @@
+import { ask } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import { getTextCards } from '@/lib/cards'
-import { ask, randomId } from '@/lib/utils'
 import { useHistory } from '@/lib/liveblocks'
 import { CardCollection } from '@/types/cards'
 import { Sections } from '@/types/command-bar'
@@ -26,7 +26,7 @@ const getParams = (store: CameraStore) => ({
 	setTransition: store.setTransitioning,
 })
 
-const useCanvasCommands = (items: CardCollection | null) => {
+const useCanvasCommands = (cards: CardCollection | null) => {
 	const history = useHistory()
 	const camera = useRefCamera()
 	const { zoomIn, zoomOut, resetCamera, setTransition } = useCamera(getParams, shallow)
@@ -35,13 +35,13 @@ const useCanvasCommands = (items: CardCollection | null) => {
 		{
 			id: 'canvas',
 			name: 'Search Canvas...',
-			subtitle: `${items?.size ?? 'Loading'} items`,
+			subtitle: `${cards?.length ?? 'Loading'} cards`,
 			icon: <DocumentSearchIcon />,
 			section: Sections.Canvas,
 			shortcut: '/',
 			keywords: ['search', 'find'],
 		},
-		[items?.size]
+		[cards?.length]
 	)
 	useRegisterAction(
 		[
@@ -74,15 +74,15 @@ const useCanvasCommands = (items: CardCollection | null) => {
 				icon: <DocumentAddIcon />,
 				section: Sections.Canvas,
 				perform: () => {
-					if (!items) throw toast.error('Canvas not loaded yet')
+					if (!cards) throw toast.error('Canvas not loaded yet')
 
-					items.set(
-						randomId(),
+					cards.insert(
 						new LiveObject(
 							createTextCard(camera.current, {
-								names: getTextCards(items).map(({ attributes: { title } }) => title),
+								names: getTextCards(cards).map(({ attributes: { title } }) => title),
 							})
-						)
+						),
+						0
 					)
 				},
 			},
@@ -93,16 +93,16 @@ const useCanvasCommands = (items: CardCollection | null) => {
 				section: Sections.Canvas,
 				keywords: ['link', 'bookmark'],
 				perform: async () => {
-					if (!items) throw toast.error('Canvas not loaded yet')
+					if (!cards) throw toast.error('Canvas not loaded yet')
 
-					items.set(
-						randomId(),
-						new LiveObject(createURLCard(camera.current, { url: await ask('What URL should we add?') }))
+					cards.insert(
+						new LiveObject(createURLCard(camera.current, { url: await ask('What URL should we add?') })),
+						0
 					)
 				},
 			},
 		],
-		[items, camera]
+		[cards, camera]
 	)
 	useRegisterAction(
 		[

@@ -1,10 +1,10 @@
-import useSWR from 'swr'
 import TweetLoader from './TweetLoader'
+import useSWRImmutable from 'swr/immutable'
 import { MqlResponseData } from '@microlink/mql'
 import { uriExpandBlacklist } from '@/lib/consts'
 
 const OpenGraph = ({ url, children }) => {
-	const { data, error, isLoading } = useSWR<MqlResponseData>(
+	const { data, error, isLoading } = useSWRImmutable<MqlResponseData>(
 		() => url && !uriExpandBlacklist.some(pathname => url.includes(pathname)) && `/api/link-preview?url=${url}`
 	)
 

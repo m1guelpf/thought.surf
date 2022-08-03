@@ -10,11 +10,11 @@ type ConnectionState = 'closed' | 'authenticating' | 'unavailable' | 'failed' | 
 
 type Presence = {
 	cursor: Point | null
-	selectedItem: string | null
+	selectedCard: string | null
 }
 
 type Storage = {
-	items: CardCollection
+	cards: CardCollection
 }
 
 type UserMeta = {}
@@ -33,7 +33,7 @@ export const client = createClient({
 	},
 })
 
-export const { RoomProvider, useOthers, useUpdateMyPresence, useMap, useHistory, useRoom, useBatch } =
+export const { RoomProvider, useOthers, useUpdateMyPresence, useList, useHistory, useRoom, useBatch } =
 	createRoomContext<Presence, Storage, UserMeta>(client)
 
 export const LiveProvider: FC<PropsWithChildren<{ roomId: string; onAuthFailure?: () => void }>> = ({
@@ -57,7 +57,7 @@ export const LiveProvider: FC<PropsWithChildren<{ roomId: string; onAuthFailure?
 	}, [state, onAuthFailure])
 
 	return (
-		<RoomProvider id={roomId} initialStorage={{ items: DEFAULT_ROOM_CONTENT }}>
+		<RoomProvider id={roomId} initialStorage={{ cards: DEFAULT_ROOM_CONTENT }}>
 			<RoomStateWatcher state={state} setState={setState} />
 			{children}
 		</RoomProvider>

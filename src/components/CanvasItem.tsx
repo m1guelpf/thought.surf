@@ -1,4 +1,4 @@
-import useItem from '@/hooks/useItem'
+import useCard from '@/hooks/useCard'
 import URLCard from './Cards/URLCard'
 import TextCard from './Cards/TextCard'
 import TweetCard from './Cards/TweetCard'
@@ -9,7 +9,7 @@ import useCamera, { shallow, CameraStore } from '@/store/camera'
 
 const CardRenderers: Record<
 	string,
-	FC<{ id: string; item: LiveObject<Card>; navigateTo: () => void; onDelete: () => void }>
+	FC<{ id: string; card: LiveObject<Card>; navigateTo: () => void; onDelete: () => void; onReorder: () => void }>
 > = {
 	[CardType.URL]: URLCard,
 	[CardType.TEXT]: TextCard,
@@ -18,26 +18,30 @@ const CardRenderers: Record<
 
 const getParams = (store: CameraStore) => ({ zoomOn: store.zoomOnPoint, setTransition: store.setTransitioning })
 
-const CanvasItem: FC<{ id: string; item: LiveObject<Card>; removeCard: (id: string) => unknown }> = ({
-	id,
-	item,
-	removeCard,
-}) => {
-	const { type } = useItem(item)
+type Props = {
+	id: string
+	card: LiveObject<Card>
+	reorderCard: (id: string) => void
+	removeCard: (id: string) => unknown
+}
+
+const CanvasItem: FC<Props> = ({ id, card, reorderCard, removeCard }) => {
+	const { type } = useCard(card)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const { zoomOn, setTransition } = useCamera(getParams, shallow)
 	const onDelete = useCallback(() => removeCard(id), [id, removeCard])
+	const onReorder = useCallback(() => reorderCard(id), [id, reorderCard])
 
 	const navigateTo = useCallback(() => {
 		const rect = containerRef.current.getBoundingClientRect()
 
 		setTransition(true)
-		zoomOn(item.get('point'), { width: rect.width, height: rect.height })
-	}, [item, zoomOn, setTransition])
+		zoomOn(card.get('point'), { width: rect.width, height: rect.height })
+	}, [card, zoomOn, setTransition])
 
 	const RenderCard = useMemo(() => CardRenderers[type], [type])
 
-	return <RenderCard id={id} item={item} navigateTo={navigateTo} onDelete={onDelete} />
+	return <RenderCard id={id} card={card} navigateTo={navigateTo} onDelete={onDelete} onReorder={onReorder} />
 }
 
 export default memo(CanvasItem)

@@ -8,10 +8,10 @@ import { useGesture } from '@use-gesture/react'
 import { FC, memo, MutableRefObject, useRef } from 'react'
 
 const ResizeButton: FC<{
-	item: LiveObject<Card>
+	card: LiveObject<Card>
 	resizeAxis: { x: boolean; y: boolean }
 	containerRef: MutableRefObject<HTMLDivElement>
-}> = ({ item, containerRef, resizeAxis }) => {
+}> = ({ card, containerRef, resizeAxis }) => {
 	const history = useHistory()
 	const camera = useRefCamera()
 	const resizeData = useRef<{ start: Point; origin: Point }>(null)
@@ -33,7 +33,7 @@ const ResizeButton: FC<{
 			onPointerMove: ({ event }) => {
 				if (!resizeData.current) return
 
-				let { width, height } = item.get('size')
+				let { width, height } = card.get('size')
 
 				if (resizeAxis.x) {
 					width = resizeData.current.start.x + event.clientX / camera.current.z - resizeData.current.origin.x
@@ -43,7 +43,7 @@ const ResizeButton: FC<{
 					height = resizeData.current.start.y + event.clientY / camera.current.z - resizeData.current.origin.y
 				}
 
-				item.update({ size: { width, height } })
+				card.update({ size: { width, height } })
 			},
 			onPointerUp: ({ event }) => {
 				if (!resizeData.current) return

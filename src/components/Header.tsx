@@ -24,7 +24,7 @@ const Header: FC<{ roomId: string }> = ({ roomId }) => {
 		return () => {
 			document.removeEventListener('mousemove', onMouseMove)
 		}
-	})
+	}, [])
 
 	return (
 		<header

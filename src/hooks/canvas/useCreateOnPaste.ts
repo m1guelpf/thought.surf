@@ -1,31 +1,28 @@
-import { randomId } from '@/lib/utils'
-import { useMap } from '@/lib/liveblocks'
+import { useList } from '@/lib/liveblocks'
 import { useRefCamera } from '@/store/camera'
 import { useCallback, useEffect } from 'react'
 import { LiveObject } from '@liveblocks/client'
-import { eventAlreadyHandled } from '@/lib/canvas'
 import { cardFromPaste, getTextCards } from '@/lib/cards'
 
 const useCreateOnPaste = () => {
-	const items = useMap('items')
+	const cards = useList('cards')
 	const camera = useRefCamera()
 
 	const onPaste = useCallback(
 		(event: ClipboardEvent) => {
-			console.log(event.composedPath())
-			items.set(
-				randomId(),
+			cards.insert(
 				new LiveObject(
 					cardFromPaste(
 						event,
 						camera.current,
-						getTextCards(items).map(({ attributes: { title } }) => title)
+						getTextCards(cards).map(({ attributes: { title } }) => title)
 					)
-				)
+				),
+				0
 			)
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[items]
+		[cards]
 	)
 
 	useEffect(() => {

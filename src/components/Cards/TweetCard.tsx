@@ -1,15 +1,14 @@
-import useSWR from 'swr'
 import Card from '../Card'
 import Tweet from '../Tweet'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
 import PinButton from '../PinButton'
-import useItem from '@/hooks/useItem'
+import useCard from '@/hooks/useCard'
 import { motion } from 'framer-motion'
 import { Camera } from '@/types/canvas'
-import { classNames } from '@/lib/utils'
 import { clearURL } from '@/lib/twitter'
+import useSWRImmutable from 'swr/immutable'
 import useMeasure from '@/hooks/useMeasure'
 import { screenToCanvas } from '@/lib/canvas'
 import Skeleton from 'react-loading-skeleton'
@@ -20,25 +19,32 @@ import { LiveObject } from '@liveblocks/client'
 import AutosizeInput from 'react-input-autosize'
 import { CardType, URLCard } from '@/types/cards'
 import useDirtyState from '@/hooks/useDirtyState'
+import { classNames, randomId } from '@/lib/utils'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { ArrowUpIcon, XIcon } from '@heroicons/react/solid'
-import { FC, memo, useCallback, useEffect, useState } from 'react'
+import { FC, memo, useCallback, useEffect, useMemo, useState } from 'react'
 
-type Props = { item: LiveObject<URLCard>; id: string; navigateTo: () => void; onDelete: () => void }
+type Props = {
+	id: string
+	onDelete: () => void
+	onReorder: () => void
+	navigateTo: () => void
+	card: LiveObject<URLCard>
+}
 
-const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
-	const [isFocused, setFocused] = useState(false)
+const cardOptions = { resizeAxis: { x: true, y: false } }
+
+const TweetCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder }) => {
 	const [measureRef, { height }] = useMeasure<HTMLDivElement>()
 	const {
-		headerPinned,
 		attributes: { url },
-	} = useItem(item)
+	} = useCard(card)
 
 	useEffect(() => {
-		const { width } = item.get('size')
+		const { width } = card.get('size')
 
-		item.set('size', { width, height: height + 20 })
-	}, [item, height])
+		card.set('size', { width, height: height + 20 })
+	}, [card, height])
 
 	const [_url, setUrl, urlDirty] = useDirtyState(url)
 
@@ -46,7 +52,7 @@ const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
 		if (!urlDirty) setUrl(url, { isClean: true })
 	}, [setUrl, url, urlDirty])
 
-	const { data, isLoading } = useSWR<TweetDetails>(`https://miguelpiedrafita.com/api/tweet-details?tweet_url=${url}`)
+	const { data } = useSWRImmutable<TweetDetails>(`https://miguelpiedrafita.com/api/tweet-details?tweet_url=${url}`)
 
 	useRegisterAction(
 		{
@@ -59,8 +65,41 @@ const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
 			section: Sections.Canvas,
 			perform: navigateTo,
 		},
-		[item, data?.user?.name, data?.user?.screen_name, data?.full_text]
+		[card, data?.user?.name, data?.user?.screen_name, data?.full_text]
 	)
+
+	const Header = useMemo(() => <CardHeader card={card} onDelete={onDelete} />, [card, onDelete])
+
+	return (
+		<Card id={id} card={card} onDelete={onDelete} onReorder={onReorder} options={cardOptions} header={Header}>
+			<div className="select-none" ref={measureRef}>
+				<Tweet tweet={data} isCard />
+			</div>
+		</Card>
+	)
+}
+
+type CardHeaderProps = {
+	card: LiveObject<URLCard>
+	onDelete: () => void
+}
+
+const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete }) => {
+	const {
+		headerPinned,
+		attributes: { url },
+	} = useCard(card)
+
+	const { data, isLoading } = useSWRImmutable<TweetDetails>(
+		`https://miguelpiedrafita.com/api/tweet-details?tweet_url=${url}`
+	)
+
+	const [isFocused, setFocused] = useState(false)
+	const [_url, setUrl, urlDirty] = useDirtyState(url)
+
+	useEffect(() => {
+		if (!urlDirty) setUrl(url, { isClean: true })
+	}, [setUrl, url, urlDirty])
 
 	const handleUrlBlur = () => {
 		setFocused(false)
@@ -77,111 +116,96 @@ const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
 		}
 
 		setUrl(_url, { isClean: true })
-		item.update({ attributes: { url: _url, isLive: false } })
+		card.update({ attributes: { url: _url, isLive: false } })
 	}
 
-	const updatePinned = useCallback(pinned => item.set('headerPinned', pinned), [item])
+	const updatePinned = useCallback(pinned => card.set('headerPinned', pinned), [card])
 
 	return (
-		<Card
-			id={id}
-			item={item}
-			onDelete={onDelete}
-			options={{ resizeAxis: { x: true, y: false } }}
-			header={
-				<div
-					className={classNames(
-						!headerPinned &&
-							'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
-						'flex items-center justify-between bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2'
-					)}
-				>
-					<motion.div
-						animate="pinHidden"
-						whileHover="pinVisible"
-						className="flex items-center space-x-3 flex-shrink min-w-0 px-6 -mx-6"
-					>
-						<PinButton
-							isPinned={headerPinned}
-							onChange={updatePinned}
-							baseVariant="pinHidden"
-							hoverVariant="pinVisible"
-						/>
-						{isLoading && <Skeleton className="z-[2]" width={32} height={32} circle />}
-						{data?.user?.profile_image_url_https && (
-							<img
-								draggable={false}
-								className="w-8 h-8 rounded-full z-[2]"
-								src={data?.user?.profile_image_url_https}
-								alt={data?.user?.name}
-							/>
-						)}
-						<div className="overflow-hidden z-[2]">
-							<p className="select-none whitespace-nowrap">
-								{data?.user?.name ?? (data?.user?.screen_name && `@${data?.user?.screen_name}`) ?? (
-									<Skeleton />
-								)}
-							</p>
-							<p className="text-black/40 dark:text-white/40 text-xs select-none whitespace-nowrap min-w-0">
-								<AutosizeInput
-									value={
-										isFocused
-											? _url
-											: isLoading
-											? _url
-											: `@${data?.user?.screen_name} • ${format(
-													new Date(data?.created_at),
-													'hh:mm a'
-											  )}`
-									}
-									onBlur={handleUrlBlur}
-									onFocus={() => setFocused(true)}
-									onChange={e => setUrl(clearURL(e.target.value.trim()))}
-									inputClassName="py-0.5 px-1 rounded-lg bg-transparent focus:bg-gray-200/50 focus:dark:bg-gray-800 focus:outline-none transition "
-									onKeyDown={e => {
-										if (e.key !== 'Enter') return
-										;(e.target as HTMLInputElement).blur()
-									}}
-								/>
-							</p>
-						</div>
-					</motion.div>
-					<div
-						className={classNames(
-							headerPinned &&
-								'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
-							'flex items-center space-x-1 flex-shrink-0'
-						)}
-					>
-						<a
-							href={url}
-							target="_blank"
-							className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
-							rel="noreferrer"
-						>
-							<ArrowUpIcon className="w-4 h-4 transform rotate-45" />
-						</a>
-						<button
-							onClick={onDelete}
-							className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
-						>
-							<XIcon className="w-4 h-4" />
-						</button>
-					</div>
-				</div>
-			}
+		<div
+			className={classNames(
+				!headerPinned &&
+					'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
+				'flex items-center justify-between bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2'
+			)}
 		>
-			<div className="select-none" ref={measureRef}>
-				<Tweet tweet={data} isCard />
+			<motion.div
+				animate="pinHidden"
+				whileHover="pinVisible"
+				className="flex items-center space-x-3 flex-shrink min-w-0 px-6 -mx-6"
+			>
+				<PinButton
+					isPinned={headerPinned}
+					onChange={updatePinned}
+					baseVariant="pinHidden"
+					hoverVariant="pinVisible"
+				/>
+				{isLoading && <Skeleton className="z-[2]" width={32} height={32} circle />}
+				{data?.user?.profile_image_url_https && (
+					<img
+						draggable={false}
+						className="w-8 h-8 rounded-full z-[2]"
+						src={data?.user?.profile_image_url_https}
+						alt={data?.user?.name}
+					/>
+				)}
+				<div className="overflow-hidden z-[2]">
+					<p className="select-none whitespace-nowrap">
+						{data?.user?.name ?? (data?.user?.screen_name && `@${data?.user?.screen_name}`) ?? <Skeleton />}
+					</p>
+					<p className="text-black/40 dark:text-white/40 text-xs select-none whitespace-nowrap min-w-0">
+						<AutosizeInput
+							value={
+								isFocused
+									? _url
+									: isLoading
+									? _url
+									: `@${data?.user?.screen_name} • ${format(new Date(data?.created_at), 'hh:mm a')}`
+							}
+							onBlur={handleUrlBlur}
+							onFocus={() => setFocused(true)}
+							onChange={e => setUrl(clearURL(e.target.value.trim()))}
+							inputClassName="py-0.5 px-1 rounded-lg bg-transparent focus:bg-gray-200/50 focus:dark:bg-gray-800 focus:outline-none transition "
+							onKeyDown={e => {
+								if (e.key !== 'Enter') return
+								;(e.target as HTMLInputElement).blur()
+							}}
+						/>
+					</p>
+				</div>
+			</motion.div>
+			<div
+				className={classNames(
+					headerPinned &&
+						'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
+					'flex items-center space-x-1 flex-shrink-0'
+				)}
+			>
+				<a
+					href={url}
+					target="_blank"
+					className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
+					rel="noreferrer"
+				>
+					<ArrowUpIcon className="w-4 h-4 transform rotate-45" />
+				</a>
+				<button
+					onClick={onDelete}
+					className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
+				>
+					<XIcon className="w-4 h-4" />
+				</button>
 			</div>
-		</Card>
+		</div>
 	)
-}
+})
+CardHeader.displayName = 'CardHeader'
 
 export const createTweetCard = (camera: Camera, url: string): URLCard => ({
-	attributes: { url: clearURL(url), isLive: false },
+	id: randomId(),
 	type: CardType.TWEET,
 	size: { width: 500, height: 500 },
+	attributes: { url: clearURL(url), isLive: false },
 	point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),
 })
 

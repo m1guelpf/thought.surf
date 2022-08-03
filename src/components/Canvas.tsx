@@ -2,18 +2,18 @@ import DevMode from './DevMode'
 import CanvasItem from './CanvasItem'
 import shallow from 'zustand/shallow'
 import { isOnScreen } from '@/lib/canvas'
-import { useMap } from '@/lib/liveblocks'
-import { getTextCards } from '@/lib/cards'
+import { useList } from '@/lib/liveblocks'
 import { Menu } from '@/types/right-click'
 import LoadingScreen from './LoadingScreen'
+import { ask, classNames } from '@/lib/utils'
 import RightClickMenu from './RightClickMenu'
 import { createURLCard } from './Cards/URLCard'
 import { LiveObject } from '@liveblocks/client'
 import { createTextCard } from './Cards/TextCard'
 import MultiplayerCursors from './MultiplayerCursors'
-import { ask, classNames, randomId } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import useCamera, { CameraStore } from '@/store/camera'
+import { findCardIndex, getTextCards } from '@/lib/cards'
 import useCreateOnDrop from '@/hooks/canvas/useCreateOnDrop'
 import useCreateOnPaste from '@/hooks/canvas/useCreateOnPaste'
 import useCameraGestures from '@/hooks/canvas/useCameraGestures'
@@ -29,12 +29,12 @@ const getParams = (store: CameraStore) => ({
 })
 
 const Canvas: FC = () => {
-	const items = useMap('items')
+	const cards = useList('cards')
 	const canvasRef = useRef<HTMLDivElement>()
 	const { camera, shouldTransition, setTransition } = useCamera(getParams, shallow)
 
 	const menu = useMemo<Menu>(() => {
-		if (!items) return []
+		if (!cards) return []
 
 		return [
 			{
@@ -44,14 +44,14 @@ const Canvas: FC = () => {
 						label: 'Note',
 						icon: <DocumentAddIcon className="w-3.5 h-3.5" />,
 						action: (_, point) => {
-							items.set(
-								randomId(),
+							cards.insert(
 								new LiveObject(
 									createTextCard(camera, {
 										point,
-										names: getTextCards(items).map(({ attributes: { title } }) => title),
+										names: getTextCards(cards).map(({ attributes: { title } }) => title),
 									})
-								)
+								),
+								0
 							)
 						},
 					},
@@ -59,42 +59,52 @@ const Canvas: FC = () => {
 						label: 'Link',
 						icon: <LinkIcon className="w-3.5 h-3.5" />,
 						action: async (_, point) => {
-							items.set(
-								randomId(),
+							cards.insert(
 								new LiveObject(
 									createURLCard(camera, { url: await ask('What URL should we add?'), point })
-								)
+								),
+								0
 							)
 						},
 					},
 				],
 			},
 		]
-	}, [items, camera])
+	}, [cards, camera])
 
 	useCreateOnDrop()
 	useCreateOnPaste()
 	usePreventGestures()
-	useCanvasCommands(items)
+	useCanvasCommands(cards)
 	useCameraGestures(canvasRef)
 
-	const removeCard = useCallback(cardId => items.delete(cardId), [items])
+	const removeCard = useCallback(cardId => cards.delete(findCardIndex(cards, cardId)), [cards])
+	const reorderCard = useCallback(
+		cardId => {
+			const cardIndex = findCardIndex(cards, cardId)
+			if (cardIndex == 0) return
+
+			cards.move(cardIndex, 0)
+		},
+		[cards]
+	)
 
 	useEffect(() => {
-		if (!items) return
+		if (!cards) return
 
-		Array.from(items).forEach(([itemId, item]) => {
-			const onScreen = isOnScreen(camera, item.get('point'), item.get('size'))
-			const el = document.querySelector<HTMLDivElement>(`[data-card-id="${itemId}"]`)
+		cards.forEach(card => {
+			const { id, point, size } = card.toObject()
+			const onScreen = isOnScreen(camera, point, size)
+			const el = document.querySelector<HTMLDivElement>(`[data-card-id="${id}"]`)
+
 			if (!el) return
-
 			el.style.contentVisibility = onScreen ? null : 'hidden'
 		})
-	}, [items, camera])
+	}, [cards, camera])
 
 	return (
 		<>
-			<LoadingScreen loading={!items} />
+			<LoadingScreen loading={!cards} />
 			<RightClickMenu menu={menu}>
 				<main ref={canvasRef} className="fixed w-full h-full inset-0 touch-none [contain:strict] z-0">
 					<DevMode />
@@ -112,9 +122,17 @@ const Canvas: FC = () => {
 					>
 						<div className="pointer-events-[all]">
 							<AnimatePresence>
-								{items &&
-									Array.from(items, ([itemId, item]) => (
-										<CanvasItem key={itemId} id={itemId} item={item} removeCard={removeCard} />
+								{cards
+									?.toArray()
+									?.reverse()
+									?.map(card => (
+										<CanvasItem
+											key={card.get('id')}
+											id={card.get('id')}
+											card={card}
+											removeCard={removeCard}
+											reorderCard={reorderCard}
+										/>
 									))}
 							</AnimatePresence>
 						</div>

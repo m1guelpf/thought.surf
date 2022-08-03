@@ -1,4 +1,4 @@
-import useItem from '@/hooks/useItem'
+import useCard from '@/hooks/useCard'
 import { motion } from 'framer-motion'
 import { Point } from '@/types/canvas'
 import { classNames } from '@/lib/utils'
@@ -19,13 +19,23 @@ type Props = {
 	header?: ReactNode
 	onDelete: () => void
 	options: CardOptions
-	item: LiveObject<Card>
+	onReorder: () => void
+	card: LiveObject<Card>
 }
 
-const Card: FC<PropsWithChildren<Props>> = ({ id, item, header, options, onDelete, children, unboxed = false }) => {
+const Card: FC<PropsWithChildren<Props>> = ({
+	id,
+	card,
+	header,
+	options,
+	onDelete,
+	children,
+	onReorder,
+	unboxed = false,
+}) => {
 	const history = useHistory()
 	const camera = useRefCamera()
-	const { point, size } = useItem(item)
+	const { point, size } = useCard(card)
 	const [scale, setScale] = useState(1)
 	const cardRef = useRef<HTMLDivElement>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -45,7 +55,7 @@ const Card: FC<PropsWithChildren<Props>> = ({ id, item, header, options, onDelet
 				setScale(0.99)
 
 				dragData.current = {
-					start: item.get('point'),
+					start: card.get('point'),
 					origin: { x: event.clientX / camera.current.z, y: event.clientY / camera.current.z },
 					pointerId: event.pointerId,
 				}
@@ -58,7 +68,7 @@ const Card: FC<PropsWithChildren<Props>> = ({ id, item, header, options, onDelet
 					dragData.current.origin
 				)
 
-				item.update({ point: addPoint(dragData.current.start, delta) })
+				card.update({ point: addPoint(dragData.current.start, delta) })
 			},
 			onPointerUp: ({ event }) => {
 				if (eventAlreadyHandled(event)) return
@@ -70,6 +80,7 @@ const Card: FC<PropsWithChildren<Props>> = ({ id, item, header, options, onDelet
 				target.style.setProperty('cursor', 'grab')
 				target.releasePointerCapture(event.pointerId)
 
+				onReorder()
 				dragData.current = null
 			},
 			onPointerOut: ({ event }) => {
@@ -114,7 +125,7 @@ const Card: FC<PropsWithChildren<Props>> = ({ id, item, header, options, onDelet
 					)}
 					style={{ scale, width: size.width, height: size.height }}
 				>
-					<ResizeButton resizeAxis={options.resizeAxis} item={item} containerRef={containerRef} />
+					<ResizeButton resizeAxis={options.resizeAxis} card={card} containerRef={containerRef} />
 					{children}
 				</motion.div>
 			</RightClickMenu>

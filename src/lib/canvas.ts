@@ -114,5 +114,5 @@ export const eventAlreadyHandled = (event: Event): boolean => {
 
 	return event
 		.composedPath()
-		.some((item: HTMLElement) => ignoreEl.includes(item.tagName?.toLowerCase()) || item.isContentEditable)
+		.some((el: HTMLElement) => ignoreEl.includes(el.tagName?.toLowerCase()) || el.isContentEditable)
 }
