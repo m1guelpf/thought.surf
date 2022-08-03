@@ -1,7 +1,9 @@
 import Card from '../Card'
 import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
+import PinButton from '../PinButton'
 import useItem from '@/hooks/useItem'
+import { motion } from 'framer-motion'
 import Video from '@/components/Video'
 import PlayIcon from '../Icons/PlayIcon'
 import PauseIcon from '../Icons/PauseIcon'
@@ -20,19 +22,22 @@ import { CardType, URLCard } from '@/types/cards'
 import useDirtyState from '@/hooks/useDirtyState'
 import { classNames, getDomain } from '@/lib/utils'
 import useRegisterAction from '@/hooks/useRegisterAction'
-import { FC, memo, useEffect, useMemo, useState } from 'react'
 import { ArrowUpIcon, XIcon, LinkIcon } from '@heroicons/react/solid'
+import { FC, memo, useCallback, useEffect, useMemo, useState } from 'react'
 
-const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => void; onDelete: () => unknown }> = ({
-	id,
-	item,
-	onDelete,
-	navigateTo,
-}) => {
+type Props = {
+	id: string
+	navigateTo: () => void
+	onDelete: () => unknown
+	item: LiveObject<URLCard>
+}
+
+const URLCard: FC<Props> = ({ id, item, onDelete, navigateTo }) => {
 	const controls = useAnimation()
 	const [isFocused, setFocused] = useState(false)
 	const [iframeRef, { width: iframeWidth }] = useMeasure<HTMLIFrameElement>()
 	const {
+		headerPinned,
 		size: { width, height },
 		attributes: { url, isLive },
 	} = useItem(item)
@@ -91,6 +96,8 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isLive])
 
+	const updatePinned = useCallback(pinned => item.set('headerPinned', pinned), [item])
+
 	return (
 		<Card
 			id={id}
@@ -99,18 +106,34 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 			onDelete={onDelete}
 			options={{ resizeAxis: { x: width >= iframeWidth, y: true } }}
 			header={
-				<div className="flex items-center justify-between opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2">
-					<div className="flex items-center space-x-3 flex-shrink min-w-0">
-						{isLoading && <Skeleton width={32} height={32} circle />}
+				<div
+					className={classNames(
+						!headerPinned &&
+							'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
+						'flex items-center justify-between bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2'
+					)}
+				>
+					<motion.div
+						className="flex items-center space-x-3 flex-shrink min-w-0 px-6 -mx-6"
+						animate="pinHidden"
+						whileHover="pinVisible"
+					>
+						<PinButton
+							baseVariant="pinHidden"
+							isPinned={headerPinned}
+							onChange={updatePinned}
+							hoverVariant="pinVisible"
+						/>
+						{isLoading && <Skeleton className="z-[2]" width={32} height={32} circle />}
 						{data?.logo && (
 							<img
 								alt={data?.title}
 								draggable={false}
 								src={data?.logo?.url}
-								className="w-8 h-8 rounded-lg"
+								className="w-8 h-8 rounded-lg z-[2]"
 							/>
 						)}
-						<div className="overflow-hidden">
+						<div className="overflow-hidden z-[2]">
 							<p className="select-none whitespace-nowrap">{data?.title ?? <Skeleton />}</p>
 							<p className="text-black/40 dark:text-white/40 text-xs select-none whitespace-nowrap truncate min-w-0">
 								<AutosizeInput
@@ -126,8 +149,14 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 								/>
 							</p>
 						</div>
-					</div>
-					<div className="flex items-center space-x-1 flex-shrink-0">
+					</motion.div>
+					<div
+						className={classNames(
+							headerPinned &&
+								'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
+							'flex items-center space-x-1 flex-shrink-0'
+						)}
+					>
 						{!hasValidEmbed && (
 							<button
 								onClick={() => item.update({ attributes: { url, isLive: !isLive } })}

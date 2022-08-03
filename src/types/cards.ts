@@ -16,6 +16,7 @@ export type Card<T extends Record<string, Json> = Record<string, Json>> = {
 	size: Size
 	type: CardType
 	attributes?: T
+	headerPinned?: boolean
 }
 
 export type CardOptions = {

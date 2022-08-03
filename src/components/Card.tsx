@@ -96,7 +96,7 @@ const Card: FC<PropsWithChildren<Props>> = ({ id, item, header, options, onDelet
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			style={{ x: point.x, y: point.y, width: size.width }}
-			className="group absolute will-change-transform [contain:layout_style_paint] space-y-2 min-w-[300px]"
+			className="group absolute will-change-transform space-y-2 min-w-[300px]"
 		>
 			{header}
 			<RightClickMenu

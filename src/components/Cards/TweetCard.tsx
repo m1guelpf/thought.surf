@@ -4,8 +4,11 @@ import Tweet from '../Tweet'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
+import PinButton from '../PinButton'
 import useItem from '@/hooks/useItem'
+import { motion } from 'framer-motion'
 import { Camera } from '@/types/canvas'
+import { classNames } from '@/lib/utils'
 import { clearURL } from '@/lib/twitter'
 import useMeasure from '@/hooks/useMeasure'
 import { screenToCanvas } from '@/lib/canvas'
@@ -17,9 +20,9 @@ import { LiveObject } from '@liveblocks/client'
 import AutosizeInput from 'react-input-autosize'
 import { CardType, URLCard } from '@/types/cards'
 import useDirtyState from '@/hooks/useDirtyState'
-import { FC, memo, useEffect, useState } from 'react'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { ArrowUpIcon, XIcon } from '@heroicons/react/solid'
+import { FC, memo, useCallback, useEffect, useState } from 'react'
 
 type Props = { item: LiveObject<URLCard>; id: string; navigateTo: () => void; onDelete: () => void }
 
@@ -27,6 +30,7 @@ const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
 	const [isFocused, setFocused] = useState(false)
 	const [measureRef, { height }] = useMeasure<HTMLDivElement>()
 	const {
+		headerPinned,
 		attributes: { url },
 	} = useItem(item)
 
@@ -76,6 +80,8 @@ const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
 		item.update({ attributes: { url: _url, isLive: false } })
 	}
 
+	const updatePinned = useCallback(pinned => item.set('headerPinned', pinned), [item])
+
 	return (
 		<Card
 			id={id}
@@ -83,18 +89,34 @@ const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
 			onDelete={onDelete}
 			options={{ resizeAxis: { x: true, y: false } }}
 			header={
-				<div className="flex items-center justify-between opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2">
-					<div className="flex items-center space-x-3 flex-shrink min-w-0">
-						{isLoading && <Skeleton width={32} height={32} circle />}
+				<div
+					className={classNames(
+						!headerPinned &&
+							'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
+						'flex items-center justify-between bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2'
+					)}
+				>
+					<motion.div
+						animate="pinHidden"
+						whileHover="pinVisible"
+						className="flex items-center space-x-3 flex-shrink min-w-0 px-6 -mx-6"
+					>
+						<PinButton
+							isPinned={headerPinned}
+							onChange={updatePinned}
+							baseVariant="pinHidden"
+							hoverVariant="pinVisible"
+						/>
+						{isLoading && <Skeleton className="z-[2]" width={32} height={32} circle />}
 						{data?.user?.profile_image_url_https && (
 							<img
 								draggable={false}
-								className="w-8 h-8 rounded-full"
+								className="w-8 h-8 rounded-full z-[2]"
 								src={data?.user?.profile_image_url_https}
 								alt={data?.user?.name}
 							/>
 						)}
-						<div className="overflow-hidden">
+						<div className="overflow-hidden z-[2]">
 							<p className="select-none whitespace-nowrap">
 								{data?.user?.name ?? (data?.user?.screen_name && `@${data?.user?.screen_name}`) ?? (
 									<Skeleton />
@@ -123,8 +145,14 @@ const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
 								/>
 							</p>
 						</div>
-					</div>
-					<div className="flex items-center space-x-1 flex-shrink-0">
+					</motion.div>
+					<div
+						className={classNames(
+							headerPinned &&
+								'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
+							'flex items-center space-x-1 flex-shrink-0'
+						)}
+					>
 						<a
 							href={url}
 							target="_blank"

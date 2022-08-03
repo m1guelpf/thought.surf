@@ -88,7 +88,7 @@ const Canvas: FC = () => {
 			const el = document.querySelector<HTMLDivElement>(`[data-card-id="${itemId}"]`)
 			if (!el) return
 
-			el.style.contentVisibility = onScreen ? 'auto' : 'hidden'
+			el.style.contentVisibility = onScreen ? null : 'hidden'
 		})
 	}, [items, camera])
 
