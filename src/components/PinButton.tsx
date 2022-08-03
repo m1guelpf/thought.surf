@@ -24,7 +24,10 @@ const PinButton: FC<Props> = ({ isPinned, onChange, baseVariant, hoverVariant })
 			onClick={onButtonClick}
 			variants={{ [baseVariant]: { x: 28, opacity: 0 }, [hoverVariant]: { x: 5, opacity: 1 } }}
 		>
-			<PinIcon animate={{ rotate: isPinned ? 0 : -45 }} className="w-3 h-3 text-gray-400 !origin-center" />
+			<PinIcon
+				animate={{ rotate: isPinned ? 0 : -45 }}
+				className="w-3 h-3 text-gray-400 dark:text-gray-500 !origin-center"
+			/>
 		</motion.button>
 	)
 }
