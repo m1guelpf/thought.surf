@@ -12,8 +12,6 @@ const useCreateOnPaste = () => {
 
 	const onPaste = useCallback(
 		(event: ClipboardEvent) => {
-			if (eventAlreadyHandled(event)) return
-
 			items.set(
 				randomId(),
 				new LiveObject(
