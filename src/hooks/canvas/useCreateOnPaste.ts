@@ -12,6 +12,7 @@ const useCreateOnPaste = () => {
 
 	const onPaste = useCallback(
 		(event: ClipboardEvent) => {
+			console.log(event.composedPath())
 			items.set(
 				randomId(),
 				new LiveObject(
@@ -28,10 +29,10 @@ const useCreateOnPaste = () => {
 	)
 
 	useEffect(() => {
-		document.addEventListener('paste', onPaste)
+		window.addEventListener('paste', onPaste)
 
 		return () => {
-			document.removeEventListener('paste', onPaste)
+			window.removeEventListener('paste', onPaste)
 		}
 	})
 }
