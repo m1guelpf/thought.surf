@@ -1,16 +1,20 @@
 import useSWR from 'swr'
 import Card from '../Card'
 import Tweet from '../Tweet'
+import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
 import useItem from '@/hooks/useItem'
 import { Camera } from '@/types/canvas'
+import { clearURL } from '@/lib/twitter'
 import useMeasure from '@/hooks/useMeasure'
 import { screenToCanvas } from '@/lib/canvas'
+import Skeleton from 'react-loading-skeleton'
 import { TweetDetails } from '@/types/twitter'
 import { Sections } from '@/types/command-bar'
 import TwitterIcon from '../Icons/TwitterIcon'
 import { LiveObject } from '@liveblocks/client'
+import AutosizeInput from 'react-input-autosize'
 import { CardType, URLCard } from '@/types/cards'
 import useDirtyState from '@/hooks/useDirtyState'
 import { FC, memo, useEffect, useState } from 'react'
@@ -72,62 +76,82 @@ const TweetCard: FC<Props> = ({ id, item, navigateTo, onDelete }) => {
 		item.update({ attributes: { url: _url, isLive: false } })
 	}
 
-	if (isLoading) return null
-
 	return (
-		<Card id={id} item={item} onDelete={onDelete} options={{ resizeAxis: { x: true, y: false } }}>
-			<div
-				onPaste={event => event.stopPropagation()}
-				className="absolute bottom-4 inset-x-4 bg-white dark:bg-gray-800 shadow py-2 px-2 rounded-lg opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-between overflow-hidden space-x-6 z-20"
-			>
-				<div className="flex items-center space-x-2 flex-1 ml-2 relative">
-					<TwitterIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
-					<input
-						className="bg-transparent rounded-lg flex-1 p-1 px-2 pl-7 !-ml-2 text-gray-600 dark:text-gray-400 z-[2]"
-						type="url"
-						value={
-							isFocused
-								? _url
-								: `${data?.user?.name} (@${data?.user?.screen_name}): ${data?.full_text.substring(
-										0,
-										100
-								  )}`
-						}
-						onFocus={() => setFocused(true)}
-						onBlur={handleUrlBlur}
-						onKeyDown={e => {
-							if (e.key !== 'Enter') return
-							;(e.target as HTMLInputElement).blur()
-						}}
-						onChange={event => setUrl(event.target.value.trim())}
-					/>
+		<Card
+			id={id}
+			item={item}
+			onDelete={onDelete}
+			options={{ resizeAxis: { x: true, y: false } }}
+			header={
+				<div className="flex items-center justify-between opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2">
+					<div className="flex items-center space-x-3 flex-shrink min-w-0">
+						{isLoading && <Skeleton width={32} height={32} circle />}
+						{data?.user?.profile_image_url_https && (
+							<img
+								draggable={false}
+								className="w-8 h-8 rounded-full"
+								src={data?.user?.profile_image_url_https}
+								alt={data?.user?.name}
+							/>
+						)}
+						<div className="overflow-hidden">
+							<p className="select-none whitespace-nowrap">
+								{data?.user?.name ?? (data?.user?.screen_name && `@${data?.user?.screen_name}`) ?? (
+									<Skeleton />
+								)}
+							</p>
+							<p className="text-black/40 dark:text-white/40 text-xs select-none whitespace-nowrap min-w-0">
+								<AutosizeInput
+									value={
+										isFocused
+											? _url
+											: isLoading
+											? _url
+											: `@${data?.user?.screen_name} • ${format(
+													new Date(data?.created_at),
+													'hh:mm a'
+											  )}`
+									}
+									onBlur={handleUrlBlur}
+									onFocus={() => setFocused(true)}
+									onChange={e => setUrl(clearURL(e.target.value.trim()))}
+									inputClassName="py-0.5 px-1 rounded-lg bg-transparent focus:bg-gray-200/50 focus:dark:bg-gray-800 focus:outline-none transition "
+									onKeyDown={e => {
+										if (e.key !== 'Enter') return
+										;(e.target as HTMLInputElement).blur()
+									}}
+								/>
+							</p>
+						</div>
+					</div>
+					<div className="flex items-center space-x-1 flex-shrink-0">
+						<a
+							href={url}
+							target="_blank"
+							className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
+							rel="noreferrer"
+						>
+							<ArrowUpIcon className="w-4 h-4 transform rotate-45" />
+						</a>
+						<button
+							onClick={onDelete}
+							className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
+						>
+							<XIcon className="w-4 h-4" />
+						</button>
+					</div>
 				</div>
-				<div className="flex items-center space-x-1">
-					<a
-						href={url}
-						target="_blank"
-						className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
-						rel="noreferrer"
-					>
-						<ArrowUpIcon className="w-4 h-4 transform rotate-45" />
-					</a>
-					<button
-						onClick={onDelete}
-						className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
-					>
-						<XIcon className="w-4 h-4" />
-					</button>
-				</div>
-			</div>
+			}
+		>
 			<div className="select-none" ref={measureRef}>
-				<Tweet tweet={data} />
+				<Tweet tweet={data} isCard />
 			</div>
 		</Card>
 	)
 }
 
 export const createTweetCard = (camera: Camera, url: string): URLCard => ({
-	attributes: { url, isLive: false },
+	attributes: { url: clearURL(url), isLive: false },
 	type: CardType.TWEET,
 	size: { width: 500, height: 500 },
 	point: screenToCanvas({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, camera),

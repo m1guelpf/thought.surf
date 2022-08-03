@@ -15,11 +15,12 @@ import { Camera, Point } from '@/types/canvas'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
 import { MqlResponseData } from '@microlink/mql'
+import AutosizeInput from 'react-input-autosize'
 import { CardType, URLCard } from '@/types/cards'
 import useDirtyState from '@/hooks/useDirtyState'
 import { classNames, getDomain } from '@/lib/utils'
-import { FC, memo, useEffect, useMemo } from 'react'
 import useRegisterAction from '@/hooks/useRegisterAction'
+import { FC, memo, useEffect, useMemo, useState } from 'react'
 import { ArrowUpIcon, XIcon, LinkIcon } from '@heroicons/react/solid'
 
 const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => void; onDelete: () => unknown }> = ({
@@ -29,6 +30,7 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	navigateTo,
 }) => {
 	const controls = useAnimation()
+	const [isFocused, setFocused] = useState(false)
 	const [iframeRef, { width: iframeWidth }] = useMeasure<HTMLIFrameElement>()
 	const {
 		size: { width, height },
@@ -51,6 +53,7 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 	)
 
 	const handleUrlBlur = () => {
+		setFocused(false)
 		if (!urlDirty) return
 
 		if (!REGEX.URL.test(_url)) {
@@ -96,17 +99,31 @@ const URLCard: FC<{ item: LiveObject<URLCard>; id: string; navigateTo: () => voi
 			onDelete={onDelete}
 			options={{ resizeAxis: { x: width >= iframeWidth, y: true } }}
 			header={
-				<div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2">
+				<div className="flex items-center justify-between opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2">
 					<div className="flex items-center space-x-3 flex-shrink min-w-0">
-						{data?.logo ? (
-							<img className="w-8 h-8 rounded-lg" src={data?.logo?.url} alt={data?.title} />
-						) : (
-							<Skeleton width={32} height={32} circle />
+						{isLoading && <Skeleton width={32} height={32} circle />}
+						{data?.logo && (
+							<img
+								alt={data?.title}
+								draggable={false}
+								src={data?.logo?.url}
+								className="w-8 h-8 rounded-lg"
+							/>
 						)}
 						<div className="overflow-hidden">
 							<p className="select-none whitespace-nowrap">{data?.title ?? <Skeleton />}</p>
 							<p className="text-black/40 dark:text-white/40 text-xs select-none whitespace-nowrap truncate min-w-0">
-								{data?.author && <>{data?.author} &bull;</>} {data?.url}
+								<AutosizeInput
+									value={isFocused ? _url : data?.author ?? data?.description ?? _url}
+									onBlur={handleUrlBlur}
+									onFocus={() => setFocused(true)}
+									onChange={e => setUrl(e.target.value.trim())}
+									inputClassName="py-0.5 px-1 rounded-lg bg-transparent focus:bg-gray-200/50 focus:dark:bg-gray-800 focus:outline-none transition "
+									onKeyDown={e => {
+										if (e.key !== 'Enter') return
+										;(e.target as HTMLInputElement).blur()
+									}}
+								/>
 							</p>
 						</div>
 					</div>

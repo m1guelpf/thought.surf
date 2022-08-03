@@ -114,14 +114,7 @@ const Canvas: FC = () => {
 							<AnimatePresence>
 								{items &&
 									Array.from(items, ([itemId, item]) => (
-										<motion.div
-											key={itemId}
-											initial={{ opacity: 0 }}
-											animate={{ opacity: 1 }}
-											exit={{ opacity: 0 }}
-										>
-											<CanvasItem id={itemId} item={item} removeCard={removeCard} />
-										</motion.div>
+										<CanvasItem key={itemId} id={itemId} item={item} removeCard={removeCard} />
 									))}
 							</AnimatePresence>
 						</div>

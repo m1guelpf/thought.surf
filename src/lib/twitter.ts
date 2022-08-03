@@ -24,3 +24,5 @@ export const getShareUrl = (text: string, url?: string): string => {
 		url ? `&url=${encodeURIComponent(url)}` : ''
 	}`
 }
+
+export const clearURL = (url: string): string => url.split('?')[0]

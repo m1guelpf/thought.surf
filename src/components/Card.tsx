@@ -92,6 +92,9 @@ const Card: FC<PropsWithChildren<Props>> = ({ id, item, header, options, onDelet
 		<motion.div
 			ref={cardRef}
 			data-card-id={id}
+			exit={{ opacity: 0 }}
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
 			style={{ x: point.x, y: point.y, width: size.width }}
 			className="group absolute will-change-transform [contain:layout_style_paint] space-y-2 min-w-[300px]"
 		>
