@@ -77,7 +77,10 @@ const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder }) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isLive])
 
-	const cardOptions = useMemo(() => ({ resizeAxis: { x: width >= iframeWidth, y: true } }), [width, iframeWidth])
+	const cardOptions = useMemo(
+		() => ({ resizeAxis: { x: isLive && !data?.video ? width >= iframeWidth : true, y: true } }),
+		[isLive, data?.video, width, iframeWidth]
+	)
 	const Header = useMemo(
 		() => <CardHeader card={card} hasValidEmbed={hasValidEmbed} onDelete={onDelete} />,
 		[card, hasValidEmbed, onDelete]
