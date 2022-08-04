@@ -51,12 +51,12 @@ const MenuItem = ({ onClick, isActive, icon: Icon }) => {
 			onClick={onClick}
 			className={classNames(
 				isActive
-					? 'opacity-100 bg-gray-300/60 dark:bg-gray-600/60'
+					? 'opacity-100 bg-gray-400/60 dark:bg-gray-400/60'
 					: 'opacity-60 hover:opacity-80 bg-gray-200/60 dark:bg-gray-700/60',
 				`rounded p-1 opacity-60 transition`
 			)}
 		>
-			<Icon className="w-4 h-4" />
+			<Icon className="w-5 h-5" />
 		</button>
 	)
 }
