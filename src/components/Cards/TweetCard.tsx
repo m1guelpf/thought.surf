@@ -22,7 +22,7 @@ import useDirtyState from '@/hooks/useDirtyState'
 import { classNames, randomId } from '@/lib/utils'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { ArrowUpIcon, XIcon } from '@heroicons/react/solid'
-import { FC, memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react'
 
 type Props = {
 	id: string
@@ -30,7 +30,7 @@ type Props = {
 	onReorder: () => void
 	navigateTo: () => void
 	card: LiveObject<URLCard>
-    containerRef: MutableRefObject<HTMLDivElement>
+	containerRef: MutableRefObject<HTMLDivElement>
 }
 
 const cardOptions = { resizeAxis: { x: true, y: false } }
@@ -72,7 +72,15 @@ const TweetCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder, conta
 	const Header = useMemo(() => <CardHeader card={card} onDelete={onDelete} />, [card, onDelete])
 
 	return (
-		<Card id={id} card={card} onDelete={onDelete} onReorder={onReorder} options={cardOptions} header={Header} containerRef={containerRef}>
+		<Card
+			id={id}
+			card={card}
+			onDelete={onDelete}
+			onReorder={onReorder}
+			options={cardOptions}
+			header={Header}
+			containerRef={containerRef}
+		>
 			<div className="select-none" ref={measureRef}>
 				<Tweet tweet={data} isCard />
 			</div>
