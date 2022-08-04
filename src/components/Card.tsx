@@ -11,7 +11,7 @@ import { LiveObject } from '@liveblocks/client'
 import { useGesture } from '@use-gesture/react'
 import { Card, CardOptions } from '@/types/cards'
 import { addPoint, eventAlreadyHandled, subPoint } from '@/lib/canvas'
-import { FC, memo, PropsWithChildren, ReactNode, useRef, useState } from 'react'
+import { FC, memo, MutableRefObject, PropsWithChildren, ReactNode, useRef, useState } from 'react'
 
 type Props = {
 	id: string
@@ -21,6 +21,7 @@ type Props = {
 	options: CardOptions
 	onReorder: () => void
 	card: LiveObject<Card>
+	containerRef: MutableRefObject<HTMLDivElement>
 }
 
 const Card: FC<PropsWithChildren<Props>> = ({
@@ -31,6 +32,7 @@ const Card: FC<PropsWithChildren<Props>> = ({
 	onDelete,
 	children,
 	onReorder,
+	containerRef,
 	unboxed = false,
 }) => {
 	const history = useHistory()
@@ -38,7 +40,6 @@ const Card: FC<PropsWithChildren<Props>> = ({
 	const { point, size } = useCard(card)
 	const [scale, setScale] = useState(1)
 	const cardRef = useRef<HTMLDivElement>(null)
-	const containerRef = useRef<HTMLDivElement>(null)
 	const dragData = useRef<{ start: Point; origin: Point; pointerId: number }>(null)
 
 	useGesture(

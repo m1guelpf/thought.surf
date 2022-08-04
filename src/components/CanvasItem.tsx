@@ -4,12 +4,19 @@ import TextCard from './Cards/TextCard'
 import TweetCard from './Cards/TweetCard'
 import { Card, CardType } from '@/types/cards'
 import { LiveObject } from '@liveblocks/client'
-import { useCallback, memo, FC, useRef, useMemo } from 'react'
 import useCamera, { shallow, CameraStore } from '@/store/camera'
+import { useCallback, memo, FC, useRef, useMemo, MutableRefObject } from 'react'
 
 const CardRenderers: Record<
 	string,
-	FC<{ id: string; card: LiveObject<Card>; navigateTo: () => void; onDelete: () => void; onReorder: () => void }>
+	FC<{
+		id: string
+		onDelete: () => void
+		onReorder: () => void
+		navigateTo: () => void
+		card: LiveObject<Card>
+		containerRef: MutableRefObject<HTMLDivElement>
+	}>
 > = {
 	[CardType.URL]: URLCard,
 	[CardType.TEXT]: TextCard,
@@ -41,7 +48,16 @@ const CanvasItem: FC<Props> = ({ id, card, reorderCard, removeCard }) => {
 
 	const RenderCard = useMemo(() => CardRenderers[type], [type])
 
-	return <RenderCard id={id} card={card} navigateTo={navigateTo} onDelete={onDelete} onReorder={onReorder} />
+	return (
+		<RenderCard
+			id={id}
+			card={card}
+			navigateTo={navigateTo}
+			onDelete={onDelete}
+			onReorder={onReorder}
+			containerRef={containerRef}
+		/>
+	)
 }
 
 export default memo(CanvasItem)

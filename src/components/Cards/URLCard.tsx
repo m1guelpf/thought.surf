@@ -23,7 +23,7 @@ import useDirtyState from '@/hooks/useDirtyState'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { classNames, getDomain, randomId } from '@/lib/utils'
 import { ArrowUpIcon, XIcon, LinkIcon } from '@heroicons/react/solid'
-import { FC, memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react'
 
 type Props = {
 	id: string
@@ -31,9 +31,10 @@ type Props = {
 	navigateTo: () => void
 	onDelete: () => unknown
 	card: LiveObject<URLCard>
+	containerRef: MutableRefObject<HTMLDivElement>
 }
 
-const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder }) => {
+const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, containerRef }) => {
 	const controls = useAnimation()
 
 	const [iframeRef, { width: iframeWidth }] = useMeasure<HTMLIFrameElement>()
@@ -95,6 +96,7 @@ const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder }) => {
 			onDelete={onDelete}
 			onReorder={onReorder}
 			options={cardOptions}
+			containerRef={containerRef}
 		>
 			{(() => {
 				// if response hasn't loaded yet, show placeholder

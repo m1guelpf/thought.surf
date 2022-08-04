@@ -10,9 +10,9 @@ import { Sections } from '@/types/command-bar'
 import { XIcon } from '@heroicons/react/solid'
 import { LiveObject } from '@liveblocks/client'
 import { CardType, TextCard } from '@/types/cards'
-import { FC, memo, useEffect, useRef } from 'react'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { DocumentTextIcon } from '@heroicons/react/outline'
+import { FC, memo, MutableRefObject, useEffect, useRef } from 'react'
 
 type Props = {
 	id: string
@@ -20,11 +20,12 @@ type Props = {
 	onReorder: () => void
 	navigateTo: () => void
 	card: LiveObject<TextCard>
+	containerRef: MutableRefObject<HTMLDivElement>
 }
 
 const cardOptions = { resizeAxis: { x: true, y: false } }
 
-const TextCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder }) => {
+const TextCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder, containerRef }) => {
 	const renderTiptapMenu = useRef<HTMLDivElement>(null)
 	const [measureRef, { height }] = useMeasure<HTMLDivElement>()
 	const {
@@ -50,7 +51,14 @@ const TextCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder }) => {
 	)
 
 	return (
-		<Card id={id} card={card} onDelete={onDelete} onReorder={onReorder} options={cardOptions}>
+		<Card
+			id={id}
+			card={card}
+			onDelete={onDelete}
+			onReorder={onReorder}
+			options={cardOptions}
+			containerRef={containerRef}
+		>
 			<div className="absolute bottom-4 inset-x-4 bg-white dark:bg-gray-900 shadow py-2 px-2 rounded-lg opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-between overflow-hidden z-30">
 				<div className="flex items-center space-x-2 flex-shrink flex-grow ml-2 relative min-w-0">
 					<DocumentTextIcon className="w-4 h-4 absolute left-0 inset-y-1/4 text-gray-400 z-[1]" />
