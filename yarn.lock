@@ -5238,6 +5238,13 @@ re2@~1.17.2:
     nan "^2.16.0"
     node-gyp "^9.0.0"
 
+react-18-input-autosize@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/react-18-input-autosize/-/react-18-input-autosize-3.0.0.tgz#eb34ac8c8335c30f76a56a8902d31f1fc1b62c4c"
+  integrity sha512-7tsUc9PJWg6Vsp8qYuzlKKBf7hbCoTBdNfjYZSprEPbxf3meuhjklg9QPBe9rIyoR3uDAzmG7NpoJ1+kP5ns+w==
+  dependencies:
+    prop-types "^15.5.8"
+
 react-dom@18.1.0:
   version "18.1.0"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-18.1.0.tgz"
@@ -5257,12 +5264,6 @@ react-hot-toast@^2.3.0:
   integrity sha512-/RxV+bfjld7tSJR1SCLzMAXgFuNW7fCpK6+vbYqfmbGSWcqTMz2rizrvfWKvtcPH5HK0NqxmBaC5SrAy1F42zA==
   dependencies:
     goober "^2.1.10"
-
-"react-input-autosize@https://github.com/ruipserra/react-input-autosize#react-18":
-  version "3.0.0"
-  resolved "git+ssh://git@github.com/ruipserra/react-input-autosize.git#e3193053a0fdafd96a157ceef9d6f9159023ac65"
-  dependencies:
-    prop-types "^15.5.8"
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
