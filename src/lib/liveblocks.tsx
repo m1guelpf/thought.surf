@@ -1,9 +1,9 @@
 import { Point } from '@/types/canvas'
 import useCamera from '../store/camera'
 import { CardCollection } from '@/types/cards'
+import { DEFAULT_ROOM_CONTENT } from './consts'
 import { createClient } from '@liveblocks/client'
 import { createRoomContext } from '@liveblocks/react'
-import { APP_URL, DEFAULT_ROOM_CONTENT } from './consts'
 import { FC, PropsWithChildren, useEffect, useState } from 'react'
 
 type ConnectionState = 'closed' | 'authenticating' | 'unavailable' | 'failed' | 'open' | 'connecting'
