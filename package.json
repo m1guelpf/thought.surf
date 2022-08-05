@@ -45,7 +45,7 @@
 		"react": "18.1.0",
 		"react-dom": "18.1.0",
 		"react-hot-toast": "^2.3.0",
-		"react-input-autosize": "https://github.com/ruipserra/react-input-autosize#react-18",
+		"react-input-autosize": "https://git@github.com/ruipserra/react-input-autosize#react-18",
 		"react-loading-skeleton": "^3.1.0",
 		"react-player": "^2.10.1",
 		"siwe": "^2.0.5",
