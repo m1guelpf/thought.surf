@@ -19,7 +19,7 @@ const Cursor: FC<Props> = ({ pos, color, name, avatar, emoji }) => {
 			initial={{ x, y }}
 			animate={{ x, y }}
 			style={{ backgroundColor: color }}
-			className="absolute pointer-events-none top-0 left-0 w-14 h-14 z-20 overflow-hidden border-4 border-white rounded-full rounded-tl-none flex items-center justify-center"
+			className="absolute pointer-events-none top-0 left-0 w-14 h-14 z-20 overflow-hidden border-4 border-white dark:border-gray-900 rounded-full rounded-tl-none flex items-center justify-center"
 			transition={{ type: 'spring', damping: 30, mass: 0.8, stiffness: 350 }}
 		>
 			{avatar ? (

@@ -13,4 +13,12 @@ model User {
     address             String @id
     name                String
     profile_picture_url String
+    rooms               Room[]
+}
+
+model Room {
+    name         String  @id
+    liveblocksId String  @unique
+    is_public    Boolean @default(value: false)
+    users        User[]
 }

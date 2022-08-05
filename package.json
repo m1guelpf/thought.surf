@@ -8,7 +8,8 @@
 		"start": "next start",
 		"lint": "next lint",
 		"postinstall": "patch-package",
-		"vercel-build": "prisma generate && next build"
+		"vercel-build": "prisma generate && yarn migrate && next build",
+		"migrate": "DATABASE_URL=\"$MIGRATE_DATABASE_URL\" prisma migrate deploy"
 	},
 	"dependencies": {
 		"@headlessui/react": "^1.6.6",
