@@ -7,6 +7,10 @@
 	@apply !w-full !h-full;
 }
 
+[aria-label='Change Network'] {
+	@apply !hidden;
+}
+
 .walletconnect-qrcode__base {
 	@apply !bg-white/50 dark:!bg-black/50 !z-50;
 }

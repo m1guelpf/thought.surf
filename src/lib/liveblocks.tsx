@@ -17,7 +17,13 @@ type Storage = {
 	cards: CardCollection
 }
 
-type UserMeta = {}
+type UserMeta = {
+	id: string
+	info: {
+		name?: string
+		avatar?: string
+	}
+}
 
 export const client = createClient({
 	authEndpoint: async room => {
