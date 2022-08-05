@@ -1,3 +1,4 @@
+import { APP_HOST } from './consts'
 import { NextApiHandler } from 'next'
 import { IronSessionOptions } from 'iron-session'
 import { withIronSessionApiRoute } from 'iron-session/next'
@@ -7,6 +8,7 @@ const sessionOptions: IronSessionOptions = {
 	cookieName: 'infinite_session',
 	ttl: 3600 * 24 * 30, // 1 month
 	cookieOptions: {
+		domain: APP_HOST,
 		secure: process.env.NODE_ENV === 'production',
 	},
 }

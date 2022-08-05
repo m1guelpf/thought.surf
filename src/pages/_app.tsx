@@ -6,9 +6,11 @@ import { localStorageProvider } from '@/lib/swr-cache'
 import EthereumProvider from '@/components/EthereumProvider'
 import SkeletonProvider from '@/components/SkeletonProvider'
 
+const fetcher = url => fetch(url, { credentials: 'include' }).then(res => res.json())
+
 const App = ({ Component, pageProps }) => {
 	return (
-		<SWRConfig value={{ provider: localStorageProvider, fetcher: url => fetch(url).then(res => res.json()) }}>
+		<SWRConfig value={{ fetcher, provider: localStorageProvider }}>
 			<ThemeProvider defaultTheme="dark" attribute="class">
 				<SkeletonProvider>
 					<EthereumProvider>

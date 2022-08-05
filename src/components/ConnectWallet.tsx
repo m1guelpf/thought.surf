@@ -1,5 +1,5 @@
-import useSWR from 'swr'
 import { SiweMessage } from 'siwe'
+import useSWRImmutable from 'swr/immutable'
 import { ConnectKitButton } from 'connectkit'
 import { useEffect, useMemo, useRef } from 'react'
 import { useAccount, useSignMessage } from 'wagmi'
@@ -8,9 +8,7 @@ const ConnectWallet = () => {
 	const { address } = useAccount()
 	const isConnected = useRef<boolean>(false)
 
-	const { data, isLoading } = useSWR<{ nonce: string; authenticated: boolean }>('/api/auth/login', {
-		revalidateOnFocus: false,
-	})
+	const { data, isLoading, mutate } = useSWRImmutable<{ nonce: string; authenticated: boolean }>('/api/auth/login')
 
 	const message = useMemo<string>(() => {
 		if (typeof window === 'undefined' || !address) return
@@ -36,7 +34,7 @@ const ConnectWallet = () => {
 				headers: {
 					'Content-Type': 'application/json',
 				},
-			})
+			}).then(() => mutate())
 		},
 	})
 
@@ -46,13 +44,14 @@ const ConnectWallet = () => {
 
 		signMessage()
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [address])
+	}, [address, data?.authenticated])
 
 	useEffect(() => {
 		if (address || !isConnected.current) return
 
-		fetch('/api/auth/login', { method: 'DELETE', credentials: 'include' })
 		isConnected.current = false
+		localStorage.removeItem('walletconnect')
+		fetch('/api/auth/login', { method: 'DELETE', credentials: 'include' })
 	}, [address])
 
 	return <ConnectKitButton />

@@ -1,9 +1,9 @@
 import { Point } from '@/types/canvas'
 import useCamera from '../store/camera'
 import { CardCollection } from '@/types/cards'
-import { DEFAULT_ROOM_CONTENT } from './consts'
 import { createClient } from '@liveblocks/client'
 import { createRoomContext } from '@liveblocks/react'
+import { APP_URL, DEFAULT_ROOM_CONTENT } from './consts'
 import { FC, PropsWithChildren, useEffect, useState } from 'react'
 
 type ConnectionState = 'closed' | 'authenticating' | 'unavailable' | 'failed' | 'open' | 'connecting'
@@ -74,17 +74,9 @@ export const RoomStateWatcher = ({ state, setState }) => {
 	const room = useRoom()
 
 	useEffect(() => {
-		const checkState = (state, newState) => {
-			if (state == newState) return
+		const unsubscribe = room.subscribe('connection', setState)
 
-			setState(newState)
-		}
-
-		const interval = setInterval(() => checkState(state, room.getConnectionState()), 1000)
-
-		return () => {
-			clearInterval(interval)
-		}
+		return unsubscribe
 	})
 
 	return null
