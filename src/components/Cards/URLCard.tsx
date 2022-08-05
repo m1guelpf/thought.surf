@@ -200,9 +200,8 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, onDelete })
 	return (
 		<div
 			className={classNames(
-				!headerPinned &&
-					'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
-				'flex items-center justify-between bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2'
+				!headerPinned && 'opacity-0 group-hover:opacity-100 focus-within:opacity-100',
+				'flex items-center justify-between bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2 transition-opacity duration-300'
 			)}
 		>
 			<motion.div

@@ -1,11 +1,12 @@
 import useSWR from 'swr'
 import { SiweMessage } from 'siwe'
-import { useEffect, useMemo } from 'react'
 import { ConnectKitButton } from 'connectkit'
+import { useEffect, useMemo, useRef } from 'react'
 import { useAccount, useSignMessage } from 'wagmi'
 
 const ConnectWallet = () => {
 	const { address } = useAccount()
+	const isConnected = useRef<boolean>(false)
 
 	const { data, isLoading } = useSWR<{ nonce: string; authenticated: boolean }>('/api/auth/login', {
 		revalidateOnFocus: false,
@@ -40,10 +41,18 @@ const ConnectWallet = () => {
 	})
 
 	useEffect(() => {
+		if (address) isConnected.current = true
 		if (!address || isLoading || data?.authenticated) return
 
 		signMessage()
 		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [address])
+
+	useEffect(() => {
+		if (address || !isConnected.current) return
+
+		fetch('/api/auth/login', { method: 'DELETE', credentials: 'include' })
+		isConnected.current = false
 	}, [address])
 
 	return <ConnectKitButton />
