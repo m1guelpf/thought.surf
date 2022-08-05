@@ -12,11 +12,12 @@ const MultiplayerCursors: FC<{ canvas: RefObject<HTMLDivElement> }> = ({ canvas 
 
 	return (
 		<>
-			{others.map(({ connectionId, presence }) => {
+			{others.map(({ connectionId, presence, info }) => {
 				if (!presence || !presence.cursor) return
 
 				return (
 					<Cursor
+						name={info.name}
 						key={connectionId}
 						pos={presence.cursor}
 						color={CURSOR_COLORS[connectionId % CURSOR_COLORS.length]}
