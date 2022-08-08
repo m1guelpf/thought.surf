@@ -8,7 +8,10 @@ const ConnectWallet = () => {
 	const { address } = useAccount()
 	const isConnected = useRef<boolean>(false)
 
-	const { data, isLoading, mutate } = useSWRImmutable<{ nonce: string; authenticated: boolean }>('/api/auth/login')
+	const { data, isLoading, mutate } = useSWRImmutable<{ nonce: string; authenticated: boolean }>(
+		'/api/auth/login',
+		url => fetch(url, { credentials: 'include' }).then(res => res.json())
+	)
 
 	const message = useMemo<string>(() => {
 		if (typeof window === 'undefined' || !address) return

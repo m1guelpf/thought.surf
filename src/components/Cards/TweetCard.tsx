@@ -169,7 +169,9 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete }) => {
 									? _url
 									: isLoading
 									? _url
-									: `@${data?.user?.screen_name} • ${format(new Date(data?.created_at), 'hh:mm a')}`
+									: `@${data?.user?.screen_name} • ${
+											data?.created_at ? format(new Date(data?.created_at), 'hh:mm a') : ''
+									  }`
 							}
 							onBlur={handleUrlBlur}
 							onFocus={() => setFocused(true)}
