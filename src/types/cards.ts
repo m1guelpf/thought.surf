@@ -5,6 +5,7 @@ import { Json, LiveList, LiveObject } from '@liveblocks/client'
 
 export enum CardType {
 	URL = 'url',
+	FILE = 'file',
 	TEXT = 'text',
 	TWEET = 'tweet',
 }
@@ -33,4 +34,10 @@ export type TextCard = Card<{
 export type URLCard = Card<{
 	url: string
 	isLive: boolean
+}>
+
+export type ImageCard = Card<{
+	url: string
+	title: string
+	mimeType: string
 }>

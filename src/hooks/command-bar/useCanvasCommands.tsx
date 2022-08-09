@@ -1,13 +1,15 @@
-import { ask } from '@/lib/utils'
 import toast from 'react-hot-toast'
-import { getTextCards } from '@/lib/cards'
+import { getNamedCards } from '@/lib/cards'
 import { useHistory } from '@/lib/liveblocks'
+import { ask, requestFile } from '@/lib/utils'
 import { CardCollection } from '@/types/cards'
+import { uploadFile } from '@/lib/file-upload'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
 import useRegisterAction from '../useRegisterAction'
 import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
+import { createImageCard } from '@/components/Cards/ImageCard'
 import useCamera, { shallow, CameraStore, useRefCamera } from '@/store/camera'
 import {
 	LinkIcon,
@@ -17,6 +19,7 @@ import {
 	ZoomOutIcon,
 	DocumentAddIcon,
 	DocumentSearchIcon,
+	PhotographIcon,
 } from '@heroicons/react/outline'
 
 const getParams = (store: CameraStore) => ({
@@ -79,7 +82,7 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 					cards.insert(
 						new LiveObject(
 							createTextCard(camera.current, {
-								names: getTextCards(cards).map(({ attributes: { title } }) => title),
+								names: getNamedCards(cards).map(({ attributes: { title } }) => title),
 							})
 						),
 						0
@@ -97,6 +100,30 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 
 					cards.insert(
 						new LiveObject(createURLCard(camera.current, { url: await ask('What URL should we add?') })),
+						0
+					)
+				},
+			},
+			{
+				id: 'add-image',
+				name: 'Add Image Card',
+				icon: <PhotographIcon />,
+				section: Sections.Canvas,
+				keywords: ['upload', 'photo', 'picture'],
+				perform: async () => {
+					if (!cards) throw toast.error('Canvas not loaded yet')
+
+					const file = await requestFile(['image/gif', 'image/jpg', 'image/jpeg', 'image/png'])
+
+					cards.insert(
+						new LiveObject(
+							createImageCard(camera.current, {
+								name: file.name,
+								mimeType: file.type,
+								url: await uploadFile(file),
+								names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+							})
+						),
 						0
 					)
 				},

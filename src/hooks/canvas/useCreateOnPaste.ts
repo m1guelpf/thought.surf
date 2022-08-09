@@ -2,7 +2,7 @@ import { useList } from '@/lib/liveblocks'
 import { useRefCamera } from '@/store/camera'
 import { useCallback, useEffect } from 'react'
 import { LiveObject } from '@liveblocks/client'
-import { cardFromPaste, getTextCards } from '@/lib/cards'
+import { cardFromPaste, getNamedCards } from '@/lib/cards'
 
 const useCreateOnPaste = () => {
 	const cards = useList('cards')
@@ -15,7 +15,7 @@ const useCreateOnPaste = () => {
 					cardFromPaste(
 						event,
 						camera.current,
-						getTextCards(cards).map(({ attributes: { title } }) => title)
+						getNamedCards(cards).map(({ attributes: { title } }) => title)
 					)
 				),
 				0

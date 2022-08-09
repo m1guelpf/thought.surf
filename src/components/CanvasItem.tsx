@@ -2,6 +2,7 @@ import useCard from '@/hooks/useCard'
 import URLCard from './Cards/URLCard'
 import TextCard from './Cards/TextCard'
 import TweetCard from './Cards/TweetCard'
+import ImageCard from './Cards/ImageCard'
 import { Card, CardType } from '@/types/cards'
 import { LiveObject } from '@liveblocks/client'
 import useCamera, { shallow, CameraStore } from '@/store/camera'
@@ -20,6 +21,7 @@ const CardRenderers: Record<
 > = {
 	[CardType.URL]: URLCard,
 	[CardType.TEXT]: TextCard,
+	[CardType.FILE]: ImageCard,
 	[CardType.TWEET]: TweetCard,
 }
 

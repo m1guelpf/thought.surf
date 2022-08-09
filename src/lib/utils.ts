@@ -33,3 +33,19 @@ export const ask = (message: string): Promise<string> => {
 		resolve(response)
 	})
 }
+
+export const requestFile = (mimeTypes?: string[]): Promise<File> => {
+	return new Promise((resolve, reject) => {
+		const input = document.createElement('input')
+		input.type = 'file'
+		if (mimeTypes) input.accept = mimeTypes.join(', ')
+		input.onchange = e => {
+			const file = (e.target as HTMLInputElement).files[0]
+
+			if (!file) reject(new Error('No file selected'))
+			resolve(file)
+		}
+
+		input.click()
+	})
+}

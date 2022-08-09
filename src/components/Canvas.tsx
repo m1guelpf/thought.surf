@@ -5,15 +5,18 @@ import { isOnScreen } from '@/lib/canvas'
 import { useList } from '@/lib/liveblocks'
 import { Menu } from '@/types/right-click'
 import LoadingScreen from './LoadingScreen'
-import { ask, classNames } from '@/lib/utils'
 import RightClickMenu from './RightClickMenu'
+import { uploadFile } from '@/lib/file-upload'
 import { createURLCard } from './Cards/URLCard'
 import { LiveObject } from '@liveblocks/client'
 import { createTextCard } from './Cards/TextCard'
+import { createImageCard } from './Cards/ImageCard'
 import MultiplayerCursors from './MultiplayerCursors'
 import { AnimatePresence, motion } from 'framer-motion'
 import useCamera, { CameraStore } from '@/store/camera'
-import { findCardIndex, getTextCards } from '@/lib/cards'
+import { PhotographIcon } from '@heroicons/react/outline'
+import { findCardIndex, getNamedCards } from '@/lib/cards'
+import { ask, classNames, requestFile } from '@/lib/utils'
 import useCreateOnDrop from '@/hooks/canvas/useCreateOnDrop'
 import useCreateOnPaste from '@/hooks/canvas/useCreateOnPaste'
 import useCameraGestures from '@/hooks/canvas/useCameraGestures'
@@ -43,12 +46,12 @@ const Canvas: FC = () => {
 					{
 						label: 'Note',
 						icon: <DocumentAddIcon className="w-3.5 h-3.5" />,
-						action: (_, point) => {
+						action: async (_, point) => {
 							cards.insert(
 								new LiveObject(
 									createTextCard(camera, {
 										point,
-										names: getTextCards(cards).map(({ attributes: { title } }) => title),
+										names: getNamedCards(cards).map(({ attributes: { title } }) => title),
 									})
 								),
 								0
@@ -62,6 +65,26 @@ const Canvas: FC = () => {
 							cards.insert(
 								new LiveObject(
 									createURLCard(camera, { url: await ask('What URL should we add?'), point })
+								),
+								0
+							)
+						},
+					},
+					{
+						label: 'Image',
+						icon: <PhotographIcon className="w-3.5 h-3.5" />,
+						action: async (_, point) => {
+							const file = await requestFile(['image/gif', 'image/jpg', 'image/jpeg', 'image/png'])
+
+							cards.insert(
+								new LiveObject(
+									createImageCard(camera, {
+										point,
+										name: file.name,
+										mimeType: file.type,
+										url: await uploadFile(file),
+										names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+									})
 								),
 								0
 							)

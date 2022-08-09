@@ -3,7 +3,7 @@ import { useCallback, useEffect } from 'react'
 import { LiveObject } from '@liveblocks/client'
 import { eventAlreadyHandled } from '@/lib/canvas'
 import { useBatch, useList } from '@/lib/liveblocks'
-import { cardFromDrag, getTextCards } from '@/lib/cards'
+import { cardFromDrag, getNamedCards } from '@/lib/cards'
 
 const useCreateOnDrop = () => {
 	const batch = useBatch()
@@ -18,7 +18,7 @@ const useCreateOnDrop = () => {
 			const addCards = cardFromDrag(
 				event,
 				camera.current,
-				getTextCards(cards).map(({ attributes: { title } }) => title)
+				getNamedCards(cards).map(({ attributes: { title } }) => title)
 			)
 
 			batch(() => addCards.forEach(card => cards.insert(new LiveObject(card), 0)))

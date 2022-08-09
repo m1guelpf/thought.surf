@@ -51,6 +51,8 @@ export const findCard = (cards: CardCollection, id: string): Card | undefined =>
 	return cards.find(card => card.get('id') === id).toObject()
 }
 
-export const getTextCards = (cards: CardCollection): TextCard[] => {
-	return cards.map(card => card.toObject()).filter(({ type }) => type === CardType.TEXT) as TextCard[]
+export const getNamedCards = (cards: CardCollection): TextCard[] => {
+	return cards
+		.map(card => card.toObject())
+		.filter(({ type }) => [CardType.TEXT, CardType.FILE].includes(type)) as TextCard[]
 }
