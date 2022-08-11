@@ -7,12 +7,12 @@ type BaseItem = {
 	shortcut?: string
 }
 
-type Group = BaseItem & { items: Menu }
-type SubMenu = BaseItem & { submenu: Menu }
-type Item = BaseItem & {
+export type Group = BaseItem & { items: Menu }
+export type SubMenu = BaseItem & { submenu: Menu }
+export type Item = BaseItem & {
 	action: (event: MouseEvent, mouse: Point) => void
 }
-type Checkbox = BaseItem & {
+export type Checkbox = BaseItem & {
 	checked: boolean
 	onChange: (checked: boolean) => void
 }

@@ -1,9 +1,9 @@
 import { Point } from '@/types/canvas'
 import { classNames } from '@/lib/utils'
 import { CheckIcon } from '@heroicons/react/solid'
-import { Menu, MenuItem } from '@/types/right-click'
 import { ChevronRightIcon } from '@heroicons/react/outline'
 import * as ContextMenu from '@radix-ui/react-context-menu'
+import { Checkbox, Group, Item, Menu, MenuItem, SubMenu } from '@/types/right-click'
 import { FC, memo, PointerEventHandler, PropsWithChildren, ReactNode, RefObject, useRef } from 'react'
 
 const RightClickMenu: FC<PropsWithChildren<{ menu?: Menu }>> = ({ children, menu = [] }) => {
@@ -44,34 +44,34 @@ const MenuRenderer: FC<{ item: MenuItem; isFirst?: boolean; mouse?: RefObject<Po
 	isFirst = false,
 	mouse,
 }) => {
-	if (item.submenu) {
+	if ((item as SubMenu).submenu) {
 		return (
 			<>
 				{!isFirst && <ContextMenu.Separator className="my-1 h-px bg-gray-200 dark:bg-gray-700" />}
-				<SubMenuRenderer item={item} mouse={mouse} />
+				<SubMenuRenderer item={item as SubMenu} mouse={mouse} />
 			</>
 		)
 	}
 
-	if (item.items) {
+	if ((item as Group).items) {
 		return (
 			<>
 				{!isFirst && <ContextMenu.Separator className="my-1 h-px bg-gray-200 dark:bg-gray-700" />}
 				<ContextMenu.Label className="select-none px-2 py-2 text-xs text-gray-700 dark:text-gray-200">
 					{item.label}
 				</ContextMenu.Label>
-				{item.items.map((item, i) => (
+				{(item as Group).items.map((item, i) => (
 					<MenuRenderer key={i} item={item} />
 				))}
 			</>
 		)
 	}
 
-	if (item.onChange) {
+	if ((item as Checkbox).onChange) {
 		return (
 			<ContextMenu.CheckboxItem
-				checked={item.checked}
-				onCheckedChange={item.onChange}
+				checked={(item as Checkbox).checked}
+				onCheckedChange={(item as Checkbox).onChange}
 				className={classNames(
 					'w-full text-left',
 					'text-gray-400 focus:bg-gray-50 dark:text-gray-500 dark:focus:bg-gray-900',
@@ -80,7 +80,7 @@ const MenuRenderer: FC<{ item: MenuItem; isFirst?: boolean; mouse?: RefObject<Po
 			>
 				<MenuItemIcon icon={item.icon} />
 				<MenuItemLabel label={item.label} />
-				{item.checked && <MenuItemIcon icon={<CheckIcon className="w-3.5 h-3.5" />} />}
+				{(item as Checkbox).checked && <MenuItemIcon icon={<CheckIcon className="w-3.5 h-3.5" />} />}
 			</ContextMenu.CheckboxItem>
 		)
 	}
@@ -88,7 +88,7 @@ const MenuRenderer: FC<{ item: MenuItem; isFirst?: boolean; mouse?: RefObject<Po
 	return (
 		<ContextMenu.Item asChild>
 			<button
-				onClick={event => item.action(event, mouse.current)}
+				onClick={event => (item as Item).action(event, mouse.current)}
 				className={classNames(
 					'w-full text-left',
 					'text-gray-400 focus:bg-gray-50 dark:text-gray-500 dark:focus:bg-gray-900',
@@ -103,7 +103,7 @@ const MenuRenderer: FC<{ item: MenuItem; isFirst?: boolean; mouse?: RefObject<Po
 	)
 }
 
-const SubMenuRenderer: FC<{ item: MenuItem; mouse?: RefObject<Point> }> = ({ item, mouse }) => (
+const SubMenuRenderer: FC<{ item: SubMenu; mouse?: RefObject<Point> }> = ({ item, mouse }) => (
 	<ContextMenu.Sub>
 		<ContextMenu.SubTrigger
 			className={classNames(
