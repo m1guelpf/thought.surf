@@ -1,3 +1,4 @@
+import useSpacebar from '../useSpacebar'
 import { RefObject, useCallback } from 'react'
 import { useGesture } from '@use-gesture/react'
 import { eventAlreadyHandled } from '@/lib/canvas'
@@ -6,15 +7,20 @@ import useCamera, { shallow } from '@/store/camera'
 const getParams = store => ({ panCamera: store.panCamera, zoomCamera: store.zoomCamera })
 
 const useCameraGestures = (canvasRef: RefObject<HTMLDivElement>) => {
+	const pressingSpace = useSpacebar()
 	const { panCamera, zoomCamera } = useCamera(getParams, shallow)
 
 	const onDrag = useCallback(
-		({ event, delta }) => {
-			if ((event as PointerEvent)?.pointerType == 'mouse' || eventAlreadyHandled(event)) return
+		({ event, delta, first, last }) => {
+			if (eventAlreadyHandled(event)) return
+			if ((event as PointerEvent)?.pointerType == 'mouse' && !pressingSpace.current) return
+
+			if (first) canvasRef.current.style.cursor = 'grabbing'
+			if (last) canvasRef.current.style.cursor = null
 
 			panCamera(delta[0] * -1, delta[1] * -1)
 		},
-		[panCamera]
+		[canvasRef, panCamera, pressingSpace]
 	)
 
 	const onWheel = useCallback(
