@@ -17,13 +17,17 @@ import { Camera, Point } from '@/types/canvas'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
 import { MqlResponseData } from '@microlink/mql'
-import { CardType, URLCard } from '@/types/cards'
 import useDirtyState from '@/hooks/useDirtyState'
+import HeaderTopIcon from '../Icons/HeaderTopIcon'
 import AutosizeInput from 'react-18-input-autosize'
+import InputFieldIcon from '../Icons/InputFieldIcon'
+import { ClipboardIcon } from '@heroicons/react/outline'
 import useRegisterAction from '@/hooks/useRegisterAction'
-import { classNames, getDomain, randomId } from '@/lib/utils'
-import { ArrowUpIcon, XIcon, LinkIcon } from '@heroicons/react/solid'
-import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react'
+import { CardOptions, CardType, URLCard } from '@/types/cards'
+import { classNames, copy, getDomain, randomId } from '@/lib/utils'
+import { PlayIcon as PlayMenuIcon } from '@heroicons/react/outline'
+import { ArrowUpIcon, XIcon, LinkIcon, ExternalLinkIcon } from '@heroicons/react/solid'
+import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type Props = {
 	id: string
@@ -35,11 +39,12 @@ type Props = {
 }
 
 const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, containerRef }) => {
-	const controls = useAnimation()
+	const urlInputRef = useRef<AutosizeInput>(null)
 
 	const [iframeRef, { width: iframeWidth }] = useMeasure<HTMLIFrameElement>()
 	const {
-		size: { width, height },
+		headerPinned,
+		size: { width },
 		attributes: { url, isLive },
 	} = useCard(card)
 
@@ -64,27 +69,48 @@ const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, contain
 		[card, data?.title, data?.logo]
 	)
 
-	useEffect(() => {
-		if (!data?.video) return
-
-		controls.set({ y: isLive ? -height + 75 : 0 })
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [height])
-
-	useEffect(() => {
-		if (!data?.video) return
-
-		controls.start({ y: isLive ? -height + 75 : 0 })
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isLive])
-
-	const cardOptions = useMemo(
-		() => ({ resizeAxis: { x: isLive && !data?.video ? width >= iframeWidth : true, y: true } }),
-		[isLive, data?.video, width, iframeWidth]
+	const cardOptions = useMemo<CardOptions>(
+		() => ({
+			resizeAxis: { x: isLive && !data?.video ? width >= iframeWidth : true, y: true },
+			menuItems: [
+				{
+					label: 'Open in new tab',
+					action: () => window.open(url),
+					icon: <ExternalLinkIcon className="h-3.5 w-3.5" />,
+				},
+				{
+					label: 'Change URL',
+					icon: <InputFieldIcon className="h-3.5 w-3.5" />,
+					action: () => requestAnimationFrame(() => urlInputRef.current?.input?.focus()),
+				},
+				{
+					label: 'Copy URL',
+					action: () => copy(url),
+					icon: <ClipboardIcon className="h-3.5 w-3.5" />,
+				},
+				{
+					label: 'Pin Header',
+					checked: headerPinned,
+					icon: <HeaderTopIcon className="h-3.5 w-3.5" />,
+					onChange: headerPinned => card.update({ headerPinned }),
+				},
+				...(hasValidEmbed
+					? []
+					: [
+							{
+								label: 'Play / Embed',
+								checked: isLive,
+								icon: <PlayMenuIcon className="h-3.5 w-3.5" />,
+								onChange: isLive => card.update({ attributes: { url, isLive } }),
+							},
+					  ]),
+			],
+		}),
+		[card, headerPinned, hasValidEmbed, urlInputRef, url, isLive, data?.video, width, iframeWidth]
 	)
 	const Header = useMemo(
-		() => <CardHeader card={card} hasValidEmbed={hasValidEmbed} onDelete={onDelete} />,
-		[card, hasValidEmbed, onDelete]
+		() => <CardHeader card={card} hasValidEmbed={hasValidEmbed} onDelete={onDelete} inputRef={urlInputRef} />,
+		[card, hasValidEmbed, onDelete, urlInputRef]
 	)
 
 	return (
@@ -160,12 +186,13 @@ const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, contain
 }
 
 type CardHeaderProps = {
-	card: LiveObject<URLCard>
-	hasValidEmbed: boolean
 	onDelete: () => void
+	hasValidEmbed: boolean
+	card: LiveObject<URLCard>
+	inputRef: MutableRefObject<AutosizeInput>
 }
 
-const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, onDelete }) => {
+const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, onDelete, inputRef }) => {
 	const {
 		headerPinned,
 		attributes: { url, isLive },
@@ -228,6 +255,7 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, onDelete })
 					<p className="select-none whitespace-nowrap">{data?.title ?? <Skeleton />}</p>
 					<p className="text-black/40 dark:text-white/40 text-xs select-none whitespace-nowrap truncate min-w-0">
 						<AutosizeInput
+							ref={inputRef}
 							value={isFocused ? _url : data?.author ?? data?.description ?? _url}
 							onBlur={handleUrlBlur}
 							onFocus={() => setFocused(true)}

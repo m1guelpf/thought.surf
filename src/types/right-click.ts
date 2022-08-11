@@ -1,17 +1,20 @@
 import { Point } from './canvas'
 import { MouseEvent, ReactNode } from 'react'
 
-export type MenuItem = {
+type BaseItem = {
 	label: string
-	shortcut?: string
 	icon?: ReactNode
-	items?: MenuItem[]
-	action?: (event: MouseEvent, mouse: Point) => void
-	submenu?: MenuItem[]
-} & (
-	| { items: MenuItem[]; submenu?: never; action?: never }
-	| { items?: never; submenu: MenuItem[]; action?: never }
-	| { items?: never; submenu?: never; action: (event: MouseEvent, mouse: Point) => void }
-)
+	shortcut?: string
+}
 
-export type Menu = MenuItem[]
+type Group = BaseItem & { items: Menu }
+type SubMenu = BaseItem & { submenu: Menu }
+type MenuItem = BaseItem & {
+	action: (event: MouseEvent, mouse: Point) => void
+}
+type Checkbox = BaseItem & {
+	checked: boolean
+	onChange: (checked: boolean) => void
+}
+
+export type Menu = Array<Group | SubMenu | Checkbox | MenuItem>

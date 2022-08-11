@@ -128,40 +128,41 @@ const Canvas: FC = () => {
 	return (
 		<>
 			<LoadingScreen loading={!cards} />
-			<RightClickMenu menu={menu}>
-				<main ref={canvasRef} className="fixed w-full h-full inset-0 touch-none [contain:strict] z-0">
-					<DevMode />
-					<MultiplayerCursors canvas={canvasRef} />
-					<motion.div
-						transformTemplate={({ scale, x, y }) =>
-							`scale(${scale}) translateX(${x}) translateY(${y}) translateZ(0px)`
-						}
-						className={classNames(
-							shouldTransition && 'transition-transform duration-1000',
-							'absolute will-change-transform'
-						)}
-						onTransitionEnd={() => setTransition(false)}
-						style={{ scale: camera.z, x: camera.x, y: camera.y }}
-					>
-						<div className="pointer-events-[all]">
-							<AnimatePresence>
-								{cards
-									?.toArray()
-									?.reverse()
-									?.map(card => (
-										<CanvasItem
-											key={card.get('id')}
-											id={card.get('id')}
-											card={card}
-											removeCard={removeCard}
-											reorderCard={reorderCard}
-										/>
-									))}
-							</AnimatePresence>
-						</div>
-					</motion.div>
-				</main>
-			</RightClickMenu>
+			<main ref={canvasRef} className="fixed w-full h-full inset-0 touch-none [contain:strict] z-0">
+				<DevMode />
+				<MultiplayerCursors canvas={canvasRef} />
+				<motion.div
+					transformTemplate={({ scale, x, y }) =>
+						`scale(${scale}) translateX(${x}) translateY(${y}) translateZ(0px)`
+					}
+					className={classNames(
+						shouldTransition && 'transition-transform duration-1000',
+						'absolute will-change-transform'
+					)}
+					onTransitionEnd={() => setTransition(false)}
+					style={{ scale: camera.z, x: camera.x, y: camera.y }}
+				>
+					<div className="pointer-events-[all]">
+						<AnimatePresence>
+							{cards
+								?.toArray()
+								?.reverse()
+								?.map(card => (
+									<CanvasItem
+										key={card.get('id')}
+										id={card.get('id')}
+										card={card}
+										removeCard={removeCard}
+										reorderCard={reorderCard}
+									/>
+								))}
+						</AnimatePresence>
+					</div>
+				</motion.div>
+				<RightClickMenu menu={menu}>
+					<div className="fixed inset-0 -z-10" />
+				</RightClickMenu>
+			</main>
 		</>
 	)
 }

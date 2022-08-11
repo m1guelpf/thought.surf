@@ -1,5 +1,7 @@
 import { parse } from 'tldts'
 import { nanoid } from 'nanoid'
+import toast from 'react-hot-toast'
+import _copy from 'copy-to-clipboard'
 
 export const classNames = (...classes: string[]): string => classes.filter(Boolean).join(' ')
 
@@ -48,4 +50,8 @@ export const requestFile = (mimeTypes?: string[]): Promise<File> => {
 
 		input.click()
 	})
+}
+
+export const copy = (text: string) => {
+	_copy(text, { onCopy: () => toast.success('Copied!') })
 }

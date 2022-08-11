@@ -9,11 +9,14 @@ import { Camera, Point } from '@/types/canvas'
 import { uploadFile } from '@/lib/file-upload'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
-import { CardType, ImageCard } from '@/types/cards'
+import HeaderTopIcon from '../Icons/HeaderTopIcon'
+import InputFieldIcon from '../Icons/InputFieldIcon'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { classNames, randomId, requestFile } from '@/lib/utils'
+import { CardOptions, CardType, ImageCard } from '@/types/cards'
 import { XIcon, PhotographIcon, UploadIcon } from '@heroicons/react/solid'
-import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react'
+import { PhotographIcon as PhotographMenuIcon } from '@heroicons/react/outline'
+import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type Props = {
 	id: string
@@ -24,13 +27,25 @@ type Props = {
 	containerRef: MutableRefObject<HTMLDivElement>
 }
 
-const cardOptions = { resizeAxis: { x: true, y: true } }
-
 const ImageCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, containerRef }) => {
+	const titleInputRef = useRef<HTMLInputElement>(null)
 	const [isLoaded, setLoaded] = useState<boolean>(false)
 	const {
+		headerPinned,
 		attributes: { url, title },
 	} = useCard(card)
+
+	const replaceImage = useCallback(async () => {
+		const file = await requestFile(['image/gif', 'image/jpg', 'image/jpeg', 'image/png'])
+
+		card.update({
+			attributes: {
+				mimeType: file.type,
+				url: await uploadFile(file),
+				title: card.get('attributes').title,
+			},
+		})
+	}, [card])
 
 	useEffect(() => {
 		setLoaded(false)
@@ -48,7 +63,35 @@ const ImageCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, conta
 		[card, title]
 	)
 
-	const Header = useMemo(() => <CardHeader card={card} onDelete={onDelete} />, [card, onDelete])
+	const cardOptions = useMemo<CardOptions>(
+		() => ({
+			resizeAxis: { x: true, y: true },
+			menuItems: [
+				{
+					label: 'Change Title',
+					icon: <InputFieldIcon className="h-3.5 w-3.5" />,
+					action: () => requestAnimationFrame(() => titleInputRef.current?.focus()),
+				},
+				{
+					label: 'Replace Image',
+					action: replaceImage,
+					icon: <PhotographMenuIcon className="h-3.5 w-3.5" />,
+				},
+				{
+					label: 'Pin Header',
+					checked: headerPinned,
+					icon: <HeaderTopIcon className="h-3.5 w-3.5" />,
+					onChange: headerPinned => card.update({ headerPinned }),
+				},
+			],
+		}),
+		[card, headerPinned, replaceImage]
+	)
+
+	const Header = useMemo(
+		() => <CardHeader card={card} onDelete={onDelete} replaceImage={replaceImage} inputRef={titleInputRef} />,
+		[card, replaceImage, onDelete, titleInputRef]
+	)
 
 	return (
 		<Card
@@ -74,27 +117,18 @@ const ImageCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, conta
 }
 
 type CardHeaderProps = {
-	card: LiveObject<ImageCard>
 	onDelete: () => void
+	replaceImage: () => void
+	card: LiveObject<ImageCard>
+	inputRef: MutableRefObject<HTMLInputElement>
 }
 
-const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete }) => {
+const CardHeader: FC<CardHeaderProps> = memo(({ card, replaceImage, onDelete, inputRef }) => {
 	const {
 		headerPinned,
 		attributes: { title },
 	} = useCard(card)
 
-	const replaceImage = useCallback(async () => {
-		const file = await requestFile(['image/gif', 'image/jpg', 'image/jpeg', 'image/png'])
-
-		card.update({
-			attributes: {
-				mimeType: file.type,
-				url: await uploadFile(file),
-				title: card.get('attributes').title,
-			},
-		})
-	}, [card])
 	const updatePinned = useCallback(pinned => card.set('headerPinned', pinned), [card])
 	const updateTitle = useCallback(
 		event =>
@@ -129,6 +163,7 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete }) => {
 				<div className="overflow-hidden z-[2]">
 					<input
 						value={title}
+						ref={inputRef}
 						onChange={updateTitle}
 						className="bg-transparent text-xl rounded-lg w-full p-1 px-2 text-black/60 dark:text-white/60"
 						onKeyDown={e => {

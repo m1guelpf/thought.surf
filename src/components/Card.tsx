@@ -45,7 +45,7 @@ const Card: FC<PropsWithChildren<Props>> = ({
 	useGesture(
 		{
 			onPointerDown: ({ event }) => {
-				if (eventAlreadyHandled(event)) return
+				if (eventAlreadyHandled(event) || event.button == 2) return
 
 				const target = event.currentTarget as HTMLDivElement
 

@@ -1,5 +1,6 @@
 import { Point } from '@/types/canvas'
 import { classNames } from '@/lib/utils'
+import { CheckIcon } from '@heroicons/react/solid'
 import { Menu, MenuItem } from '@/types/right-click'
 import { ChevronRightIcon } from '@heroicons/react/outline'
 import * as ContextMenu from '@radix-ui/react-context-menu'
@@ -63,6 +64,24 @@ const MenuRenderer: FC<{ item: MenuItem; isFirst?: boolean; mouse?: RefObject<Po
 					<MenuRenderer key={i} item={item} />
 				))}
 			</>
+		)
+	}
+
+	if (item.onChange) {
+		return (
+			<ContextMenu.CheckboxItem
+				checked={item.checked}
+				onCheckedChange={item.onChange}
+				className={classNames(
+					'w-full text-left',
+					'text-gray-400 focus:bg-gray-50 dark:text-gray-500 dark:focus:bg-gray-900',
+					'flex cursor-default select-none items-center rounded-md px-2 py-2 text-xs outline-none'
+				)}
+			>
+				<MenuItemIcon icon={item.icon} />
+				<MenuItemLabel label={item.label} />
+				{item.checked && <MenuItemIcon icon={<CheckIcon className="w-3.5 h-3.5" />} />}
+			</ContextMenu.CheckboxItem>
 		)
 	}
 
