@@ -55,6 +55,8 @@ const TextCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder, contai
 		[card, onDelete]
 	)
 
+	const onDocUpdate = useCallback(doc => card.set('attributes', { doc, title: card.get('attributes').title }), [card])
+
 	return (
 		<Card
 			id={id}
@@ -68,8 +70,8 @@ const TextCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder, contai
 			<div className="w-full" onPointerDown={onReorder} ref={measureRef}>
 				<TipTap
 					doc={doc}
+					setDoc={onDocUpdate}
 					renderMenu={renderTiptapMenu}
-					setDoc={doc => card.set('attributes', { doc, title })}
 					editorClassName="bg-black/[.01] dark:bg-black/80 rounded-lg"
 				/>
 			</div>
