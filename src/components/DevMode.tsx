@@ -1,11 +1,10 @@
 import { memo, useState } from 'react'
-import { Camera } from '@/types/canvas'
 import { useOthers } from '@/lib/liveblocks'
 import { Sections } from '@/types/command-bar'
+import AsteriskIcon from './Icons/AsteriskIcon'
 import { getBrowserViewport } from '@/lib/canvas'
 import useCamera, { CameraStore } from '@/store/camera'
 import useRegisterAction from '@/hooks/useRegisterAction'
-import { CubeTransparentIcon } from '@heroicons/react/outline'
 
 const getCamera = (store: CameraStore) => store.camera
 
@@ -17,7 +16,7 @@ const DevMode = () => {
 	useRegisterAction({
 		id: 'dev-mode',
 		name: 'Toggle Debug Info',
-		icon: <CubeTransparentIcon />,
+		icon: <AsteriskIcon />,
 		section: Sections.Canvas,
 		keywords: ['debug', 'dev', 'mode'],
 		perform: () => setDevMode(i => !i),

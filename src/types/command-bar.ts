@@ -15,6 +15,7 @@ export enum Priority {
 
 export type Action = {
 	id: string
+	name: string
 	parent?: string
 	icon: ReactNode
 	subtitle?: string
@@ -23,7 +24,6 @@ export type Action = {
 	fallback?: boolean
 	keywords?: string[]
 	priority?: Priority
-	perform?: (query: string) => void
+	perform?: () => void
 	hasChildren?: boolean
-	name: string | ((string) => string)
 }

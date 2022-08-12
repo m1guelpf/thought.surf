@@ -1,4 +1,5 @@
 const colors = require('tailwindcss/colors')
+const plugin = require('tailwindcss/plugin')
 
 /** @type {import('tailwindcss/tailwind-config').TailwindConfig} */
 module.exports = {
@@ -43,5 +44,6 @@ module.exports = {
 		require('@tailwindcss/typography'),
 		require('@tailwindcss/line-clamp'),
 		require('tailwindcss-radix')({ variantPrefix: false }),
+		plugin(({ addVariant }) => addVariant('selected', "&[aria-selected='true']")),
 	],
 }
