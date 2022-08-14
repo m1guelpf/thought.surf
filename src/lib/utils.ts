@@ -17,6 +17,12 @@ export const normalizeKey = (keyCode: string) => {
 }
 
 export const randomId = (): string => nanoid()
+export const randomNum = (min: number, max: number): number => {
+	min = Math.ceil(min)
+	max = Math.floor(max)
+
+	return Math.floor(Math.random() * (max - min + 1)) + min
+}
 
 export const getSubdomain = (host: string): string => {
 	if (host.includes('localhost:')) return host.split('localhost:')[0].replace(/\.$/, '')

@@ -1,5 +1,6 @@
 const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
+const defaultTheme = require('tailwindcss/defaultTheme')
 
 /** @type {import('tailwindcss/tailwind-config').TailwindConfig} */
 module.exports = {
@@ -7,6 +8,10 @@ module.exports = {
 	darkMode: 'class',
 	theme: {
 		extend: {
+			fontFamily: {
+				rbk: ['RubikVariable', ...defaultTheme.fontFamily.sans],
+				sans: ['Inter', ...defaultTheme.fontFamily.sans],
+			},
 			colors: {
 				'soft-black': '#141415',
 				gray: colors.neutral,
@@ -14,6 +19,7 @@ module.exports = {
 			animation: {
 				loading: 'loading 2s linear infinite',
 				'scale-in': 'scale-in 0.2s ease-in-out',
+				'rainbow-colors': 'rainbow-colors 1s linear 0s infinite',
 				'slide-down': 'slide-down 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
 				'slide-up': 'slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
 			},
@@ -36,6 +42,24 @@ module.exports = {
 				'slide-up': {
 					'0%': { opacity: 0, transform: 'translateY(10px)' },
 					'100%': { opacity: 1, transform: 'translateY(0)' },
+				},
+				'rainbow-colors': {
+					'0%, 100%': {
+						color: '#6666ff',
+						borderColor: '#6666ff',
+					},
+					'10%': {
+						color: '#0099ff',
+						borderColor: '#0099ff',
+					},
+					'50%': {
+						color: '#00ff00',
+						borderColor: '#00ff00',
+					},
+					'75%': {
+						color: '#ff3399',
+						borderColor: '#ff3399',
+					},
 				},
 			},
 		},

@@ -12,15 +12,7 @@ export default function middleware(req: NextRequest) {
 	const url = req.nextUrl
 	const subdomain = getSubdomain(req.headers.get('host'))
 
-	// `{id}.infinite.camp/` => `/board/{id}`
-	if (subdomain) {
-		if (url.pathname != '/') return rewriteTo(`/404`, url)
-
-		return rewriteTo(`/board/${subdomain}`, url)
-	}
-
-	// `/` => `/board/home`
-	if (url.pathname == '/') return rewriteTo(`/board/home`, url)
+	if (subdomain) return rewriteTo(`/404`, url)
 }
 
 const rewriteTo = (path: string, url: NextURL): NextResponse => {
