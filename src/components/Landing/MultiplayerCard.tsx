@@ -4,7 +4,7 @@ import { Point } from 'framer-motion'
 import { APP_NAME } from '@/lib/consts'
 import partyParrot from '@images/parrot.gif'
 import { RandomCursors } from './RandomCursor'
-import { FC, PropsWithChildren, RefObject } from 'react'
+import { FC, memo, PropsWithChildren, RefObject } from 'react'
 
 type Props = PropsWithChildren<{
 	initialPos: Point
@@ -28,7 +28,7 @@ const MultiplayerCard: FC<Props> = ({ containerRef, initialPos }) => {
 			</div>
 			<div className="mt-4 relative h-24 group">
 				<RandomCursors render={4} />
-				<span className="absolute inset-0 flex items-center justify-center text-gray-300 group-hover:opacity-0 transition-opacity duration-300">
+				<span className="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-700 group-hover:opacity-0 transition-opacity duration-300">
 					(hover me)
 				</span>
 				<div className="mt-4 flex h-full items-center justify-center border-4 border-indigo-500 group-hover:animate-rainbow-colors border-dashed opacity-40 group-hover:opacity-100 transition-all duration-300 filter blur-md group-hover:blur-0">
@@ -55,4 +55,4 @@ const MultiplayerCard: FC<Props> = ({ containerRef, initialPos }) => {
 	)
 }
 
-export default MultiplayerCard
+export default memo(MultiplayerCard)

@@ -1,4 +1,5 @@
 import type p5 from 'p5'
+import { memo } from 'react'
 import Sketch from 'react-p5'
 
 const vectorShader = `
@@ -330,4 +331,4 @@ const AnimatedBackground = ({ className = '' }) => {
 	return <Sketch draw={draw} setup={setup} className={className} windowResized={windowResize} />
 }
 
-export default AnimatedBackground
+export default memo(AnimatedBackground)

@@ -2,11 +2,14 @@ import Link from 'next/link'
 import { useRef } from 'react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
+import { useTheme } from 'next-themes'
 import { motion } from 'framer-motion'
 import { APP_NAME } from '@/lib/consts'
+import { ConnectKitButton } from 'connectkit'
 import FileCard from '@/components/Landing/FileCard'
 import LoadingIcon from '@/components/Icons/LoadingIcon'
 import m1guelpfAvatar from '@images/avatars/m1guelpf.jpg'
+import ThemeButton from '@/components/Landing/ThemeButton'
 import { BubbleHeading } from '@/components/Landing/BubbleText'
 import MultiplayerCard from '@/components/Landing/MultiplayerCard'
 const AnimatedBackground = dynamic(() => import('@/components/Landing/AnimatedBackground'), { ssr: false })
@@ -14,6 +17,7 @@ const AnimatedBackground = dynamic(() => import('@/components/Landing/AnimatedBa
 const MotionLink = motion(Link)
 
 const LandingPage = () => {
+	const { theme, setTheme } = useTheme()
 	const containerRef = useRef<HTMLDivElement>(null)
 
 	return (
@@ -22,13 +26,33 @@ const LandingPage = () => {
 				<MotionLink href="/" whileHover={{ scale: 1.05, rotate: -2 }} whileTap={{ scale: 1.05, rotate: 2 }}>
 					<LoadingIcon className="w-24 -ml-4 md:m-0" />
 				</MotionLink>
-				<motion.button
-					whileHover={{ scale: 1.05, rotate: 2 }}
-					whileTap={{ scale: 1.05, rotate: 2 }}
-					className="md:text-lg font-bold"
-				>
-					Sign in
-				</motion.button>
+				<ConnectKitButton.Custom>
+					{({ show, isConnected }) => {
+						if (!isConnected) {
+							return (
+								<motion.button
+									onClick={show}
+									className="md:text-lg font-bold"
+									whileTap={{ scale: 1.05, rotate: 2 }}
+									whileHover={{ scale: 1.05, rotate: 2 }}
+								>
+									Sign in
+								</motion.button>
+							)
+						}
+
+						return (
+							<MotionLink
+								href="/dashboard"
+								className="md:text-lg font-bold"
+								whileTap={{ scale: 1.05, rotate: 2 }}
+								whileHover={{ scale: 1.05, rotate: 2 }}
+							>
+								Dashboard
+							</MotionLink>
+						)
+					}}
+				</ConnectKitButton.Custom>
 			</div>
 			<div
 				className="flex-1 md:mb-3 h-full w-full flex flex-col items-center md:justify-around md:rounded-[48px] pb-10 md:pt-10 relative space-y-6 md:space-y-0 overflow-hidden"
@@ -43,7 +67,7 @@ const LandingPage = () => {
 					className="py-3 px-6"
 					title="README.md"
 					containerRef={containerRef}
-					initialPos={{ x: 52, y: 110 }}
+					initialPos={{ x: 303, y: 580 }}
 				>
 					<p className="max-w-[18rem] md:max-w-md text-sm md:text-lg">
 						<h1 className="text-2xl font-medium mb-3"># Welcome to {APP_NAME}</h1>
@@ -52,17 +76,18 @@ const LandingPage = () => {
 						bookmarks, embeds, and multiplayer, your brain will feel just at home.
 					</p>
 				</FileCard>
-				<MultiplayerCard containerRef={containerRef} initialPos={{ x: 540, y: 60 }} />
+				<MultiplayerCard containerRef={containerRef} initialPos={{ x: 4789, y: 1068 }} />
 				<div className="hidden [content-visibility:hidden] md:[content-visibility:unset] md:absolute inset-0 md:flex items-center justify-center">
 					<BubbleHeading containerRef={containerRef} />
 				</div>
-				<div className="absolute bottom-4 inset-x-0 flex justify-center z-50">
+				<ThemeButton className="absolute bottom-0 right-0" />
+				<div className="absolute bottom-4 inset-x-0 flex justify-center z-50 pointer-events-none">
 					<motion.a
 						target="_blank"
 						rel="noreferrer"
 						whileHover={{ scale: 1.03 }}
 						href="https://twitter.com/m1guelpf"
-						className="flex items-center space-x-2 bg-black/10 py-1 pl-4 pr-2 rounded-full"
+						className="flex items-center space-x-2 bg-black/10 py-1 pl-4 pr-2 rounded-full pointer-events-auto"
 					>
 						<p className="text-white">Built by</p>
 						<a className="flex items-center space-x-1">

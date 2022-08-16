@@ -9,7 +9,7 @@ type Props = {
 	doc: JSONContent
 	className?: string
 	editorClassName?: string
-	setDoc: (doc: JSONContent) => void
+	setDoc?: (doc: JSONContent) => void
 	renderMenu?: RefObject<HTMLDivElement>
 }
 
@@ -22,7 +22,7 @@ const TipTap: FC<Props> = ({ className = '', editorClassName = '', doc, setDoc, 
 		},
 		content: doc,
 		onUpdate: ({ editor }) => {
-			setDoc(editor.getJSON())
+			setDoc && setDoc(editor.getJSON())
 		},
 		extensions: [
 			Link.configure({ HTMLAttributes: { target: '_blank' } }),

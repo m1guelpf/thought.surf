@@ -1,11 +1,11 @@
 import { randomNum } from '@/lib/utils'
 import { PerfectCursor } from 'perfect-cursors'
 import avatar3 from '@images/avatars/ruedart.jpg'
-import avatar4 from '@images/avatars/punk4156.jpg'
 import avatar1 from '@images/avatars/m1guelpf.jpg'
+import avatar4 from '@images/avatars/dcbuild3r.jpg'
 import avatar2 from '@images/avatars/sadlyoddisfying.jpg'
 import { CURSOR_COLORS, CURSOR_NAMES } from '@/lib/consts'
-import { FC, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { FC, memo, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
 
 const CURSOR_AVATARS: string[] = [avatar1.src, avatar2.src, avatar3.src, avatar4.src]
@@ -74,4 +74,4 @@ export const RandomCursors: FC<{ render: number }> = ({ render }) => {
 	)
 }
 
-export default RandomCursor
+export default memo(RandomCursor)

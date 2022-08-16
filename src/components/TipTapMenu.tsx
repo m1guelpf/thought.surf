@@ -8,7 +8,7 @@ import { LinkIcon } from '@heroicons/react/solid'
 import StrikethroughIcon from './Icons/StrikethroughIcon'
 
 export const TipTapMenu = ({ editor, renderAt }: { editor: Editor; renderAt: RefObject<HTMLDivElement> }) => {
-	if (!editor) return
+	if (!editor || !renderAt?.current) return
 
 	return createPortal(
 		<>

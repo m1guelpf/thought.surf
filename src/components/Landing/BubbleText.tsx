@@ -1,6 +1,6 @@
 import { classNames } from '@/lib/utils'
 import { motion, MotionProps } from 'framer-motion'
-import { FC, PropsWithChildren, RefObject, useMemo } from 'react'
+import { FC, memo, PropsWithChildren, RefObject, useMemo } from 'react'
 
 type Props = PropsWithChildren<{
 	className?: { container?: string; text?: string; shadow?: string }
@@ -26,26 +26,26 @@ const BubbleText: FC<Props & MotionProps> = ({ children, className = {}, ...prop
 	)
 }
 
-export const BubbleHeading: FC<{ containerRef: RefObject<HTMLDivElement>; className?: string }> = ({
-	containerRef,
-	className,
-}) => {
-	return (
-		<BubbleText
-			drag
-			dragSnapToOrigin
-			dragElastic={0.001}
-			dragConstraints={containerRef}
-			whileDrag={{ cursor: 'grabbing' }}
-			className={{
-				shadow: 'bg-purple-900/40',
-				text: 'text-center text-4xl md:text-7xl font-black text-white',
-				container: classNames(className, 'max-w-[300px] md:max-w-6xl mx-auto cursor-grab'),
-			}}
-		>
-			Your ideas are limitless. Break the walls around them.
-		</BubbleText>
-	)
-}
+export const BubbleHeading: FC<{ containerRef: RefObject<HTMLDivElement>; className?: string }> = memo(
+	({ containerRef, className }) => {
+		return (
+			<BubbleText
+				drag
+				dragSnapToOrigin
+				dragElastic={0.001}
+				dragConstraints={containerRef}
+				whileDrag={{ cursor: 'grabbing' }}
+				className={{
+					shadow: 'bg-purple-900/40',
+					text: 'text-center text-4xl md:text-7xl font-black text-white',
+					container: classNames(className, 'max-w-[300px] md:max-w-6xl mx-auto cursor-grab'),
+				}}
+			>
+				Your ideas are limitless. Break the walls around them.
+			</BubbleText>
+		)
+	}
+)
+BubbleHeading.displayName = 'BubbleHeading'
 
-export default BubbleText
+export default memo(BubbleText)
