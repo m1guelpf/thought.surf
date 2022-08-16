@@ -33,6 +33,7 @@ const RandomCursor: FC<Props> = ({}) => {
 
 	useLayoutEffect(() => {
 		const interval = setInterval(() => {
+			if (!document.hasFocus()) return
 			pc.addPoint([randomNum(0, 80), randomNum(0, 80)])
 			if (rCursor.current.style.top) rCursor.current.style.opacity = '1'
 		}, 1000 + i * randomNum(100, 500))
