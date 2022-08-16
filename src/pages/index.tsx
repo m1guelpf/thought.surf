@@ -2,22 +2,71 @@ import Link from 'next/link'
 import { useRef } from 'react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import { useTheme } from 'next-themes'
 import { motion } from 'framer-motion'
 import { APP_NAME } from '@/lib/consts'
+import { JSONContent } from '@tiptap/react'
 import { ConnectKitButton } from 'connectkit'
-import FileCard from '@/components/Landing/FileCard'
 import LoadingIcon from '@/components/Icons/LoadingIcon'
 import m1guelpfAvatar from '@images/avatars/m1guelpf.jpg'
 import ThemeButton from '@/components/Landing/ThemeButton'
+import EditableCard from '@/components/Landing/EditableCard'
 import { BubbleHeading } from '@/components/Landing/BubbleText'
 import MultiplayerCard from '@/components/Landing/MultiplayerCard'
+import { buildDoc, buildHeading, buildParagraph, buildTaskItem, buildTaskList, buildText } from '@/lib/tiptap/builder'
 const AnimatedBackground = dynamic(() => import('@/components/Landing/AnimatedBackground'), { ssr: false })
 
 const MotionLink = motion(Link)
 
+const CARD_CONTENTS: Record<string, JSONContent> = {
+	readme: buildDoc([
+		buildHeading(`# Welcome to ${APP_NAME}`, 3),
+		buildParagraph([
+			buildText(APP_NAME, { color: '#a855f7', 'font-weight': '500' }),
+			' gives you an infinite canvas to organize your thoughts, collaborate with others and brainstorm new ideas. With interactive bookmarks, embeds, and multiplayer, your brain will feel just at home.',
+		]),
+	]),
+	features: buildDoc([
+		buildHeading(`# ${APP_NAME} features`, 3),
+		buildTaskList([
+			buildTaskItem('Infinite canvas with zoom, pan & drag', true),
+			buildTaskItem(
+				[
+					'Cards',
+					buildTaskList([
+						buildTaskItem('Drag & resize', true),
+						buildTaskItem(
+							[
+								'Bookmark cards',
+								buildTaskList([
+									buildTaskItem('Screenshot website', true),
+									buildTaskItem('"Play" mode (live frame)', true),
+								]),
+							],
+							true
+						),
+						buildTaskItem('Image/video upload', true),
+						buildTaskItem('Tweet embeds', true),
+						buildTaskItem('Other embeds', true),
+					]),
+				],
+				true
+			),
+			buildTaskItem(
+				[
+					'Multiplayer',
+					buildTaskList([
+						buildTaskItem('Live cursors', true),
+						buildTaskItem('Live typing', true),
+						buildTaskItem('Live dragging/resizing/creating', true),
+					]),
+				],
+				true
+			),
+		]),
+	]),
+}
+
 const LandingPage = () => {
-	const { theme, setTheme } = useTheme()
 	const containerRef = useRef<HTMLDivElement>(null)
 
 	return (
@@ -43,7 +92,7 @@ const LandingPage = () => {
 
 						return (
 							<MotionLink
-								href="/dashboard"
+								href="/board/home"
 								className="md:text-lg font-bold"
 								whileTap={{ scale: 1.05, rotate: 2 }}
 								whileHover={{ scale: 1.05, rotate: 2 }}
@@ -63,19 +112,18 @@ const LandingPage = () => {
 					<AnimatedBackground className="absolute -z-10" />
 				</div>
 				<BubbleHeading className="mt-4 md:hidden md:[content-visibility:hidden]" containerRef={containerRef} />
-				<FileCard
-					className="py-3 px-6"
+				<EditableCard
 					title="README.md"
 					containerRef={containerRef}
+					content={CARD_CONTENTS.readme}
 					initialPos={{ x: 303, y: 580 }}
-				>
-					<p className="max-w-[18rem] md:max-w-md text-sm md:text-lg">
-						<h1 className="text-2xl font-medium mb-3"># Welcome to {APP_NAME}</h1>
-						<span className="font-medium text-purple-500">{APP_NAME}</span> gives you an infinite canvas to
-						organize your thoughts, collaborate with others and brainstorm new ideas. With interactive
-						bookmarks, embeds, and multiplayer, your brain will feel just at home.
-					</p>
-				</FileCard>
+				/>
+				<EditableCard
+					title="Features.md"
+					containerRef={containerRef}
+					content={CARD_CONTENTS.features}
+					initialPos={{ x: 357, y: 3795 }}
+				/>
 				<MultiplayerCard containerRef={containerRef} initialPos={{ x: 4789, y: 1068 }} />
 				<div className="hidden [content-visibility:hidden] md:[content-visibility:unset] md:absolute inset-0 md:flex items-center justify-center">
 					<BubbleHeading containerRef={containerRef} />

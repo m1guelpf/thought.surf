@@ -2,30 +2,29 @@ import Image from 'next/image'
 import FileCard from './FileCard'
 import { Point } from 'framer-motion'
 import { APP_NAME } from '@/lib/consts'
+import EditableCard from './EditableCard'
+import { JSONContent } from '@tiptap/react'
 import partyParrot from '@images/parrot.gif'
 import { RandomCursors } from './RandomCursor'
 import { FC, memo, PropsWithChildren, RefObject } from 'react'
+import { buildDoc, buildHeading, buildParagraph, buildText } from '@/lib/tiptap/builder'
 
 type Props = PropsWithChildren<{
 	initialPos: Point
 	containerRef: RefObject<HTMLDivElement>
 }>
 
+const cardDoc: JSONContent = buildDoc([
+	buildHeading("# Aren't things better with frens?", 3),
+	buildParagraph([
+		buildText(APP_NAME, { color: '#a855f7', 'font-weight': '500' }),
+		' natively supports multiplayer, so you can jam on ideas with your favourite people.',
+	]),
+])
+
 const MultiplayerCard: FC<Props> = ({ containerRef, initialPos }) => {
 	return (
-		<FileCard
-			title="Multiplayer_Fun.md"
-			className="relative flex-1 py-3 px-6"
-			initialPos={initialPos}
-			containerRef={containerRef}
-		>
-			<div className="max-w-[18rem] md:max-w-md text-sm md:text-lg">
-				<p className="text-2xl font-medium mb-3"># Aren&apos;t things better with frens?</p>
-				<p className="text-lg ">
-					<span className="font-medium text-purple-500">{APP_NAME}</span> natively supports multiplayer, so
-					you can jam on ideas with your favourite people.
-				</p>
-			</div>
+		<EditableCard content={cardDoc} title="Multiplayer_Fun.md" initialPos={initialPos} containerRef={containerRef}>
 			<div className="mt-4 relative h-24 group">
 				<RandomCursors render={4} />
 				<span className="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-700 group-hover:opacity-0 transition-opacity duration-300">
@@ -51,7 +50,7 @@ const MultiplayerCard: FC<Props> = ({ containerRef, initialPos }) => {
 					</div>
 				</div>
 			</div>
-		</FileCard>
+		</EditableCard>
 	)
 }
 
