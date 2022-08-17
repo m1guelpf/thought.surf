@@ -3664,10 +3664,10 @@ clsx@^1.1.0:
   resolved "https://registry.yarnpkg.com/clsx/-/clsx-1.2.1.tgz#0ddc4a20a549b59c93a4116bb26f5294ca17dc12"
   integrity sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==
 
-cmdk@^0.1.18:
-  version "0.1.18"
-  resolved "https://registry.yarnpkg.com/cmdk/-/cmdk-0.1.18.tgz#e9c1bd599b25d7e8b5dfbafdf07e850fa52516b7"
-  integrity sha512-+9RbuAkOTY3yaSDQeL6CzC36KBTelVywHR9M5ap7ZiC6aJ5iePtRqTUZ3IS7W9CMrxZyBWAv9yAYZJBhw9t/oQ==
+cmdk@^0.1.19:
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/cmdk/-/cmdk-0.1.19.tgz#57448a37079a353347e9c5dc29d9d53025e5ea9a"
+  integrity sha512-cG0d9GXBVS1G4yk8ZcwGw0TrWOHTaPlnkawo33qZtodJLnx6rFeINyhpFPHv+LMd4HQqxFEGh8jfJqEKS/Sh3g==
   dependencies:
     "@radix-ui/react-dialog" "0.1.7"
     command-score "0.1.2"

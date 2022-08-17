@@ -184,7 +184,7 @@ type OptionRendererProps = {
 const OptionRenderer: FC<OptionRendererProps> = ({ actions, className, query, parents, onClick }) => (
 	<Command.List className={className}>
 		{actions.map(([name, actions], i) => (
-			<CommandGroup key={name} name={name} isFirst={i === 0} skip={query != ''}>
+			<CommandGroup key={name} name={name} isFirst={i === 0}>
 				{actions.map(action => (
 					<Command.Item
 						key={action.id}
@@ -240,7 +240,7 @@ const OptionRenderer: FC<OptionRendererProps> = ({ actions, className, query, pa
 type CommandGroupTypes = PropsWithChildren<{ name: string; skip?: boolean; isFirst: boolean }>
 
 const CommandGroup: FC<CommandGroupTypes> = ({ name, children, skip, isFirst }) => {
-	if (skip || !name) return <>{children}</>
+	if (!name) return <>{children}</>
 
 	return (
 		<Command.Group
