@@ -43,6 +43,7 @@ const FileCard: FC<Props> = ({ containerRef, title, icon: Icon, children, classN
 			dragElastic={false}
 			dragMomentum={false}
 			style={{ x, y, scale }}
+			whileDrag={{ cursor: 'grabbing' }}
 			className="absolute top-0 left-0 bg-white dark:bg-gray-900 rounded-3xl overflow-hidden z-20 md:min-w-[300px] md:min-h-[150px] shadow-card mx-2 md:mx-0"
 		>
 			<div className="bg-gray-100 dark:bg-gray-700 py-3 flex items-center justify-center space-x-1">

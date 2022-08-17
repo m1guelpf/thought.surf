@@ -13,6 +13,9 @@ const useTrackCursor = (canvasRef: RefObject<HTMLDivElement>) => {
 			onPointerMove: ({ event }) => {
 				updateMyPresence({ cursor: screenToCanvas({ x: event.clientX, y: event.clientY }, camera.current) })
 			},
+			onPointerLeave: () => {
+				updateMyPresence({ cursor: null })
+			},
 		},
 		{ target: canvasRef }
 	)

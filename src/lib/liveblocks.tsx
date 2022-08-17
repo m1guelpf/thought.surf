@@ -64,13 +64,13 @@ export const LiveProvider: FC<PropsWithChildren<{ roomId: string; onAuthFailure?
 
 	return (
 		<RoomProvider id={roomId} initialStorage={{ cards: DEFAULT_ROOM_CONTENT }}>
-			<RoomStateWatcher state={state} setState={setState} />
+			<RoomStateWatcher setState={setState} />
 			{children}
 		</RoomProvider>
 	)
 }
 
-export const RoomStateWatcher = ({ state, setState }) => {
+export const RoomStateWatcher = ({ setState }) => {
 	const room = useRoom()
 
 	useEffect(() => {
@@ -80,4 +80,16 @@ export const RoomStateWatcher = ({ state, setState }) => {
 	})
 
 	return null
+}
+
+export const getRoomsUserCount = async (roomId: string, jwtToken: string): Promise<number> => {
+	// API not documented on liveblocks.io
+	const result = await fetch(`https://liveblocks.net/api/v1/room/${roomId}/users`, {
+		headers: {
+			Authorization: `Bearer ${jwtToken}`,
+			'Content-Type': 'application/json',
+		},
+	}).then(res => res.json())
+
+	return result.data.length
 }
