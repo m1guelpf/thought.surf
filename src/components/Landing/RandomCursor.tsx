@@ -52,10 +52,10 @@ const RandomCursor: FC<Props> = ({}) => {
 			className="absolute pointer-events-none top-0 left-0 w-14 h-14 z-20 overflow-hidden rounded-full rounded-tl-none flex items-center justify-center transition-opacity"
 		>
 			<Avatar>
-				<AvatarImage src={CURSOR_AVATARS?.[i]} alt="" className="w-full h-full" />
+				<AvatarImage src={CURSOR_AVATARS[i % CURSOR_AVATARS.length]} alt="" className="w-full h-full" />
 				<AvatarFallback>
 					<p className={`leading-relaxed text-white text-2xl whitespace-nowrap uppercase`}>
-						{CURSOR_NAMES[i]}
+						{CURSOR_NAMES[i % CURSOR_NAMES.length]}
 					</p>
 				</AvatarFallback>
 			</Avatar>

@@ -18,7 +18,7 @@ const FileCard: FC<Props> = ({ containerRef, title, icon: Icon, children, classN
 	const y = useMotionValue(0)
 	const scale = useMotionValue(0)
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		const container = containerRef.current
 		if (!container) return
 
