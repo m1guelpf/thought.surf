@@ -1,5 +1,6 @@
 import { randomId } from '@/lib/utils'
 import { withSession } from '@/lib/session'
+import { MAX_FILE_SIZE } from '@/lib/consts'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { GetFederationTokenCommand, STSClient, STSClientConfig } from '@aws-sdk/client-sts'
 
@@ -12,6 +13,8 @@ let config: STSClientConfig = {
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+	if (req.body.size > MAX_FILE_SIZE) return res.status(400).send('Invalid file.')
+
 	let key = `uploads/${randomId()}/${req.body.filename.toLowerCase()}`
 
 	let policy = {

@@ -1,16 +1,18 @@
 import toast from 'react-hot-toast'
+import { MAX_FILE_SIZE } from './consts'
 import { Upload } from '@aws-sdk/lib-storage'
 import { XhrHttpHandler } from '@aws-sdk/xhr-http-handler'
 import { CompleteMultipartUploadCommandOutput, PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3'
 
 export const uploadFile = async (file: File): Promise<string> => {
 	const toastId = toast.loading('Uploading...')
+	if (file.size > MAX_FILE_SIZE) throw toast.error('File must be smaller than 10MB', { id: toastId })
 
 	let data = await fetch('/api/file-upload', {
 		method: 'POST',
 		credentials: 'include',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ filename: encodeURIComponent(file.name) }),
+		body: JSON.stringify({ filename: encodeURIComponent(file.name), size: file.size }),
 	}).then(res => res.json())
 
 	if (data.error) throw data.error

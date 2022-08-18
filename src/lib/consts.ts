@@ -30,6 +30,8 @@ export const REGEX = {
 	URL: /^(?:https?:\/\/.)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*$/,
 }
 
+export const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+
 export const IMAGE_TYPES = ['image/gif', 'image/jpg', 'image/jpeg', 'image/png', 'image/webp']
 export const VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
 export const OTHER_TYPES = ['application/pdf']
