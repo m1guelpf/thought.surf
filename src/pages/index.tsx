@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { APP_NAME } from '@/lib/consts'
 import { JSONContent } from '@tiptap/react'
 import { ConnectKitButton } from 'connectkit'
+import useWalletAuth from '@/hooks/useWalletAuth'
 import LoadingIcon from '@/components/Icons/LoadingIcon'
 import m1guelpfAvatar from '@images/avatars/m1guelpf.jpg'
 import ThemeButton from '@/components/Landing/ThemeButton'
@@ -67,6 +68,7 @@ const CARD_CONTENTS: Record<string, JSONContent> = {
 }
 
 const LandingPage = () => {
+	useWalletAuth()
 	const containerRef = useRef<HTMLDivElement>(null)
 
 	return (
