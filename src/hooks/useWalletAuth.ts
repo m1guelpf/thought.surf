@@ -1,14 +1,29 @@
 import { SiweMessage } from 'siwe'
+import { User } from '@prisma/client'
+import useSWRMutation from 'swr/mutation'
 import useSWRImmutable from 'swr/immutable'
 import { LoginResponse } from '@/pages/api/auth/login'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
 
-const useWalletAuth = () => {
+type WalletAuth = {
+	user: User
+	loading: boolean
+	logout: () => void
+	authenticated: boolean
+	updateUser: (user: { name: string; avatar: string }) => Promise<void>
+}
+
+const updateUser = (_, { arg }) => {
+	return fetch('/api/auth/user', { method: 'PUT', body: JSON.stringify(arg) }).then(res => res.json())
+}
+
+const useWalletAuth = (): WalletAuth => {
 	const { address } = useAccount()
 	const { disconnect } = useDisconnect()
 	const isConnected = useRef<boolean>(false)
 
+	const { trigger: triggerUserUpdate } = useSWRMutation('/api/auth/login', updateUser, { revalidate: true })
 	const { data, isLoading, mutate } = useSWRImmutable<LoginResponse>('/api/auth/login', url =>
 		fetch(url, { credentials: 'include' }).then(res => res.json())
 	)
@@ -67,7 +82,13 @@ const useWalletAuth = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [address])
 
-	return { logout: onLogout, authenticated: data?.authenticated, user: data?.user }
+	return {
+		user: data?.user,
+		logout: onLogout,
+		loading: isLoading,
+		updateUser: triggerUserUpdate,
+		authenticated: data?.authenticated,
+	}
 }
 
 export default useWalletAuth

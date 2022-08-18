@@ -32,7 +32,7 @@ const LoadingIcon: FC<{ className?: string; animated?: boolean; simple?: boolean
 		{animated || simple ? (
 			<use
 				className={`text-purple-400/90 ${animated ? 'animate-loading' : ''}`}
-				xlinkHref={!simple && '#inf'}
+				xlinkHref={simple ? '' : '#inf'}
 				strokeDasharray="1570 5143"
 				strokeDashoffset="6713px"
 			></use>

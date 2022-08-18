@@ -46,7 +46,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		await prisma.user.create({
 			data: {
 				address,
-				name: ensName ?? `${address.slice(0, 6)}...${address.slice(-4)}`,
+				name: ensName ?? `${address.slice(0, 6)}…${address.slice(-4)}`,
 				profile_picture_url: ensName ? await provider.getAvatar(ensName) : null,
 			},
 		})

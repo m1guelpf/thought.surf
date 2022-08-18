@@ -10,13 +10,13 @@ const AnimatedBackground = dynamic(() => import('@/components/Landing/AnimatedBa
 
 const LoginPage = () => {
 	const router = useRouter()
-	const { authenticated } = useWalletAuth()
+	const { loading, authenticated } = useWalletAuth()
 
 	useEffect(() => {
-		if (!authenticated) return
+		if (loading || !authenticated) return
 
 		router.push(`/${router.query.redirect || 'dashboard'}`)
-	}, [authenticated, router])
+	}, [loading, authenticated, router])
 
 	return (
 		<div className="min-h-screen flex bg-pattern">
