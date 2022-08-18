@@ -9,7 +9,7 @@ import { LiveObject } from '@liveblocks/client'
 import useRegisterAction from '../useRegisterAction'
 import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
-import { createImageCard } from '@/components/Cards/ImageCard'
+import { createFileCard } from '@/components/Cards/FileCard'
 import useCamera, { shallow, CameraStore, useRefCamera } from '@/store/camera'
 import {
 	LinkIcon,
@@ -117,7 +117,7 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 
 					cards.insert(
 						new LiveObject(
-							createImageCard(camera.current, {
+							createFileCard(camera.current, {
 								name: file.name,
 								mimeType: file.type,
 								url: await uploadFile(file),

@@ -10,7 +10,7 @@ import { uploadFile } from '@/lib/file-upload'
 import { createURLCard } from './Cards/URLCard'
 import { LiveObject } from '@liveblocks/client'
 import { createTextCard } from './Cards/TextCard'
-import { createImageCard } from './Cards/ImageCard'
+import { createFileCard } from './Cards/FileCard'
 import MultiplayerCursors from './MultiplayerCursors'
 import { AnimatePresence, motion } from 'framer-motion'
 import useCamera, { CameraStore } from '@/store/camera'
@@ -78,7 +78,7 @@ const Canvas: FC = () => {
 
 							cards.insert(
 								new LiveObject(
-									createImageCard(camera, {
+									createFileCard(camera, {
 										point,
 										name: file.name,
 										mimeType: file.type,

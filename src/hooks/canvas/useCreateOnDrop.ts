@@ -11,11 +11,11 @@ const useCreateOnDrop = () => {
 	const camera = useRefCamera()
 
 	const onDrop = useCallback(
-		(event: DragEvent) => {
+		async (event: DragEvent) => {
 			if (eventAlreadyHandled(event)) return
 			event.preventDefault()
 
-			const addCards = cardFromDrag(
+			const addCards = await cardFromDrag(
 				event,
 				camera.current,
 				getNamedCards(cards).map(({ attributes: { title } }) => title)

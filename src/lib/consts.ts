@@ -30,4 +30,9 @@ export const REGEX = {
 	URL: /^(?:https?:\/\/.)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*$/,
 }
 
+export const IMAGE_TYPES = ['image/gif', 'image/jpg', 'image/jpeg', 'image/png', 'image/webp']
+export const VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
+export const OTHER_TYPES = ['application/pdf']
+export const MIME_TYPES = [...IMAGE_TYPES, ...VIDEO_TYPES, ...OTHER_TYPES]
+
 export const uriExpandBlacklist = ['giphy.com/', 'twitter.com/']

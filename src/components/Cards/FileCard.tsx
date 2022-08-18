@@ -13,8 +13,8 @@ import HeaderTopIcon from '../Icons/HeaderTopIcon'
 import InputFieldIcon from '../Icons/InputFieldIcon'
 import useRegisterAction from '@/hooks/useRegisterAction'
 import { classNames, randomId, requestFile } from '@/lib/utils'
-import { CardOptions, CardType, ImageCard } from '@/types/cards'
 import { XIcon, PhotographIcon, UploadIcon } from '@heroicons/react/solid'
+import { CardOptions, CardType, ImageCard as FileCard } from '@/types/cards'
 import { PhotographIcon as PhotographMenuIcon } from '@heroicons/react/outline'
 import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -23,11 +23,11 @@ type Props = {
 	onReorder: () => void
 	navigateTo: () => void
 	onDelete: () => unknown
-	card: LiveObject<ImageCard>
+	card: LiveObject<FileCard>
 	containerRef: MutableRefObject<HTMLDivElement>
 }
 
-const ImageCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, containerRef }) => {
+const FileCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, containerRef }) => {
 	const titleInputRef = useRef<HTMLInputElement>(null)
 	const [isLoaded, setLoaded] = useState<boolean>(false)
 	const {
@@ -119,7 +119,7 @@ const ImageCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, conta
 type CardHeaderProps = {
 	onDelete: () => void
 	replaceImage: () => void
-	card: LiveObject<ImageCard>
+	card: LiveObject<FileCard>
 	inputRef: MutableRefObject<HTMLInputElement>
 }
 
@@ -200,7 +200,7 @@ CardHeader.displayName = 'CardHeader'
 
 type CreateTypes = { url: string; name?: string; mimeType: string; point?: Point; names?: string[] }
 
-export const createImageCard = (camera: Camera, { url, name, mimeType, point, names }: CreateTypes): ImageCard => {
+export const createFileCard = (camera: Camera, { url, name, mimeType, point, names }: CreateTypes): FileCard => {
 	return {
 		id: randomId(),
 		type: CardType.FILE,
@@ -210,4 +210,4 @@ export const createImageCard = (camera: Camera, { url, name, mimeType, point, na
 	}
 }
 
-export default memo(ImageCard)
+export default memo(FileCard)

@@ -9,10 +9,10 @@ const useCreateOnPaste = () => {
 	const camera = useRefCamera()
 
 	const onPaste = useCallback(
-		(event: ClipboardEvent) => {
+		async (event: ClipboardEvent) => {
 			cards.insert(
 				new LiveObject(
-					cardFromPaste(
+					await cardFromPaste(
 						event,
 						camera.current,
 						getNamedCards(cards).map(({ attributes: { title } }) => title)
