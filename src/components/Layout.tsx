@@ -34,7 +34,6 @@ const Layout: FC<PropsWithChildren<{ roomId: string }>> = ({ children, roomId })
 				</title>
 			</Head>
 			<LiveProvider roomId={roomId} onAuthFailure={() => setAuthFailure(true)}>
-				<CommandBar />
 				<div className="w-full h-screen overflow-hidden bg-gray-100 dark:bg-black">
 					<Header roomId={roomId} />
 					{children}

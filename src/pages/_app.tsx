@@ -2,6 +2,7 @@ import '@/styles/styles.css'
 import { SWRConfig } from 'swr'
 import { Toaster } from 'react-hot-toast'
 import { ThemeProvider } from 'next-themes'
+import CommandBar from '@/components/CommandBar'
 import { localStorageProvider } from '@/lib/swr-cache'
 import EthereumProvider from '@/components/EthereumProvider'
 import SkeletonProvider from '@/components/SkeletonProvider'
@@ -15,6 +16,7 @@ const App = ({ Component, pageProps }) => {
 				<SkeletonProvider>
 					<EthereumProvider>
 						<Toaster />
+						<CommandBar />
 						<Component {...pageProps} />
 					</EthereumProvider>
 				</SkeletonProvider>

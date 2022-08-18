@@ -10,7 +10,7 @@ module.exports = {
 		extend: {
 			fontFamily: {
 				rbk: ['RubikVariable', ...defaultTheme.fontFamily.sans],
-				sans: ['Inter', ...defaultTheme.fontFamily.sans],
+				sans: ['InterVariable', ...defaultTheme.fontFamily.sans],
 			},
 			colors: {
 				'soft-black': '#141415',
