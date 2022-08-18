@@ -7,6 +7,7 @@ import { uploadFile } from '@/lib/file-upload'
 import { Sections } from '@/types/command-bar'
 import { LiveObject } from '@liveblocks/client'
 import useRegisterAction from '../useRegisterAction'
+import { IMAGE_TYPES, VIDEO_TYPES } from '@/lib/consts'
 import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
 import { createFileCard } from '@/components/Cards/FileCard'
@@ -20,6 +21,7 @@ import {
 	DocumentAddIcon,
 	DocumentSearchIcon,
 	PhotographIcon,
+	VideoCameraIcon,
 } from '@heroicons/react/outline'
 
 const getParams = (store: CameraStore) => ({
@@ -112,8 +114,30 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 				keywords: ['upload', 'photo', 'picture'],
 				perform: async () => {
 					if (!cards) throw toast.error('Canvas not loaded yet')
+					const file = await requestFile(IMAGE_TYPES)
 
-					const file = await requestFile(['image/gif', 'image/jpg', 'image/jpeg', 'image/png'])
+					cards.insert(
+						new LiveObject(
+							createFileCard(camera.current, {
+								name: file.name,
+								mimeType: file.type,
+								url: await uploadFile(file),
+								names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+							})
+						),
+						0
+					)
+				},
+			},
+			{
+				id: 'add-video',
+				name: 'Add Video Card',
+				icon: <VideoCameraIcon />,
+				section: Sections.Canvas,
+				keywords: ['upload', 'video', 'movie'],
+				perform: async () => {
+					if (!cards) throw toast.error('Canvas not loaded yet')
+					const file = await requestFile(VIDEO_TYPES)
 
 					cards.insert(
 						new LiveObject(

@@ -12,9 +12,9 @@ import { LiveObject } from '@liveblocks/client'
 import { createTextCard } from './Cards/TextCard'
 import { createFileCard } from './Cards/FileCard'
 import MultiplayerCursors from './MultiplayerCursors'
+import { IMAGE_TYPES, VIDEO_TYPES } from '@/lib/consts'
 import { AnimatePresence, motion } from 'framer-motion'
 import useCamera, { CameraStore } from '@/store/camera'
-import { PhotographIcon } from '@heroicons/react/outline'
 import { findCardIndex, getNamedCards } from '@/lib/cards'
 import { ask, classNames, requestFile } from '@/lib/utils'
 import useCreateOnDrop from '@/hooks/canvas/useCreateOnDrop'
@@ -24,6 +24,7 @@ import { DocumentAddIcon, LinkIcon } from '@heroicons/react/solid'
 import usePreventGestures from '@/hooks/canvas/usePreventGestures'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
 import { FC, memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import { PhotographIcon, VideoCameraIcon } from '@heroicons/react/outline'
 
 const getParams = (store: CameraStore) => ({
 	camera: store.camera,
@@ -74,7 +75,27 @@ const Canvas: FC = () => {
 						label: 'Image',
 						icon: <PhotographIcon className="w-3.5 h-3.5" />,
 						action: async (_, point) => {
-							const file = await requestFile(['image/gif', 'image/jpg', 'image/jpeg', 'image/png'])
+							const file = await requestFile(IMAGE_TYPES)
+
+							cards.insert(
+								new LiveObject(
+									createFileCard(camera, {
+										point,
+										name: file.name,
+										mimeType: file.type,
+										url: await uploadFile(file),
+										names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+									})
+								),
+								0
+							)
+						},
+					},
+					{
+						label: 'Video',
+						icon: <VideoCameraIcon className="w-3.5 h-3.5" />,
+						action: async (_, point) => {
+							const file = await requestFile(VIDEO_TYPES)
 
 							cards.insert(
 								new LiveObject(

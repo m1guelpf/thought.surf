@@ -61,3 +61,7 @@ export const requestFile = (mimeTypes?: string[]): Promise<File> => {
 export const copy = (text: string) => {
 	_copy(text, { onCopy: () => toast.success('Copied!') })
 }
+
+export const capitalize = (text: string): string => {
+	return text.charAt(0).toUpperCase() + text.slice(1)
+}
