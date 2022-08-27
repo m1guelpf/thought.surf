@@ -2,8 +2,8 @@ import { JSONContent } from '@tiptap/react'
 import { LiveList } from '@liveblocks/client'
 import { CardCollection } from '@/types/cards'
 
-export const APP_NAME = 'Infinite'
-export const APP_HOST = process.env.NODE_ENV == 'production' ? '.infinite.camp' : 'localhost'
+export const APP_NAME = 'thought.surf'
+export const APP_HOST = process.env.NODE_ENV == 'production' ? '.thought.surf' : 'localhost'
 
 export const CURSOR_COLORS = ['#DC2626', '#D97706', '#059669', '#7C3AED', '#DB2777']
 export const CURSOR_NAMES = ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐸', '🐷', '🐵', '🦄', '🦀', '🐝']

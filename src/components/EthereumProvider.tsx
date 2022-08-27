@@ -5,7 +5,7 @@ import { FC, memo, PropsWithChildren } from 'react'
 import { ConnectKitProvider, getDefaultClient } from 'connectkit'
 
 const client = createClient(
-	getDefaultClient({ appName: APP_NAME, infuraId: process.env.NEXT_PUBLIC_INFURA_ID, autoConnect: true })
+	getDefaultClient({ appName: APP_NAME, autoConnect: true, infuraId: process.env.NEXT_PUBLIC_INFURA_ID })
 )
 
 const EthereumProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
