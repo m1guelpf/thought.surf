@@ -7,6 +7,8 @@ import { panCamera, zoomCamera, zoomIn, zoomOn, zoomOut } from '../lib/canvas'
 
 export type CameraStore = {
 	camera: Camera
+	showGrid: boolean
+	toggleGrid: () => void
 	resetCamera: () => void
 	isTransitioning: boolean
 	zoomCameraIn: () => void
@@ -21,10 +23,12 @@ const useCamera = create<CameraStore>()(
 	subscribeWithSelector(
 		persist(
 			set => ({
+				showGrid: false,
 				isTransitioning: false,
 				camera: { x: 1, y: 1, z: 1 },
 				resetCamera: () => set({ camera: { x: 1, y: 1, z: 1 } }),
 				setTransitioning: isTransitioning => set({ isTransitioning }),
+				toggleGrid: () => set(store => ({ showGrid: !store.showGrid })),
 				zoomCameraIn: () => set(store => ({ camera: zoomIn(store.camera) })),
 				zoomCameraOut: () => set(store => ({ camera: zoomOut(store.camera) })),
 				panCamera: (dx, dy) => set(store => ({ camera: panCamera(store.camera, dx, dy) })),

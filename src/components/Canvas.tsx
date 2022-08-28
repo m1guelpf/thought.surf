@@ -6,6 +6,7 @@ import { useList } from '@/lib/liveblocks'
 import { Menu } from '@/types/right-click'
 import LoadingScreen from './LoadingScreen'
 import RightClickMenu from './RightClickMenu'
+import BackgroundGrid from './BackgroundGrid'
 import { uploadFile } from '@/lib/file-upload'
 import { createURLCard } from './Cards/URLCard'
 import { LiveObject } from '@liveblocks/client'
@@ -150,6 +151,7 @@ const Canvas: FC = () => {
 		<>
 			<LoadingScreen loading={!cards} />
 			<main ref={canvasRef} className="fixed w-full h-full inset-0 touch-none [contain:strict] z-0">
+				<BackgroundGrid />
 				<DevMode />
 				<MultiplayerCursors canvas={canvasRef} />
 				<motion.div
