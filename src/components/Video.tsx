@@ -24,7 +24,7 @@ const Video: FC<Props> = ({ src, poster, style = {}, inline = false, ...baseProp
 						},
 					},
 				},
-		  }
+			}
 		: {
 				playing: true,
 				config: {
@@ -34,7 +34,7 @@ const Video: FC<Props> = ({ src, poster, style = {}, inline = false, ...baseProp
 						},
 					},
 				},
-		  }
+			}
 
 	return <ReactPlayer controls url={src} {...props} ref={player} poster={poster} wrapper={Wrapper} {...baseProps} />
 }

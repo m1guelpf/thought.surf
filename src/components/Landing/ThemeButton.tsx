@@ -2,7 +2,7 @@ import { useTheme } from 'next-themes'
 import { motion } from 'framer-motion'
 import { classNames } from '@/lib/utils'
 import { FC, memo, useCallback, useMemo } from 'react'
-import { MoonIcon, SunIcon } from '@heroicons/react/solid'
+import { MoonIcon, SunIcon } from '@heroicons/react/24/solid'
 
 const THEME_ICONS = {
 	dark: SunIcon,

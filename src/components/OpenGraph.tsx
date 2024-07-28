@@ -1,14 +1,15 @@
+import { memo } from 'react'
 import TweetLoader from './TweetLoader'
 import useSWRImmutable from 'swr/immutable'
-import { MqlResponseData } from '@microlink/mql'
+import { MqlPayload } from '@microlink/mql'
 import { uriExpandBlacklist } from '@/lib/consts'
 
 const OpenGraph = ({ url, children }) => {
-	const { data, error, isLoading } = useSWRImmutable<MqlResponseData>(
+	const { data, error, isLoading } = useSWRImmutable<MqlPayload['data']>(
 		() => url && !uriExpandBlacklist.some(pathname => url.includes(pathname)) && `/api/link-preview?url=${url}`
 	)
 
-	if (url.includes('twitter.com/')) return <TweetLoader url={url}>{children}</TweetLoader>
+	if (url.includes('twitter.com/') || url.includes('x.com/')) return <TweetLoader url={url}>{children}</TweetLoader>
 
 	if (error) {
 		return (
@@ -83,4 +84,4 @@ const OpenGraph = ({ url, children }) => {
 	)
 }
 
-export default OpenGraph
+export default memo(OpenGraph)

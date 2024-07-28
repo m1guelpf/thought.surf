@@ -1,25 +1,25 @@
 import { withSession } from '@/lib/session'
-import { authorize } from '@liveblocks/node'
 import { PrismaClient } from '@prisma/client'
+import { Liveblocks } from '@liveblocks/node'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 const prisma = new PrismaClient()
+const liveblocks = new Liveblocks({ secret: process.env.LIVEBLOCKS_KEY })
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	const room = await getRoom(req.body.room, req.session.userId)
 	if (!room) return res.status(403).json({})
 
 	const { userId, userInfo } = await getUser(req.session.userId)
+    if (!userId) return res.status(403).json({})
 
-	try {
-		const result = await authorize({ room, userId, userInfo, secret: process.env.LIVEBLOCKS_KEY })
+	const session = await liveblocks.prepareSession(userId, { userInfo })
+	session.allow(room, session.FULL_ACCESS)
 
-		return res.status(result.status).end(result.body)
-	} catch (error) {
-		console.log(error)
+	const { body, status, error } = await session.authorize()
 
-		return res.status(500).end()
-	}
+	if (error) console.log(error)
+	return res.status(status).end(body)
 }
 
 const getRoom = async (name: string, userId: string): Promise<string | false> => {

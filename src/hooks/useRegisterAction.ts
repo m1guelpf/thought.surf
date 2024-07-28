@@ -1,6 +1,6 @@
 import { Action } from '@/types/command-bar'
 import { DependencyList, useEffect, useMemo } from 'react'
-import useCommandBar, { CommandBarStore, shallow } from '@/store/command-bar'
+import useCommandBar, { CommandBarStore } from '@/store/command-bar'
 
 const getParams = (store: CommandBarStore) => ({
 	commands: store.commands,
@@ -9,9 +9,8 @@ const getParams = (store: CommandBarStore) => ({
 })
 
 const useRegisterAction = (action: Action | Action[], dependencies: DependencyList = [], include: boolean = true) => {
-	const { commands, addCommands, removeCommands } = useCommandBar(getParams, shallow)
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const { commands, addCommands, removeCommands } = useCommandBar(getParams)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
 	const actionsCache = useMemo(() => (Array.isArray(action) ? action : [action]), dependencies)
 
 	const parentsLoaded = useMemo<boolean>(

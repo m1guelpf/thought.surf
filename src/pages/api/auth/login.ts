@@ -1,13 +1,18 @@
-import { ethers } from 'ethers'
+import { SiweMessage } from 'siwe'
+import { mainnet } from 'viem/chains'
 import { withSession } from '@/lib/session'
-import { generateNonce, SiweMessage } from 'siwe'
+import { generateSiweNonce } from 'viem/siwe'
+import { createPublicClient, http } from 'viem'
 import { PrismaClient, User } from '@prisma/client'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export type LoginResponse = { authenticated: boolean; nonce: string | null; user: User | null }
 
 const prisma = new PrismaClient()
-const provider = new ethers.providers.InfuraProvider(null, process.env.NEXT_PUBLIC_INFURA_ID)
+const eth = createPublicClient({
+	chain: mainnet,
+	transport: http(`https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`),
+})
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method == 'GET') {
@@ -18,7 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			} as LoginResponse)
 		}
 
-		req.session.nonce = generateNonce()
+		req.session.nonce = generateSiweNonce()
 		await req.session.save()
 
 		return res.status(200).json({ nonce: req.session.nonce, authenticated: false } as LoginResponse)
@@ -41,13 +46,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	const user = await prisma.user.findUnique({ where: { address } })
 
 	if (!user) {
-		const ensName = await provider.lookupAddress(address)
+		const name = await eth.getEnsName({ address: address as `0x${string}` })
 
 		await prisma.user.create({
 			data: {
 				address,
-				name: ensName ?? `${address.slice(0, 6)}…${address.slice(-4)}`,
-				profile_picture_url: ensName ? await provider.getAvatar(ensName) : null,
+				name: name ?? `${address.slice(0, 6)}…${address.slice(-4)}`,
+				profile_picture_url: name ? await eth.getEnsAvatar({ name }) : null,
 			},
 		})
 	}

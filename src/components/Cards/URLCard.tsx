@@ -2,54 +2,47 @@ import Card from '../Card'
 import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
 import PinButton from '../PinButton'
-import useCard from '@/hooks/useCard'
 import { motion } from 'framer-motion'
 import Video from '@/components/Video'
 import PlayIcon from '../Icons/PlayIcon'
 import PauseIcon from '../Icons/PauseIcon'
 import useSWRImmutable from 'swr/immutable'
+import { MqlPayload } from '@microlink/mql'
 import useMeasure from '@/hooks/useMeasure'
-import { useAnimation } from 'framer-motion'
 import { createTweetCard } from './TweetCard'
 import { screenToCanvas } from '@/lib/canvas'
 import Skeleton from 'react-loading-skeleton'
 import { Camera, Point } from '@/types/canvas'
 import { Sections } from '@/types/command-bar'
-import { LiveObject } from '@liveblocks/client'
-import { MqlResponseData } from '@microlink/mql'
 import useDirtyState from '@/hooks/useDirtyState'
 import HeaderTopIcon from '../Icons/HeaderTopIcon'
 import AutosizeInput from 'react-18-input-autosize'
 import InputFieldIcon from '../Icons/InputFieldIcon'
-import { ClipboardIcon } from '@heroicons/react/outline'
+import { ClipboardIcon } from '@heroicons/react/16/solid'
 import useRegisterAction from '@/hooks/useRegisterAction'
-import { CardOptions, CardType, URLCard } from '@/types/cards'
+import { useDeleteCard, useUpdateCard } from '@/hooks/useCard'
 import { classNames, copy, getDomain, randomId } from '@/lib/utils'
-import { PlayIcon as PlayMenuIcon } from '@heroicons/react/outline'
-import { ArrowUpIcon, XIcon, LinkIcon, ExternalLinkIcon } from '@heroicons/react/solid'
+import { CardOptions, CardType, type URLCard } from '@/types/cards'
+import { PlayIcon as PlayMenuIcon } from '@heroicons/react/16/solid'
+import { ArrowUpIcon, XMarkIcon, LinkIcon } from '@heroicons/react/16/solid'
 import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type Props = {
 	id: string
-	onReorder: () => void
+	card: URLCard
 	navigateTo: () => void
-	onDelete: () => unknown
-	card: LiveObject<URLCard>
 	containerRef: MutableRefObject<HTMLDivElement>
 }
 
-const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, containerRef }) => {
+const URLCard: FC<Props> = ({ id, card, navigateTo, containerRef }) => {
+	const updateCard = useUpdateCard(card.id)
 	const urlInputRef = useRef<AutosizeInput>(null)
 
 	const [iframeRef, { width: iframeWidth }] = useMeasure<HTMLIFrameElement>()
-	const {
-		headerPinned,
-		size: { width },
-		attributes: { url, isLive },
-	} = useCard(card)
 
-	const { data, isLoading } = useSWRImmutable<MqlResponseData>(
-		() => url && `/api/link-preview?url=${url}&screenshot=true&video=true&embed=true`
+	const { data, isLoading } = useSWRImmutable<MqlPayload['data']>(
+		() =>
+			card.attributes.url && `/api/link-preview?url=${card.attributes.url}&screenshot=true&video=true&embed=true`
 	)
 
 	const hasValidEmbed = useMemo<boolean>(
@@ -63,20 +56,20 @@ const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, contain
 			perform: navigateTo,
 			id: `canvas-item-${id}`,
 			section: Sections.Canvas,
-			name: data?.title ?? getDomain(url),
+			name: data?.title ?? getDomain(card.attributes.url),
 			icon: data?.logo ? <img className="rounded w-full h-full" src={data.logo.url} alt="" /> : <LinkIcon />,
 		},
-		[card, data?.title, data?.logo]
+		[card.attributes.url, data?.title, data?.logo]
 	)
 
 	const cardOptions = useMemo<CardOptions>(
 		() => ({
-			resizeAxis: { x: isLive && !data?.video ? width >= iframeWidth : true, y: true },
+			resizeAxis: { x: card.attributes.isLive && !data?.video ? card.size.width >= iframeWidth : true, y: true },
 			menuItems: [
 				{
 					label: 'Open in new tab',
-					action: () => window.open(url),
-					icon: <ExternalLinkIcon className="h-3.5 w-3.5" />,
+					action: () => window.open(card.attributes.url),
+					icon: <LinkIcon className="h-3.5 w-3.5" />,
 				},
 				{
 					label: 'Change URL',
@@ -85,45 +78,36 @@ const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, contain
 				},
 				{
 					label: 'Copy URL',
-					action: () => copy(url),
+					action: () => copy(card.attributes.url),
 					icon: <ClipboardIcon className="h-3.5 w-3.5" />,
 				},
 				{
 					label: 'Pin Header',
-					checked: headerPinned,
+					checked: card.headerPinned,
 					icon: <HeaderTopIcon className="h-3.5 w-3.5" />,
-					onChange: headerPinned => card.update({ headerPinned }),
+					onChange: headerPinned => updateCard({ headerPinned }),
 				},
 				...(hasValidEmbed
 					? []
 					: [
 							{
 								label: 'Play / Embed',
-								checked: isLive,
+								checked: card.attributes.isLive,
 								icon: <PlayMenuIcon className="h-3.5 w-3.5" />,
-								onChange: isLive => card.update({ attributes: { url, isLive } }),
+								onChange: isLive => updateCard({ attributes: { isLive } }),
 							},
-					  ]),
+						]),
 			],
 		}),
-		[card, headerPinned, hasValidEmbed, urlInputRef, url, isLive, data?.video, width, iframeWidth]
+		[card, hasValidEmbed, urlInputRef, data?.video, iframeWidth]
 	)
 	const Header = useMemo(
-		() => <CardHeader card={card} hasValidEmbed={hasValidEmbed} onDelete={onDelete} inputRef={urlInputRef} />,
-		[card, hasValidEmbed, onDelete, urlInputRef]
+		() => <CardHeader card={card} hasValidEmbed={hasValidEmbed} inputRef={urlInputRef} />,
+		[card, hasValidEmbed, urlInputRef]
 	)
 
 	return (
-		<Card
-			id={id}
-			unboxed
-			card={card}
-			header={Header}
-			onDelete={onDelete}
-			onReorder={onReorder}
-			options={cardOptions}
-			containerRef={containerRef}
-		>
+		<Card id={id} unboxed card={card} header={Header} options={cardOptions} containerRef={containerRef}>
 			{(() => {
 				// if response hasn't loaded yet, show placeholder
 				if (isLoading) {
@@ -131,15 +115,15 @@ const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, contain
 				}
 
 				// if we're in live mode with a video, show the video
-				if (isLive && data.video) {
+				if (card.attributes.isLive && data?.video) {
 					return <Video src={data.video.url} poster={data?.image?.url} />
 				}
 
 				// if we're in live mode with no video, embed the page
-				if (isLive) {
+				if (card.attributes.isLive) {
 					return (
 						<iframe
-							src={url}
+							src={card.attributes.url}
 							loading="lazy"
 							title={data?.title}
 							className="h-full w-full rounded-lg block object-cover"
@@ -186,48 +170,46 @@ const URLCard: FC<Props> = ({ id, card, onDelete, navigateTo, onReorder, contain
 }
 
 type CardHeaderProps = {
-	onDelete: () => void
+	card: URLCard
 	hasValidEmbed: boolean
-	card: LiveObject<URLCard>
 	inputRef: MutableRefObject<AutosizeInput>
 }
 
-const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, onDelete, inputRef }) => {
-	const {
-		headerPinned,
-		attributes: { url, isLive },
-	} = useCard(card)
+const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, inputRef }) => {
+	const updateCard = useUpdateCard(card.id)
+	const deleteCard = useDeleteCard(card.id)
 
-	const { data, isLoading } = useSWRImmutable<MqlResponseData>(
-		() => url && `/api/link-preview?url=${url}&screenshot=true&video=true&embed=true`
+	const { data, isLoading } = useSWRImmutable<MqlPayload['data']>(
+		() =>
+			card.attributes.url && `/api/link-preview?url=${card.attributes.url}&screenshot=true&video=true&embed=true`
 	)
 
 	const [isFocused, setFocused] = useState(false)
-	const [_url, setUrl, urlDirty] = useDirtyState(url)
+	const [_url, setUrl, urlDirty] = useDirtyState(card.attributes.url)
 
 	useEffect(() => {
-		if (!urlDirty) setUrl(url, { isClean: true })
-	}, [setUrl, url, urlDirty])
+		if (!urlDirty) setUrl(card.attributes.url, { isClean: true })
+	}, [setUrl, card.attributes.url, urlDirty])
 
 	const handleUrlBlur = () => {
 		setFocused(false)
 		if (!urlDirty) return
 
 		if (!REGEX.URL.test(_url)) {
-			setUrl(url, { isClean: true })
+			setUrl(card.attributes.url, { isClean: true })
 			return toast.error('Invalid URL')
 		}
 
 		setUrl(_url, { isClean: true })
-		card.update({ attributes: { url: _url, isLive } })
+		updateCard({ attributes: { url: _url } })
 	}
 
-	const updatePinned = useCallback(pinned => card.set('headerPinned', pinned), [card])
+	const updatePinned = useCallback(headerPinned => updateCard({ headerPinned }), [card])
 
 	return (
 		<div
 			className={classNames(
-				!headerPinned && 'opacity-0 group-hover:opacity-100 focus-within:opacity-100',
+				!card.headerPinned && 'opacity-0 group-hover:opacity-100 focus-within:opacity-100',
 				'flex items-center justify-between bg-gray-100/80 dark:bg-black/80 p-2 rounded-lg w-full space-x-2 transition-opacity duration-300'
 			)}
 		>
@@ -238,9 +220,9 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, onDelete, i
 			>
 				<PinButton
 					baseVariant="pinHidden"
-					isPinned={headerPinned}
 					onChange={updatePinned}
 					hoverVariant="pinVisible"
+					isPinned={card.headerPinned}
 				/>
 				{isLoading && <Skeleton className="z-[2]" width={32} height={32} circle />}
 				{data?.logo && (
@@ -256,7 +238,7 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, onDelete, i
 					<p className="text-black/40 dark:text-white/40 text-xs select-none whitespace-nowrap truncate min-w-0">
 						<AutosizeInput
 							ref={inputRef}
-							value={isFocused ? _url : data?.author ?? data?.description ?? _url}
+							value={isFocused ? _url : (data?.description ?? _url)}
 							onBlur={handleUrlBlur}
 							onFocus={() => setFocused(true)}
 							onChange={e => setUrl(e.target.value.trim())}
@@ -271,26 +253,30 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, onDelete, i
 			</motion.div>
 			<div
 				className={classNames(
-					headerPinned &&
+					card.headerPinned &&
 						'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
 					'flex items-center space-x-1 flex-shrink-0'
 				)}
 			>
 				{!hasValidEmbed && (
 					<button
-						onClick={() => card.update({ attributes: { url, isLive: !isLive } })}
+						onClick={() => updateCard({ attributes: { isLive: !card.attributes.isLive } })}
 						className={classNames(
-							isLive
+							card.attributes.isLive
 								? 'opacity-100 bg-gray-300/60 dark:bg-gray-500/60'
 								: 'opacity-60 hover:opacity-80 bg-gray-200/60 dark:bg-gray-700/60',
 							'rounded p-1 opacity-60 transition'
 						)}
 					>
-						{isLive ? <PauseIcon className="w-4 h-4 p-0.5" /> : <PlayIcon className="w-4 h-4 p-0.5" />}
+						{card.attributes.isLive ? (
+							<PauseIcon className="w-4 h-4 p-0.5" />
+						) : (
+							<PlayIcon className="w-4 h-4 p-0.5" />
+						)}
 					</button>
 				)}
 				<a
-					href={url}
+					href={card.attributes.url}
 					target="_blank"
 					className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
 					rel="noreferrer"
@@ -298,10 +284,10 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, hasValidEmbed, onDelete, i
 					<ArrowUpIcon className="w-4 h-4 transform rotate-45" />
 				</a>
 				<button
-					onClick={onDelete}
+					onClick={deleteCard}
 					className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
 				>
-					<XIcon className="w-4 h-4" />
+					<XMarkIcon className="w-4 h-4" />
 				</button>
 			</div>
 		</div>

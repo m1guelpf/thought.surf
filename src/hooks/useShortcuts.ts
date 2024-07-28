@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import tinykeys, { KeyBindingMap, KeyBindingOptions } from 'tinykeys'
+import { tinykeys, KeyBindingMap, KeyBindingOptions } from 'tinykeys'
 
 const useShortcuts = (shortcuts: KeyBindingMap, options?: KeyBindingOptions) => {
 	useEffect(() => {

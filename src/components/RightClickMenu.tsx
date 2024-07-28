@@ -1,20 +1,23 @@
 import { Point } from '@/types/canvas'
 import { classNames } from '@/lib/utils'
 import { CheckIcon } from '@heroicons/react/solid'
-import { ChevronRightIcon } from '@heroicons/react/outline'
 import * as ContextMenu from '@radix-ui/react-context-menu'
+import { ChevronRightIcon } from '@heroicons/react/24/outline'
 import { Checkbox, Group, Item, Menu, MenuItem, SubMenu } from '@/types/right-click'
-import { FC, memo, PointerEventHandler, PropsWithChildren, ReactNode, RefObject, useRef } from 'react'
+import { FC, memo, PointerEventHandler, PropsWithChildren, ReactNode, RefObject, useCallback, useRef } from 'react'
 
 const RightClickMenu: FC<PropsWithChildren<{ menu?: Menu }>> = ({ children, menu = [] }) => {
 	const mousePos = useRef<Point>({ x: 0, y: 0 })
 
-	if (menu.length == 0) return <>{children}</>
+	const handlePointerDown: PointerEventHandler<HTMLSpanElement> = useCallback(
+		event => {
+			event.stopPropagation()
+			mousePos.current = { x: event.clientX, y: event.clientY }
+		},
+		[mousePos]
+	)
 
-	const handlePointerDown: PointerEventHandler<HTMLSpanElement> = event => {
-		event.stopPropagation()
-		mousePos.current = { x: event.clientX, y: event.clientY }
-	}
+	if (menu.length == 0) return <>{children}</>
 
 	return (
 		<ContextMenu.Root>

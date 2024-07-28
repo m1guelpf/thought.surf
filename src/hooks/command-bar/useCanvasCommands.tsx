@@ -1,28 +1,28 @@
 import toast from 'react-hot-toast'
+import { Card } from '@/types/cards'
+import { useAddCard } from '../useCard'
 import { getNamedCards } from '@/lib/cards'
-import { useHistory } from '@/lib/liveblocks'
 import { ask, requestFile } from '@/lib/utils'
-import { CardCollection } from '@/types/cards'
 import { uploadFile } from '@/lib/file-upload'
 import { Sections } from '@/types/command-bar'
-import { LiveObject } from '@liveblocks/client'
 import useRegisterAction from '../useRegisterAction'
 import { IMAGE_TYPES, VIDEO_TYPES } from '@/lib/consts'
 import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
 import { createFileCard } from '@/components/Cards/FileCard'
-import useCamera, { shallow, CameraStore, useRefCamera } from '@/store/camera'
+import useCamera, { CameraStore, useRefCamera } from '@/store/camera'
+import { useHistory, useMutation, useStorage } from '@liveblocks/react'
 import {
 	LinkIcon,
-	ReplyIcon,
+	ArrowUturnLeftIcon,
 	CameraIcon,
-	ZoomInIcon,
-	ZoomOutIcon,
-	DocumentAddIcon,
-	DocumentSearchIcon,
-	PhotographIcon,
+	MagnifyingGlassPlusIcon,
+	MagnifyingGlassMinusIcon,
+	DocumentPlusIcon,
+	DocumentMagnifyingGlassIcon,
+	PhotoIcon,
 	VideoCameraIcon,
-} from '@heroicons/react/outline'
+} from '@heroicons/react/24/outline'
 
 const getParams = (store: CameraStore) => ({
 	zoomIn: store.zoomCameraIn,
@@ -31,17 +31,19 @@ const getParams = (store: CameraStore) => ({
 	setTransition: store.setTransitioning,
 })
 
-const useCanvasCommands = (cards: CardCollection | null) => {
+const useCanvasCommands = () => {
+	const addCard = useAddCard()
 	const history = useHistory()
 	const camera = useRefCamera()
-	const { zoomIn, zoomOut, resetCamera, setTransition } = useCamera(getParams, shallow)
+	const cards = useStorage(root => root.cards)
+	const { zoomIn, zoomOut, resetCamera, setTransition } = useCamera(getParams)
 
 	useRegisterAction(
 		{
 			id: 'canvas',
 			name: 'Search Canvas...',
 			subtitle: `${cards?.length ?? 'Loading'} cards`,
-			icon: <DocumentSearchIcon />,
+			icon: <DocumentMagnifyingGlassIcon />,
 			section: Sections.Canvas,
 			shortcut: '/',
 			keywords: ['search', 'find'],
@@ -53,7 +55,7 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 			{
 				id: 'undo-action',
 				name: 'Undo',
-				icon: <ReplyIcon />,
+				icon: <ArrowUturnLeftIcon />,
 				section: Sections.Canvas,
 				keywords: ['back'],
 				shortcut: '$mod+KeyZ',
@@ -62,7 +64,7 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 			{
 				id: 'redo-action',
 				name: 'Redo',
-				icon: <ReplyIcon className="transform -scale-x-100" />,
+				icon: <ArrowUturnLeftIcon className="transform -scale-x-100" />,
 				section: Sections.Canvas,
 				keywords: ['forward'],
 				shortcut: '$mod+Shift+KeyZ',
@@ -76,18 +78,15 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 			{
 				id: 'add-text',
 				name: 'Add Text Card',
-				icon: <DocumentAddIcon />,
+				icon: <DocumentPlusIcon />,
 				section: Sections.Canvas,
 				perform: () => {
 					if (!cards) throw toast.error('Canvas not loaded yet')
 
-					cards.insert(
-						new LiveObject(
-							createTextCard(camera.current, {
-								names: getNamedCards(cards).map(({ attributes: { title } }) => title),
-							})
-						),
-						0
+					addCard(
+						createTextCard(camera.current, {
+							names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+						})
 					)
 				},
 			},
@@ -98,34 +97,26 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 				section: Sections.Canvas,
 				keywords: ['link', 'bookmark'],
 				perform: async () => {
-					if (!cards) throw toast.error('Canvas not loaded yet')
-
-					cards.insert(
-						new LiveObject(createURLCard(camera.current, { url: await ask('What URL should we add?') })),
-						0
-					)
+					addCard(createURLCard(camera.current, { url: await ask('What URL should we add?') }))
 				},
 			},
 			{
 				id: 'add-image',
 				name: 'Add Image Card',
-				icon: <PhotographIcon />,
+				icon: <PhotoIcon />,
 				section: Sections.Canvas,
 				keywords: ['upload', 'photo', 'picture'],
 				perform: async () => {
 					if (!cards) throw toast.error('Canvas not loaded yet')
 					const file = await requestFile(IMAGE_TYPES)
 
-					cards.insert(
-						new LiveObject(
-							createFileCard(camera.current, {
-								name: file.name,
-								mimeType: file.type,
-								url: await uploadFile(file),
-								names: getNamedCards(cards).map(({ attributes: { title } }) => title),
-							})
-						),
-						0
+					addCard(
+						createFileCard(camera.current, {
+							name: file.name,
+							mimeType: file.type,
+							url: await uploadFile(file),
+							names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+						})
 					)
 				},
 			},
@@ -139,16 +130,13 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 					if (!cards) throw toast.error('Canvas not loaded yet')
 					const file = await requestFile(VIDEO_TYPES)
 
-					cards.insert(
-						new LiveObject(
-							createFileCard(camera.current, {
-								name: file.name,
-								mimeType: file.type,
-								url: await uploadFile(file),
-								names: getNamedCards(cards).map(({ attributes: { title } }) => title),
-							})
-						),
-						0
+					addCard(
+						createFileCard(camera.current, {
+							name: file.name,
+							mimeType: file.type,
+							url: await uploadFile(file),
+							names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+						})
 					)
 				},
 			},
@@ -162,7 +150,7 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 				name: 'Zoom In',
 				perform: zoomIn,
 				shortcut: 'Equal',
-				icon: <ZoomInIcon />,
+				icon: <MagnifyingGlassPlusIcon />,
 				keywords: ['bigger'],
 				section: Sections.Canvas,
 			},
@@ -171,7 +159,7 @@ const useCanvasCommands = (cards: CardCollection | null) => {
 				name: 'Zoom Out',
 				perform: zoomOut,
 				shortcut: 'Minus',
-				icon: <ZoomOutIcon />,
+				icon: <MagnifyingGlassMinusIcon />,
 				keywords: ['smaller'],
 				section: Sections.Canvas,
 			},

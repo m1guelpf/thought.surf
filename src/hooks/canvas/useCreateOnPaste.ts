@@ -1,28 +1,25 @@
-import { useList } from '@/lib/liveblocks'
+import { useAddCard } from '../useCard'
 import { useRefCamera } from '@/store/camera'
 import { useCallback, useEffect } from 'react'
-import { LiveObject } from '@liveblocks/client'
 import { cardFromPaste, getNamedCards } from '@/lib/cards'
+import { useMutation, useStorage } from '@liveblocks/react'
 
 const useCreateOnPaste = () => {
-	const cards = useList('cards')
+	const addCard = useAddCard()
 	const camera = useRefCamera()
+	const cards = useStorage(root => root.cards)
 
 	const onPaste = useCallback(
 		async (event: ClipboardEvent) => {
-			cards.insert(
-				new LiveObject(
-					await cardFromPaste(
-						event,
-						camera.current,
-						getNamedCards(cards).map(({ attributes: { title } }) => title)
-					)
-				),
-				0
+			addCard(
+				await cardFromPaste(
+					event,
+					camera.current,
+					getNamedCards(cards).map(({ attributes: { title } }) => title)
+				)
 			)
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[cards]
+		[cards, camera]
 	)
 
 	useEffect(() => {

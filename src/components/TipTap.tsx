@@ -32,6 +32,7 @@ const TipTap: FC<Props> = ({
 }) => {
 	const editor = useEditor({
 		content: doc,
+		immediatelyRender: false,
 		editorProps: { attributes: { class: proseClassName } },
 		onUpdate: ({ editor }) => {
 			setDoc && setDoc(editor.getJSON())

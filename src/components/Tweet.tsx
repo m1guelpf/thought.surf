@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import Autolinker from 'autolinker'
 import OpenGraph from './OpenGraph'
 import { FC, memo, useMemo } from 'react'
+import { TweetBase } from 'react-tweet/api'
 import Skeleton from 'react-loading-skeleton'
 import { TweetDetails } from '@/types/twitter'
 import { getText, getVideoSource } from '@/lib/twitter'
@@ -12,10 +13,10 @@ const Tweet: FC<{
 	isMini?: boolean
 	isCard?: boolean
 	className?: string
-	tweet: TweetDetails
+	tweet: TweetBase | TweetDetails
 }> = ({ tweet, className = '', isMini = false, isCard = false }) => {
 	const endsWithLink = useMemo(() => {
-		return tweet?.entities?.urls?.find(link => tweet.full_text.endsWith(link.url))
+		return tweet?.entities?.urls?.find(link => tweet.text.endsWith(link.url))
 	}, [tweet])
 
 	return (
@@ -75,7 +76,7 @@ const Tweet: FC<{
 					)}
 					<div className="flex flex-wrap justify-start items-start flex-1 -mt-1.5">
 						<div className="w-full my-1">
-							{tweet?.full_text ? (
+							{tweet?.text ? (
 								<p
 									className={`text-black/80 dark:text-white/80 whitespace-pre-line ${
 										isMini ? 'text-sm lg:text-base' : ''
@@ -95,19 +96,22 @@ const Tweet: FC<{
 							) : (
 								<Skeleton width="80%" count={3} />
 							)}
-							{endsWithLink && endsWithLink.display_url != tweet.quoted_status_permalink?.display && (
-								<div className="mt-2">
-									<OpenGraph url={endsWithLink.expanded_url}>{endsWithLink.display_url}</OpenGraph>
-								</div>
-							)}
-							{tweet?.extended_entities?.media && (
+							{endsWithLink &&
+								endsWithLink.display_url /** != tweet.quoted_status_permalink?.display **/ && (
+									<div className="mt-2">
+										<OpenGraph url={endsWithLink.expanded_url}>
+											{endsWithLink.display_url}
+										</OpenGraph>
+									</div>
+								)}
+							{tweet && 'mediaDetails' in tweet && tweet?.mediaDetails && (
 								<div className="mt-2 rounded-lg">
 									<div
-										className={`w-full h-64 object-cover relative rounded-xl overflow-hidden inline-grid ${
-											tweet.extended_entities.media.length > 1 ? 'grid-cols-2' : 'grid-cols-1'
+										className={`w-full  object-cover relative rounded-xl overflow-hidden inline-grid ${
+											tweet.mediaDetails.length > 1 ? 'grid-cols-2' : 'grid-cols-1'
 										} gap-0.5 pointer-events-none`}
 									>
-										{tweet.extended_entities.media.map((media, i) =>
+										{tweet.mediaDetails.map((media, i) =>
 											['video', 'animated_gif'].includes(media.type) ? (
 												<div
 													key={i}
@@ -126,8 +130,8 @@ const Tweet: FC<{
 									</div>
 								</div>
 							)}
-							{tweet?.is_quote_status && (
-								<Tweet className="mt-2" tweet={tweet.quoted_status} isMini={true} />
+							{tweet && 'quoted_tweet' in tweet && tweet?.quoted_tweet && (
+								<Tweet className="mt-2" tweet={tweet.quoted_tweet} isMini={true} />
 							)}
 						</div>
 					</div>

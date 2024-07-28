@@ -1,7 +1,7 @@
-import create from 'zustand'
-import shallow from 'zustand/shallow'
+import { shallow } from 'zustand/shallow'
 import { RefObject, useEffect, useRef } from 'react'
 import { Camera, Point, Size } from '@/types/canvas'
+import { createWithEqualityFn } from 'zustand/traditional'
 import { subscribeWithSelector, persist } from 'zustand/middleware'
 import { panCamera, zoomCamera, zoomIn, zoomOn, zoomOut } from '../lib/canvas'
 
@@ -19,7 +19,7 @@ export type CameraStore = {
 	setTransitioning: (isTransitioning: boolean) => void
 }
 
-const useCamera = create<CameraStore>()(
+const useCamera = createWithEqualityFn<CameraStore>()(
 	subscribeWithSelector(
 		persist(
 			set => ({
@@ -37,7 +37,8 @@ const useCamera = create<CameraStore>()(
 			}),
 			{ name: 'camera', partialize: state => ({ camera: state.camera }) }
 		)
-	)
+	),
+	shallow
 )
 
 export const useRefCamera = (): RefObject<Camera> => {
@@ -47,8 +48,7 @@ export const useRefCamera = (): RefObject<Camera> => {
 		() =>
 			useCamera.subscribe(
 				store => store.camera,
-				camera => (cameraRef.current = camera),
-				{ equalityFn: shallow }
+				camera => (cameraRef.current = camera)
 			),
 		[]
 	)
@@ -56,5 +56,4 @@ export const useRefCamera = (): RefObject<Camera> => {
 	return cameraRef
 }
 
-export { shallow }
 export default useCamera

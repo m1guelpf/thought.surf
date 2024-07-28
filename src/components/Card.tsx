@@ -1,44 +1,33 @@
-import useCard from '@/hooks/useCard'
 import { motion } from 'framer-motion'
 import { Point } from '@/types/canvas'
 import { classNames } from '@/lib/utils'
 import ResizeButton from './ResizeButton'
 import { useRefCamera } from '@/store/camera'
-import { useHistory } from '@/lib/liveblocks'
 import RightClickMenu from './RightClickMenu'
-import { XIcon } from '@heroicons/react/solid'
-import { LiveObject } from '@liveblocks/client'
+import { useHistory } from '@liveblocks/react'
 import { useGesture } from '@use-gesture/react'
-import { Card, CardOptions } from '@/types/cards'
+import { XMarkIcon } from '@heroicons/react/16/solid'
+import { type Card, CardOptions } from '@/types/cards'
 import { addPoint, eventAlreadyHandled, subPoint } from '@/lib/canvas'
+import { useDeleteCard, useReorderCard, useUpdateCard } from '@/hooks/useCard'
 import { FC, memo, MutableRefObject, PropsWithChildren, ReactNode, useRef, useState } from 'react'
 
 type Props = {
 	id: string
+	card: Card
 	unboxed?: boolean
 	header?: ReactNode
-	onDelete: () => void
 	options: CardOptions
-	onReorder: () => void
-	card: LiveObject<Card>
 	containerRef: MutableRefObject<HTMLDivElement>
 }
 
-const Card: FC<PropsWithChildren<Props>> = ({
-	id,
-	card,
-	header,
-	options,
-	onDelete,
-	children,
-	onReorder,
-	containerRef,
-	unboxed = false,
-}) => {
+const Card: FC<PropsWithChildren<Props>> = ({ id, card, header, options, children, containerRef, unboxed = false }) => {
 	const history = useHistory()
 	const camera = useRefCamera()
-	const { point, size } = useCard(card)
+	const updateCard = useUpdateCard(id)
 	const [scale, setScale] = useState(1)
+	const deleteCard = useDeleteCard(card.id)
+	const reorderCard = useReorderCard(card.id)
 	const cardRef = useRef<HTMLDivElement>(null)
 	const dragData = useRef<{ start: Point; origin: Point; pointerId: number }>(null)
 
@@ -56,7 +45,7 @@ const Card: FC<PropsWithChildren<Props>> = ({
 				setScale(0.99)
 
 				dragData.current = {
-					start: card.get('point'),
+					start: card.point,
 					origin: { x: event.clientX / camera.current.z, y: event.clientY / camera.current.z },
 					pointerId: event.pointerId,
 				}
@@ -69,7 +58,7 @@ const Card: FC<PropsWithChildren<Props>> = ({
 					dragData.current.origin
 				)
 
-				card.update({ point: addPoint(dragData.current.start, delta) })
+				updateCard({ point: addPoint(dragData.current.start, delta) })
 			},
 			onPointerUp: ({ event }) => {
 				if (eventAlreadyHandled(event)) return
@@ -81,7 +70,7 @@ const Card: FC<PropsWithChildren<Props>> = ({
 				target.style.setProperty('cursor', 'grab')
 				target.releasePointerCapture(event.pointerId)
 
-				onReorder()
+				reorderCard()
 				dragData.current = null
 			},
 			onPointerOut: ({ event }) => {
@@ -107,14 +96,14 @@ const Card: FC<PropsWithChildren<Props>> = ({
 			exit={{ opacity: 0 }}
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
-			style={{ x: point.x, y: point.y, width: size.width }}
+			style={{ x: card.point.x, y: card.point.y, width: card.size.width }}
 			className="group absolute will-change-transform space-y-2 min-w-[300px]"
 		>
 			{header}
 			<RightClickMenu
 				menu={[
 					...(options.menuItems ?? []),
-					{ icon: <XIcon className="h-3.5 w-3.5" />, label: 'Delete', action: onDelete },
+					{ icon: <XMarkIcon className="h-3.5 w-3.5" />, label: 'Delete', action: deleteCard },
 				]}
 			>
 				<motion.div
@@ -124,7 +113,7 @@ const Card: FC<PropsWithChildren<Props>> = ({
 						!unboxed && 'p-3',
 						'min-w-[300px] min-h-[150px] bg-white/50 dark:bg-gray-900/90 cursor-grab rounded-lg shadow-card backdrop-blur backdrop-filter'
 					)}
-					style={{ scale, width: size.width, height: size.height }}
+					style={{ scale, width: card.size.width, height: card.size.height }}
 				>
 					<ResizeButton resizeAxis={options.resizeAxis} card={card} containerRef={containerRef} />
 					{children}

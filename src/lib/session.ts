@@ -1,9 +1,8 @@
 import { APP_HOST } from './consts'
 import { NextApiHandler } from 'next'
-import { IronSessionOptions } from 'iron-session'
-import { withIronSessionApiRoute } from 'iron-session/next'
+import { getIronSession, SessionOptions } from 'iron-session'
 
-const sessionOptions: IronSessionOptions = {
+const sessionOptions: SessionOptions = {
 	password: process.env.APP_KEY,
 	ttl: 3600 * 24 * 30, // 1 month
 	cookieName: 'thoughtsurf_session',
@@ -13,4 +12,23 @@ const sessionOptions: IronSessionOptions = {
 	},
 }
 
-export const withSession = (handler: NextApiHandler) => withIronSessionApiRoute(handler, sessionOptions)
+export const withSession = (handler: NextApiHandler): NextApiHandler => {
+	return async (req, res) => {
+		const session = await getIronSession(req, res, sessionOptions)
+
+		Object.defineProperty(req, 'session', {
+			enumerable: true,
+			get: () => session,
+			set: value => {
+				const keys = Object.keys(value)
+
+				Object.keys(session)
+					.filter(key => !keys.includes(key))
+					.forEach(key => delete session[key])
+				keys.forEach(key => (session[key] = value[key]))
+			},
+		})
+
+		return handler(req, res)
+	}
+}

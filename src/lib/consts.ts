@@ -8,7 +8,7 @@ export const APP_HOST = process.env.NODE_ENV == 'production' ? '.thought.surf' :
 export const CURSOR_COLORS = ['#DC2626', '#D97706', '#059669', '#7C3AED', '#DB2777']
 export const CURSOR_NAMES = ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐸', '🐷', '🐵', '🦄', '🦀', '🐝']
 
-export const DEFAULT_ROOM_CONTENT: CardCollection = new LiveList()
+export const DEFAULT_ROOM_CONTENT: CardCollection = new LiveList([])
 
 export const DEFAULT_TEXT: JSONContent = {
 	type: 'doc',
@@ -26,8 +26,8 @@ export const DEFAULT_TEXT: JSONContent = {
 }
 
 export const REGEX = {
-	TWEET_URL: /twitter\.com\/\w+\/status(?:es)?\/\d+/,
-	URL: /^(?:https?:\/\/.)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*$/,
+	TWEET_URL: /(?:twitter\.com)|(?:x\.com)\/\w+\/status(?:es)?\/\d+/,
+	URL: /^(?:https?:\/\/.)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{0,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*$/,
 }
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB

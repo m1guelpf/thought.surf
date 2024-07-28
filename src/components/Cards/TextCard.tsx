@@ -1,76 +1,69 @@
 import Card from '../Card'
 import TipTap from '../TipTap'
 import { getName } from '@/lib/names'
-import useCard from '@/hooks/useCard'
 import useMeasure from '@/hooks/useMeasure'
 import { screenToCanvas } from '@/lib/canvas'
 import { Camera, Point } from '@/types/canvas'
 import { Sections } from '@/types/command-bar'
-import { LiveObject } from '@liveblocks/client'
-import { XIcon } from '@heroicons/react/outline'
 import { classNames, randomId } from '@/lib/utils'
-import { CardType, TextCard } from '@/types/cards'
+import { XMarkIcon } from '@heroicons/react/16/solid'
+import { CardType, type TextCard } from '@/types/cards'
 import useRegisterAction from '@/hooks/useRegisterAction'
-import { DocumentTextIcon } from '@heroicons/react/outline'
+import { DocumentTextIcon } from '@heroicons/react/24/outline'
+import { useDeleteCard, useReorderCard, useUpdateCard } from '@/hooks/useCard'
 import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useRef } from 'react'
 
 type Props = {
 	id: string
-	onDelete: () => void
-	onReorder: () => void
+	card: TextCard
 	navigateTo: () => void
-	card: LiveObject<TextCard>
 	containerRef: MutableRefObject<HTMLDivElement>
 }
 
 const cardOptions = { resizeAxis: { x: true, y: false } }
 
-const TextCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder, containerRef }) => {
+const TextCard: FC<Props> = ({ id, card, navigateTo, containerRef }) => {
+	const updateCard = useUpdateCard(card.id)
+	const reorderCard = useReorderCard(card.id)
 	const renderTiptapMenu = useRef<HTMLDivElement>(null)
 	const [measureRef, { height }] = useMeasure<HTMLDivElement>()
-	const {
-		attributes: { doc, title },
-	} = useCard(card)
 
 	useEffect(() => {
-		const { width } = card.get('size')
+		if (card.size.height == height + 20) return
 
-		card.set('size', { width, height: height + 20 })
+		const { width } = card.size
+		updateCard({ size: { width, height: height + 20 } })
 	}, [card, height])
 
 	useRegisterAction(
 		{
 			id: `canvas-item-${id}`,
-			name: title,
+			name: card.attributes.title,
 			icon: <DocumentTextIcon />,
 			parent: 'canvas',
 			section: Sections.Canvas,
 			perform: navigateTo,
 		},
-		[card, title]
+		[id, card.attributes.title]
 	)
 
-	const Header = useMemo(
-		() => <CardHeader card={card} onDelete={onDelete} renderMenu={renderTiptapMenu} />,
-		[card, onDelete]
-	)
+	const Header = useMemo(() => <CardHeader card={card} renderMenu={renderTiptapMenu} />, [card])
 
-	const onDocUpdate = useCallback(doc => card.set('attributes', { doc, title: card.get('attributes').title }), [card])
+	const onDocUpdate = useCallback(
+		doc =>
+			updateCard(card => {
+				card.attributes.doc = doc
+				return card
+			}),
+		[card]
+	)
 
 	return (
-		<Card
-			id={id}
-			card={card}
-			header={Header}
-			onDelete={onDelete}
-			onReorder={onReorder}
-			options={cardOptions}
-			containerRef={containerRef}
-		>
-			<div className="w-full" onPointerDown={onReorder} ref={measureRef}>
+		<Card id={id} card={card} header={Header} options={cardOptions} containerRef={containerRef}>
+			<div className="w-full" onPointerDown={reorderCard} ref={measureRef}>
 				<TipTap
-					doc={doc}
 					setDoc={onDocUpdate}
+					doc={card.attributes.doc}
 					renderMenu={renderTiptapMenu}
 					editorClassName="bg-black/[.01] dark:bg-black/80 rounded-lg"
 				/>
@@ -80,19 +73,21 @@ const TextCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder, contai
 }
 
 type CardHeaderProps = {
-	onDelete: () => void
-	card: LiveObject<TextCard>
+	card: TextCard
 	renderMenu: MutableRefObject<HTMLDivElement>
 }
 
-const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete, renderMenu }) => {
-	const {
-		attributes: { title },
-	} = useCard(card)
-
+const CardHeader: FC<CardHeaderProps> = memo(({ card, renderMenu }) => {
+	const updateCard = useUpdateCard(card.id)
+	const deleteCard = useDeleteCard(card.id)
 	const updateTitle = useCallback(
-		event => card.set('attributes', { doc: card.get('attributes').doc, title: event.target.value }),
-		[card]
+		event => {
+			updateCard(card => {
+				card.attributes.title = event.target.value
+				return card
+			})
+		},
+		[updateCard]
 	)
 
 	return (
@@ -103,8 +98,8 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete, renderMenu }) =>
 			)}
 		>
 			<input
-				value={title}
 				onChange={updateTitle}
+				value={card.attributes.title}
 				className="bg-transparent text-lg rounded-lg w-full p-1 px-2 text-black/60 dark:text-white/60"
 				onKeyDown={e => {
 					if (e.key !== 'Enter') return
@@ -114,10 +109,10 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete, renderMenu }) =>
 			<div className="flex items-center space-x-1 flex-shrink-0">
 				<div className="flex items-center space-x-0.5" ref={renderMenu} />
 				<button
-					onClick={onDelete}
+					onClick={deleteCard}
 					className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
 				>
-					<XIcon className="w-5 h-5" />
+					<XMarkIcon className="w-5 h-5" />
 				</button>
 			</div>
 		</div>

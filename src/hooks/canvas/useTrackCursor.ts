@@ -2,7 +2,7 @@ import { RefObject } from 'react'
 import { screenToCanvas } from '@/lib/canvas'
 import { useRefCamera } from '@/store/camera'
 import { useGesture } from '@use-gesture/react'
-import { useUpdateMyPresence } from '@/lib/liveblocks'
+import { useUpdateMyPresence } from '@liveblocks/react'
 
 const useTrackCursor = (canvasRef: RefObject<HTMLDivElement>) => {
 	const camera = useRefCamera()

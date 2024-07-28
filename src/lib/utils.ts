@@ -30,7 +30,13 @@ export const getSubdomain = (host: string): string => {
 	return parse(host).subdomain
 }
 
-export const getDomain = (url: string): string => new URL(url).host
+export const getDomain = (url: string): string => {
+    try {
+        return new URL(url)?.host
+    } catch {
+        return url
+    }
+}
 
 export const ask = (message: string): Promise<string> => {
 	return new Promise((resolve, reject) => {

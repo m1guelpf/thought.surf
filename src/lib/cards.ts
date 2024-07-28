@@ -2,6 +2,7 @@ import toast from 'react-hot-toast'
 import { Camera } from '@/types/canvas'
 import { uploadFile } from './file-upload'
 import { MIME_TYPES, REGEX } from './consts'
+import { LiveObject } from '@liveblocks/client'
 import { createURLCard } from '@/components/Cards/URLCard'
 import { createTextCard } from '@/components/Cards/TextCard'
 import { createFileCard } from '@/components/Cards/FileCard'
@@ -59,15 +60,6 @@ export const cardFromDrag = async (event: DragEvent, camera: Camera, names: stri
 	]
 }
 
-export const findCardIndex = (cards: CardCollection, id: string): number => {
-	return cards.findIndex(card => card.get('id') === id)
-}
-export const findCard = (cards: CardCollection, id: string): Card | undefined => {
-	return cards.find(card => card.get('id') === id).toObject()
-}
-
-export const getNamedCards = (cards: CardCollection): TextCard[] => {
-	return cards
-		.map(card => card.toObject())
-		.filter(({ type }) => [CardType.TEXT, CardType.FILE].includes(type)) as TextCard[]
+export const getNamedCards = (cards: readonly Card[]): TextCard[] => {
+	return cards.filter(({ type }) => [CardType.TEXT, CardType.FILE].includes(type)) as TextCard[]
 }

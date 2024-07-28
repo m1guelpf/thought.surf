@@ -1,16 +1,16 @@
 import { Command } from 'cmdk'
 import { groupBy } from '@/lib/array'
-import { Dialog } from '@headlessui/react'
 import AnimateResize from './AnimateResize'
 import { Action } from '@/types/command-bar'
 import useShortcuts from '@/hooks/useShortcuts'
 import { classNames, normalizeKey } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronRightIcon } from '@heroicons/react/solid'
+import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import useAuthCommands from '@/hooks/command-bar/useAuthCommands'
-import { FC, PropsWithChildren, useCallback, useMemo } from 'react'
 import useThemeCommands from '@/hooks/command-bar/useThemeCommands'
-import useCommandBar, { CommandBarStore, shallow } from '@/store/command-bar'
+import useCommandBar, { CommandBarStore } from '@/store/command-bar'
+import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
+import { FC, PropsWithChildren, useCallback, useEffect, useMemo, useRef } from 'react'
 
 const getParams = (store: CommandBarStore) => ({
 	menu: store.menu,
@@ -25,10 +25,9 @@ const getParams = (store: CommandBarStore) => ({
 })
 
 const CommandBar: FC<{}> = () => {
-	const { menu, query, setMenu, setQuery, open, setOpen, commands, filteredCommands, parents } = useCommandBar(
-		getParams,
-		shallow
-	)
+	const inputRef = useRef<HTMLInputElement>(null)
+	const { menu, query, setMenu, setQuery, open, setOpen, commands, filteredCommands, parents } =
+		useCommandBar(getParams)
 
 	useAuthCommands()
 	useThemeCommands()
@@ -38,6 +37,12 @@ const CommandBar: FC<{}> = () => {
 	}, [filteredCommands])
 
 	const parent = useMemo(() => menu && parents[menu], [parents, menu])
+
+	useEffect(() => {
+		if (!open) return
+
+		inputRef.current?.focus()
+	}, [open])
 
 	useShortcuts({
 		'$mod+KeyK': event => {
@@ -101,7 +106,7 @@ const CommandBar: FC<{}> = () => {
 		<AnimatePresence onExitComplete={onClosed}>
 			{open && (
 				<Dialog open={open} as="div" className="relative z-40" onClose={setOpen}>
-					<Dialog.Overlay
+					<DialogBackdrop
 						as={motion.div}
 						exit={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
@@ -112,7 +117,7 @@ const CommandBar: FC<{}> = () => {
 						shouldFilter={false}
 						className="fixed inset-0 z-10 overflow-y-auto p-4 sm:p-6 md:p-20 flex items-center justify-center"
 					>
-						<Dialog.Panel
+						<DialogPanel
 							key="panel"
 							as={motion.div}
 							initial={{ opacity: 0, scale: 0.75 }}
@@ -138,11 +143,13 @@ const CommandBar: FC<{}> = () => {
 										</div>
 									)}
 									<Command.Input
+										autoFocus
 										value={query}
+										ref={inputRef}
 										onKeyDown={onKeyDown}
 										onValueChange={setQuery}
 										placeholder="Type a command or search..."
-										className="h-12 w-full border-0 bg-transparent pl-11 pr-4 placeholder:text-black/30 dark:text-white/60 dark:placeholder:text-white/50 text-gray-900 placeholder-gray-500 border-b-[1px] border-black/10 dark:bg-black/10 dark:border-white/10 focus:ring-0 focus:outline-0 sm:text-sm"
+										className="h-12 w-full border-0 bg-transparent pl-11 pr-4 placeholder:text-black/30 dark:text-white/60 dark:placeholder:text-white/50 text-gray-900 placeholder-gray-500 border-b-[1px] border-black/10 dark:bg-black/10 dark:border-white/10 focus:ring-0 focus:border-black/10 focus:outline-0 sm:text-sm"
 									/>
 								</div>
 								{filteredCommands.length == 0 ? (
@@ -165,7 +172,7 @@ const CommandBar: FC<{}> = () => {
 									</ul>
 								)}
 							</AnimateResize>
-						</Dialog.Panel>
+						</DialogPanel>
 					</Command>
 				</Dialog>
 			)}
@@ -219,8 +226,8 @@ const OptionRenderer: FC<OptionRendererProps> = ({ actions, className, query, pa
 							</div>
 						</div>
 						{action.shortcut && (
-							<div aria-hidden className="flex items-center space-x-2">
-								{action.shortcut?.split('+').map(sc => (
+							<div aria-hidden className="flex items-center space-x-1">
+								{action.shortcut.split('+').map(sc => (
 									<kbd
 										key={sc}
 										className="py-px px-2 bg-black/5 text-black/50 dark:bg-white/10 dark:text-white/40 rounded-md text-sm flex items-center justify-center"

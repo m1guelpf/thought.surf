@@ -3,9 +3,7 @@ import useSWRImmutable from 'swr/immutable'
 import { TweetDetails } from '@/types/twitter'
 
 const TweetLoader = ({ url, children = null, ...props }) => {
-	const { data, error, isLoading } = useSWRImmutable<TweetDetails>(
-		`https://miguelpiedrafita.com/api/tweet-details?tweet_url=${url}`
-	)
+	const { data, error, isLoading } = useSWRImmutable<TweetDetails>(`/api/tweet-details?url=${url}`)
 
 	if (error) {
 		return (

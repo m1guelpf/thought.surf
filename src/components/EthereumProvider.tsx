@@ -1,20 +1,30 @@
 import { useTheme } from 'next-themes'
+import { mainnet } from 'wagmi/chains'
 import { APP_NAME } from '@/lib/consts'
-import { createClient, WagmiConfig } from 'wagmi'
 import { FC, memo, PropsWithChildren } from 'react'
-import { ConnectKitProvider, getDefaultClient } from 'connectkit'
+import { WagmiProvider, createConfig, http } from 'wagmi'
+import { ConnectKitProvider, getDefaultConfig } from 'connectkit'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-const client = createClient(
-	getDefaultClient({ appName: APP_NAME, autoConnect: true, infuraId: process.env.NEXT_PUBLIC_INFURA_ID })
+const queryClient = new QueryClient()
+const config = createConfig(
+	getDefaultConfig({
+		chains: [mainnet],
+		appName: APP_NAME,
+		walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
+		transports: { [mainnet.id]: http(`https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`) },
+	})
 )
 
 const EthereumProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
 	const { theme } = useTheme()
 
 	return (
-		<WagmiConfig client={client}>
-			<ConnectKitProvider mode={theme as 'light' | 'dark'}>{children}</ConnectKitProvider>
-		</WagmiConfig>
+		<WagmiProvider config={config}>
+			<QueryClientProvider client={queryClient}>
+				<ConnectKitProvider mode={theme as 'light' | 'dark'}>{children}</ConnectKitProvider>
+			</QueryClientProvider>
+		</WagmiProvider>
 	)
 }
 

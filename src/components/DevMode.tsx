@@ -1,5 +1,5 @@
 import { memo, useState } from 'react'
-import { useOthers } from '@/lib/liveblocks'
+import { useOthers } from '@liveblocks/react'
 import { Sections } from '@/types/command-bar'
 import AsteriskIcon from './Icons/AsteriskIcon'
 import { getBrowserViewport } from '@/lib/canvas'
@@ -33,7 +33,7 @@ const DevMode = () => {
 			<div>y: {Math.floor(viewport?.minY)}</div>
 			<div>width: {Math.floor(viewport?.width)}</div>
 			<div>height: {Math.floor(viewport?.height)}</div>
-			<div>multiplayer: {others.count}</div>
+			<div>multiplayer: {others.length}</div>
 		</div>
 	)
 }

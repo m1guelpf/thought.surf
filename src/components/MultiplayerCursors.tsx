@@ -1,6 +1,6 @@
 import Cursor from './Cursor'
 import { FC, memo, RefObject } from 'react'
-import { useOthers } from '@/lib/liveblocks'
+import { useOthers } from '@liveblocks/react'
 import { CURSOR_COLORS, CURSOR_NAMES } from '@/lib/consts'
 import useTrackCursor from '@/hooks/canvas/useTrackCursor'
 

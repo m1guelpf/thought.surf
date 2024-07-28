@@ -1,9 +1,9 @@
-import create from 'zustand'
-import shallow from 'zustand/shallow'
 import commandScore from 'command-score'
+import { shallow } from 'zustand/shallow'
 import { Action } from '@/types/command-bar'
 import { RefObject, useEffect, useRef } from 'react'
 import { subscribeWithSelector } from 'zustand/middleware'
+import { createWithEqualityFn } from 'zustand/traditional'
 
 export type CommandBarStore = {
 	open: boolean
@@ -21,7 +21,7 @@ export type CommandBarStore = {
 	}
 }
 
-const useCommandBar = create<CommandBarStore>()(
+const useCommandBar = createWithEqualityFn<CommandBarStore>()(
 	subscribeWithSelector((set, get) => ({
 		query: '',
 		menu: '',
@@ -79,7 +79,8 @@ const useCommandBar = create<CommandBarStore>()(
 				)
 			},
 		},
-	}))
+	})),
+	shallow
 )
 
 const hasParent = (command, _, commands) => {
@@ -120,5 +121,4 @@ export const useRefCommands = (): RefObject<Action[]> => {
 	return commandsRef
 }
 
-export { shallow }
 export default useCommandBar

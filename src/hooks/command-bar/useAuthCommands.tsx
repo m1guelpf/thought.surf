@@ -2,16 +2,18 @@ import toast from 'react-hot-toast'
 import { useModal } from 'connectkit'
 import { useAccount, useDisconnect } from 'wagmi'
 import useRegisterAction from '../useRegisterAction'
-import { LogoutIcon } from '@heroicons/react/outline'
 import { Priority, Sections } from '@/types/command-bar'
 import EthereumIcon from '@/components/Icons/EthereumIcon'
+import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline'
 
 const useAuthCommands = () => {
 	const { setOpen } = useModal()
 	const { isConnected } = useAccount()
 	const { disconnect } = useDisconnect({
-		onSuccess: () => {
-			toast.success('Disconnected!')
+		mutation: {
+			onSuccess: () => {
+				toast.success('Disconnected!')
+			},
 		},
 	})
 
@@ -33,9 +35,9 @@ const useAuthCommands = () => {
 		{
 			id: 'wallet-logout',
 			name: 'Sign Out',
-			icon: <LogoutIcon />,
-			section: Sections.Account,
 			priority: Priority.HIGH,
+			section: Sections.Account,
+			icon: <ArrowRightStartOnRectangleIcon />,
 			keywords: ['logout', 'disconnect', 'wallet', 'ethereum'],
 			perform: () => disconnect(),
 		},

@@ -1,7 +1,7 @@
-import { SiweMessage } from 'siwe'
 import { User } from '@prisma/client'
 import useSWRMutation from 'swr/mutation'
 import useSWRImmutable from 'swr/immutable'
+import { createSiweMessage } from 'viem/siwe'
 import { LoginResponse } from '@/pages/api/auth/login'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
@@ -31,15 +31,15 @@ const useWalletAuth = (): WalletAuth => {
 	const message = useMemo<string>(() => {
 		if (typeof window === 'undefined' || !address || !data?.nonce) return
 
-		return new SiweMessage({
+		return createSiweMessage({
 			address,
 			chainId: 1,
 			version: '1',
+			nonce: data?.nonce,
 			uri: window.location.origin,
 			domain: window.location.host,
-			nonce: data?.nonce,
 			statement: 'Sign in with Ethereum to create your own rooms.',
-		}).prepareMessage()
+		})
 	}, [address, data?.nonce])
 
 	const onLogout = useCallback(
@@ -53,17 +53,18 @@ const useWalletAuth = (): WalletAuth => {
 	)
 
 	const { signMessage } = useSignMessage({
-		message,
-		onError: () => onLogout(),
-		onSuccess: signature => {
-			return fetch('/api/auth/login', {
-				method: 'POST',
-				credentials: 'include',
-				body: JSON.stringify({ message, signature }),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			}).then(() => mutate())
+		mutation: {
+			onError: () => onLogout(),
+			onSuccess: signature => {
+				return fetch('/api/auth/login', {
+					method: 'POST',
+					credentials: 'include',
+					body: JSON.stringify({ message, signature }),
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				}).then(() => mutate())
+			},
 		},
 	})
 
@@ -71,9 +72,9 @@ const useWalletAuth = (): WalletAuth => {
 		if (address) isConnected.current = true
 		if (!address || isLoading || data?.authenticated) return
 
-		signMessage()
+		signMessage({ account: address, message })
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [address, data?.authenticated])
+	}, [message, address, data?.authenticated])
 
 	useEffect(() => {
 		if (address || !isConnected.current) return

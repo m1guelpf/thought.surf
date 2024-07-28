@@ -4,9 +4,6 @@ const nextConfig = {
 	images: {
 		domains: ['pbs.twimg.com', 'canvas-storage.s3.eu-west-1.amazonaws.com'],
 	},
-	experimental: {
-		newNextLinkBehavior: true,
-	},
 }
 
 module.exports = nextConfig

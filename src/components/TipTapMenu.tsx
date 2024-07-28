@@ -4,7 +4,7 @@ import BoldIcon from './Icons/BoldIcon'
 import { createPortal } from 'react-dom'
 import { classNames } from '@/lib/utils'
 import ItalicIcon from './Icons/ItalicIcon'
-import { LinkIcon } from '@heroicons/react/solid'
+import { LinkIcon } from '@heroicons/react/16/solid'
 import StrikethroughIcon from './Icons/StrikethroughIcon'
 
 export const TipTapMenu = ({ editor, renderAt }: { editor: Editor; renderAt: RefObject<HTMLDivElement> }) => {

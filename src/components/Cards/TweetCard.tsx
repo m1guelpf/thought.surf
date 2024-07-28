@@ -4,7 +4,6 @@ import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import { REGEX } from '@/lib/consts'
 import PinButton from '../PinButton'
-import useCard from '@/hooks/useCard'
 import { motion } from 'framer-motion'
 import { Camera } from '@/types/canvas'
 import { clearURL } from '@/lib/twitter'
@@ -15,72 +14,61 @@ import Skeleton from 'react-loading-skeleton'
 import { TweetDetails } from '@/types/twitter'
 import { Sections } from '@/types/command-bar'
 import TwitterIcon from '../Icons/TwitterIcon'
-import { LiveObject } from '@liveblocks/client'
 import { CardType, URLCard } from '@/types/cards'
 import useDirtyState from '@/hooks/useDirtyState'
 import { classNames, randomId } from '@/lib/utils'
 import AutosizeInput from 'react-18-input-autosize'
 import useRegisterAction from '@/hooks/useRegisterAction'
-import { ArrowUpIcon, XIcon } from '@heroicons/react/solid'
+import { useDeleteCard, useUpdateCard } from '@/hooks/useCard'
+import { ArrowUpIcon, XMarkIcon } from '@heroicons/react/16/solid'
 import { FC, memo, MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react'
 
 type Props = {
 	id: string
-	onDelete: () => void
-	onReorder: () => void
+	card: URLCard
 	navigateTo: () => void
-	card: LiveObject<URLCard>
 	containerRef: MutableRefObject<HTMLDivElement>
 }
 
 const cardOptions = { resizeAxis: { x: true, y: false } }
 
-const TweetCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder, containerRef }) => {
+const TweetCard: FC<Props> = ({ id, card, navigateTo, containerRef }) => {
+	const updateCard = useUpdateCard(card.id)
 	const [measureRef, { height }] = useMeasure<HTMLDivElement>()
-	const {
-		attributes: { url },
-	} = useCard(card)
 
 	useEffect(() => {
-		const { width } = card.get('size')
+		if (card.size.height == height + 20) return
 
-		card.set('size', { width, height: height + 20 })
+		const { width } = card.size
+		updateCard({ size: { width, height: height + 20 } })
 	}, [card, height])
 
-	const [_url, setUrl, urlDirty] = useDirtyState(url)
+	const [_url, setUrl, urlDirty] = useDirtyState(card.attributes.url)
 
 	useEffect(() => {
-		if (!urlDirty) setUrl(url, { isClean: true })
-	}, [setUrl, url, urlDirty])
+		if (!urlDirty) setUrl(card.attributes.url, { isClean: true })
+	}, [setUrl, card.attributes.url, urlDirty])
 
-	const { data } = useSWRImmutable<TweetDetails>(`https://miguelpiedrafita.com/api/tweet-details?tweet_url=${url}`)
+	const { data } = useSWRImmutable<TweetDetails>(`/api/tweet-details?url=${card.attributes.url}`)
 
 	useRegisterAction(
 		{
 			id: `canvas-item-${id}`,
 			name: data?.user?.name
-				? `${data?.user?.name} (@${data?.user?.screen_name}): ${data?.full_text.substring(0, 100)}`
+				? `${data?.user?.name} (@${data?.user?.screen_name}): ${data?.text.substring(0, 100)}`
 				: 'Loading...',
 			icon: <TwitterIcon />,
 			parent: 'canvas',
 			section: Sections.Canvas,
 			perform: navigateTo,
 		},
-		[card, data?.user?.name, data?.user?.screen_name, data?.full_text]
+		[id, data?.user?.name, data?.user?.screen_name, data?.text]
 	)
 
-	const Header = useMemo(() => <CardHeader card={card} onDelete={onDelete} />, [card, onDelete])
+	const Header = useMemo(() => <CardHeader card={card} />, [card])
 
 	return (
-		<Card
-			id={id}
-			card={card}
-			onDelete={onDelete}
-			onReorder={onReorder}
-			options={cardOptions}
-			header={Header}
-			containerRef={containerRef}
-		>
+		<Card id={id} card={card} options={cardOptions} header={Header} containerRef={containerRef}>
 			<div className="select-none" ref={measureRef}>
 				<Tweet tweet={data} isCard />
 			</div>
@@ -89,51 +77,46 @@ const TweetCard: FC<Props> = ({ id, card, navigateTo, onDelete, onReorder, conta
 }
 
 type CardHeaderProps = {
-	card: LiveObject<URLCard>
-	onDelete: () => void
+	card: URLCard
 }
 
-const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete }) => {
-	const {
-		headerPinned,
-		attributes: { url },
-	} = useCard(card)
+const CardHeader: FC<CardHeaderProps> = memo(({ card }) => {
+	const updateCard = useUpdateCard(card.id)
+	const deleteCard = useDeleteCard(card.id)
 
-	const { data, isLoading } = useSWRImmutable<TweetDetails>(
-		`https://miguelpiedrafita.com/api/tweet-details?tweet_url=${url}`
-	)
+	const { data, isLoading } = useSWRImmutable<TweetDetails>(`/api/tweet-details?url=${card.attributes.url}`)
 
 	const [isFocused, setFocused] = useState(false)
-	const [_url, setUrl, urlDirty] = useDirtyState(url)
+	const [_url, setUrl, urlDirty] = useDirtyState(card.attributes.url)
 
 	useEffect(() => {
-		if (!urlDirty) setUrl(url, { isClean: true })
-	}, [setUrl, url, urlDirty])
+		if (!urlDirty) setUrl(card.attributes.url, { isClean: true })
+	}, [setUrl, card.attributes.url, urlDirty])
 
 	const handleUrlBlur = () => {
 		setFocused(false)
 		if (!urlDirty) return
 
 		if (!REGEX.URL.test(_url)) {
-			setUrl(url, { isClean: true })
+			setUrl(card.attributes.url, { isClean: true })
 			return toast.error('Invalid URL')
 		}
 
 		if (!REGEX.TWEET_URL.test(_url)) {
-			setUrl(url, { isClean: true })
+			setUrl(card.attributes.url, { isClean: true })
 			return toast.error('URL is not a tweet')
 		}
 
 		setUrl(_url, { isClean: true })
-		card.update({ attributes: { url: _url, isLive: false } })
+		updateCard({ attributes: { url: _url, isLive: false } })
 	}
 
-	const updatePinned = useCallback(pinned => card.set('headerPinned', pinned), [card])
+	const updatePinned = useCallback(headerPinned => updateCard({ headerPinned }), [card])
 
 	return (
 		<div
 			className={classNames(
-				!headerPinned &&
+				!card.headerPinned &&
 					'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
 				'flex items-center justify-between bg-gray-100/40 dark:bg-black/40 backdrop-blur backdrop-filter p-2 rounded-lg w-full space-x-2'
 			)}
@@ -144,7 +127,7 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete }) => {
 				className="flex items-center space-x-3 flex-shrink min-w-0 px-6 -mx-6"
 			>
 				<PinButton
-					isPinned={headerPinned}
+					isPinned={card.headerPinned}
 					onChange={updatePinned}
 					baseVariant="pinHidden"
 					hoverVariant="pinVisible"
@@ -168,10 +151,10 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete }) => {
 								isFocused
 									? _url
 									: isLoading
-									? _url
-									: `@${data?.user?.screen_name} • ${
-											data?.created_at ? format(new Date(data?.created_at), 'hh:mm a') : ''
-									  }`
+										? _url
+										: `@${data?.user?.screen_name} • ${
+												data?.created_at ? format(new Date(data?.created_at), 'hh:mm a') : ''
+											}`
 							}
 							onBlur={handleUrlBlur}
 							onFocus={() => setFocused(true)}
@@ -187,13 +170,13 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete }) => {
 			</motion.div>
 			<div
 				className={classNames(
-					headerPinned &&
+					card.headerPinned &&
 						'opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300',
 					'flex items-center space-x-1 flex-shrink-0'
 				)}
 			>
 				<a
-					href={url}
+					href={card.attributes.url}
 					target="_blank"
 					className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
 					rel="noreferrer"
@@ -201,10 +184,10 @@ const CardHeader: FC<CardHeaderProps> = memo(({ card, onDelete }) => {
 					<ArrowUpIcon className="w-4 h-4 transform rotate-45" />
 				</a>
 				<button
-					onClick={onDelete}
+					onClick={deleteCard}
 					className="bg-gray-200/60 dark:bg-gray-700/60 rounded p-1 opacity-80 hover:opacity-100 transition-opacity"
 				>
-					<XIcon className="w-4 h-4" />
+					<XMarkIcon className="w-4 h-4" />
 				</button>
 			</div>
 		</div>

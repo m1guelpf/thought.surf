@@ -1,9 +1,9 @@
-import mql, { MqlResponseData } from '@microlink/mql'
+import mql, { MqlPayload } from '@microlink/mql'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 const handler = async (
 	{ query: { url, screenshot, video, embed } }: NextApiRequest,
-	res: NextApiResponse<MqlResponseData | ''>
+	res: NextApiResponse<MqlPayload['data'] | ''>
 ) => {
 	res.setHeader('Cache-Control', 'max-age=86400, s-maxage=86400, stale-while-revalidate')
 	if (!url) return res.status(404).send('')
@@ -13,7 +13,7 @@ const handler = async (
 			video: !!video,
 			iframe: !!embed,
 			screenshot: !!screenshot,
-			apiKey: process.env.MICROLINK_KEY,
+			// apiKey: process.env.MICROLINK_KEY,
 		})
 		if (status == 'fail') return res.status(404).send('')
 

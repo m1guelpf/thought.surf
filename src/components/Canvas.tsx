@@ -1,31 +1,29 @@
 import DevMode from './DevMode'
 import CanvasItem from './CanvasItem'
-import shallow from 'zustand/shallow'
 import { isOnScreen } from '@/lib/canvas'
-import { useList } from '@/lib/liveblocks'
 import { Menu } from '@/types/right-click'
+import { getNamedCards } from '@/lib/cards'
 import LoadingScreen from './LoadingScreen'
+import { useAddCard } from '@/hooks/useCard'
 import RightClickMenu from './RightClickMenu'
 import BackgroundGrid from './BackgroundGrid'
 import { uploadFile } from '@/lib/file-upload'
+import { useStorage } from '@liveblocks/react'
 import { createURLCard } from './Cards/URLCard'
-import { LiveObject } from '@liveblocks/client'
 import { createTextCard } from './Cards/TextCard'
 import { createFileCard } from './Cards/FileCard'
 import MultiplayerCursors from './MultiplayerCursors'
 import { IMAGE_TYPES, VIDEO_TYPES } from '@/lib/consts'
 import { AnimatePresence, motion } from 'framer-motion'
 import useCamera, { CameraStore } from '@/store/camera'
-import { findCardIndex, getNamedCards } from '@/lib/cards'
 import { ask, classNames, requestFile } from '@/lib/utils'
+import { FC, memo, useEffect, useMemo, useRef } from 'react'
 import useCreateOnDrop from '@/hooks/canvas/useCreateOnDrop'
 import useCreateOnPaste from '@/hooks/canvas/useCreateOnPaste'
 import useCameraGestures from '@/hooks/canvas/useCameraGestures'
-import { DocumentAddIcon, LinkIcon } from '@heroicons/react/solid'
 import usePreventGestures from '@/hooks/canvas/usePreventGestures'
 import useCanvasCommands from '@/hooks/command-bar/useCanvasCommands'
-import { FC, memo, useCallback, useEffect, useMemo, useRef } from 'react'
-import { PhotographIcon, VideoCameraIcon } from '@heroicons/react/outline'
+import { PhotoIcon, VideoCameraIcon, DocumentPlusIcon, LinkIcon } from '@heroicons/react/16/solid'
 
 const getParams = (store: CameraStore) => ({
 	camera: store.camera,
@@ -34,9 +32,10 @@ const getParams = (store: CameraStore) => ({
 })
 
 const Canvas: FC = () => {
-	const cards = useList('cards')
+	const addCard = useAddCard()
 	const canvasRef = useRef<HTMLDivElement>()
-	const { camera, shouldTransition, setTransition } = useCamera(getParams, shallow)
+	const cards = useStorage(root => root.cards)
+	const { camera, shouldTransition, setTransition } = useCamera(getParams)
 
 	const menu = useMemo<Menu>(() => {
 		if (!cards) return []
@@ -47,16 +46,13 @@ const Canvas: FC = () => {
 				submenu: [
 					{
 						label: 'Note',
-						icon: <DocumentAddIcon className="w-3.5 h-3.5" />,
+						icon: <DocumentPlusIcon className="w-3.5 h-3.5" />,
 						action: async (_, point) => {
-							cards.insert(
-								new LiveObject(
-									createTextCard(camera, {
-										point,
-										names: getNamedCards(cards).map(({ attributes: { title } }) => title),
-									})
-								),
-								0
+							addCard(
+								createTextCard(camera, {
+									point,
+									names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+								})
 							)
 						},
 					},
@@ -64,31 +60,23 @@ const Canvas: FC = () => {
 						label: 'Link',
 						icon: <LinkIcon className="w-3.5 h-3.5" />,
 						action: async (_, point) => {
-							cards.insert(
-								new LiveObject(
-									createURLCard(camera, { url: await ask('What URL should we add?'), point })
-								),
-								0
-							)
+							addCard(createURLCard(camera, { url: await ask('What URL should we add?'), point }))
 						},
 					},
 					{
 						label: 'Image',
-						icon: <PhotographIcon className="w-3.5 h-3.5" />,
+						icon: <PhotoIcon className="w-3.5 h-3.5" />,
 						action: async (_, point) => {
 							const file = await requestFile(IMAGE_TYPES)
 
-							cards.insert(
-								new LiveObject(
-									createFileCard(camera, {
-										point,
-										name: file.name,
-										mimeType: file.type,
-										url: await uploadFile(file),
-										names: getNamedCards(cards).map(({ attributes: { title } }) => title),
-									})
-								),
-								0
+							addCard(
+								createFileCard(camera, {
+									point,
+									name: file.name,
+									mimeType: file.type,
+									url: await uploadFile(file),
+									names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+								})
 							)
 						},
 					},
@@ -98,17 +86,14 @@ const Canvas: FC = () => {
 						action: async (_, point) => {
 							const file = await requestFile(VIDEO_TYPES)
 
-							cards.insert(
-								new LiveObject(
-									createFileCard(camera, {
-										point,
-										name: file.name,
-										mimeType: file.type,
-										url: await uploadFile(file),
-										names: getNamedCards(cards).map(({ attributes: { title } }) => title),
-									})
-								),
-								0
+							addCard(
+								createFileCard(camera, {
+									point,
+									name: file.name,
+									mimeType: file.type,
+									url: await uploadFile(file),
+									names: getNamedCards(cards).map(({ attributes: { title } }) => title),
+								})
 							)
 						},
 					},
@@ -119,26 +104,14 @@ const Canvas: FC = () => {
 
 	useCreateOnDrop()
 	useCreateOnPaste()
+	useCanvasCommands()
 	usePreventGestures()
-	useCanvasCommands(cards)
 	useCameraGestures(canvasRef)
-
-	const removeCard = useCallback(cardId => cards.delete(findCardIndex(cards, cardId)), [cards])
-	const reorderCard = useCallback(
-		cardId => {
-			const cardIndex = findCardIndex(cards, cardId)
-			if (cardIndex == 0) return
-
-			cards.move(cardIndex, 0)
-		},
-		[cards]
-	)
 
 	useEffect(() => {
 		if (!cards) return
 
-		cards.forEach(card => {
-			const { id, point, size } = card.toObject()
+		cards.forEach(({ id, point, size }) => {
 			const onScreen = isOnScreen(camera, point, size)
 			const el = document.querySelector<HTMLDivElement>(`[data-card-id="${id}"]`)
 
@@ -146,6 +119,11 @@ const Canvas: FC = () => {
 			el.style.contentVisibility = onScreen ? null : 'hidden'
 		})
 	}, [cards, camera])
+
+	const CardRenderer = useMemo(
+		() => [...(cards ?? [])].reverse().map(card => <CanvasItem card={card} id={card.id} key={card.id} />),
+		[cards]
+	)
 
 	return (
 		<>
@@ -166,20 +144,7 @@ const Canvas: FC = () => {
 					style={{ scale: camera.z, x: camera.x, y: camera.y }}
 				>
 					<div className="pointer-events-[all]">
-						<AnimatePresence>
-							{cards
-								?.toArray()
-								?.reverse()
-								?.map(card => (
-									<CanvasItem
-										key={card.get('id')}
-										id={card.get('id')}
-										card={card}
-										removeCard={removeCard}
-										reorderCard={reorderCard}
-									/>
-								))}
-						</AnimatePresence>
+						<AnimatePresence>{CardRenderer}</AnimatePresence>
 					</div>
 				</motion.div>
 				<RightClickMenu menu={menu}>

@@ -1,15 +1,15 @@
 import String from './string'
-import { TweetDetails } from '@/types/twitter'
+import { TweetBase } from 'react-tweet/api'
 
-export const getText = (tweet: TweetDetails): String => {
-	let text = new String(tweet.full_text)
+export const getText = (tweet: TweetBase): String => {
+	let text = new String(tweet.text)
 
 	for (const image of tweet.entities.media ?? []) text = text.replaceAll(image.url, '')
 	for (const link of tweet.entities?.urls || []) text = text.replaceAll(link.url, link.display_url)
 
 	return text
-		.replaceAll(tweet?.quoted_status_permalink?.url, '')
-		.replaceAll(tweet?.quoted_status_permalink?.display, '')
+	// .replaceAll(tweet?.quoted_status_permalink?.url, '')
+	// .replaceAll(tweet?.quoted_status_permalink?.display, '')
 }
 
 export const getVideoSource = (media): string => {
